@@ -262,3 +262,12 @@ export function createWidgetDOM(widgetId, config) {
 
   return { container, chatWindow, chatButton };
 }
+
+export function appendMessage(container, text, sender, widgetId) {
+  const messageElement = document.createElement("div");
+  messageElement.className = `message ${sender}-message`;
+  messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  messageElement.innerHTML = text.replace(/\n/g, "<br>");
+  container.appendChild(messageElement);
+  container.scrollTop = container.scrollHeight;
+}

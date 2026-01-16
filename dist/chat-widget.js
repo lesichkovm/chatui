@@ -323,6 +323,14 @@
     }
     return { container, chatWindow, chatButton };
   }
+  function appendMessage(container, text, sender, widgetId) {
+    const messageElement = document.createElement("div");
+    messageElement.className = `message ${sender}-message`;
+    messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    messageElement.innerHTML = text.replace(/\n/g, "<br>");
+    container.appendChild(messageElement);
+    container.scrollTop = container.scrollHeight;
+  }
 
   // src/modules/chat-widget.class.js
   var ChatWidget = class {
@@ -340,7 +348,10 @@
         serverUrl: scriptElement.getAttribute("data-server-url") || "http://localhost:3000"
       };
       this.api = new ChatAPI({ serverUrl: this.config.serverUrl });
-      this.isOpen = false;
+      this.state = {
+        isOpen: false,
+        messages: []
+      };
       this.init();
     }
     init() {
@@ -360,20 +371,45 @@
       this.api.performHandshake();
       this.api.connect((text, sender) => this.addMessage(text, sender));
     }
+    setState(newState) {
+      this.state = { ...this.state, ...newState };
+      this.render();
+    }
+    render() {
+      if (this.state.isOpen) {
+        this.chatWindow.classList.add("window-open");
+        if (this.chatButton) {
+          this.chatButton.style.display = "flex";
+          this._updateButtonPosition(true);
+        }
+      } else {
+        this.chatWindow.classList.remove("window-open");
+        if (this.chatButton) {
+          this.chatButton.style.display = "flex";
+          this._updateButtonPosition(false);
+        }
+      }
+    }
     bindEvents() {
+      this.handlers = {
+        toggle: () => this.toggle(),
+        close: () => this.close(),
+        send: () => this.sendMessage(),
+        keypress: (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            this.sendMessage();
+          }
+        }
+      };
       if (this.chatButton) {
-        this.chatButton.addEventListener("click", () => this.toggle());
+        this.chatButton.addEventListener("click", this.handlers.toggle);
       }
       if (this.closeButton) {
-        this.closeButton.addEventListener("click", () => this.close());
+        this.closeButton.addEventListener("click", this.handlers.close);
       }
-      this.textarea.addEventListener("keypress", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          this.sendMessage();
-        }
-      });
-      this.sendButton.addEventListener("click", () => this.sendMessage());
+      this.textarea.addEventListener("keypress", this.handlers.keypress);
+      this.sendButton.addEventListener("click", this.handlers.send);
       this.setupTextareaAutoResize();
     }
     setupTextareaAutoResize() {
@@ -387,29 +423,16 @@
         this.textarea.style.overflowY = this.textarea.scrollHeight > maxHeight ? "auto" : "hidden";
       });
       resizeObserver.observe(this.textarea);
+      this.resizeObserver = resizeObserver;
     }
     toggle() {
-      if (this.isOpen) {
-        this.close();
-      } else {
-        this.open();
-      }
+      this.setState({ isOpen: !this.state.isOpen });
     }
     open() {
-      this.isOpen = true;
-      this.chatWindow.classList.add("window-open");
-      if (this.chatButton) {
-        this.chatButton.style.display = "flex";
-        this._updateButtonPosition(true);
-      }
+      this.setState({ isOpen: true });
     }
     close() {
-      this.isOpen = false;
-      this.chatWindow.classList.remove("window-open");
-      if (this.chatButton) {
-        this.chatButton.style.display = "flex";
-        this._updateButtonPosition(false);
-      }
+      this.setState({ isOpen: false });
     }
     _updateButtonPosition(isOpen) {
       const { position } = this.config;
@@ -443,12 +466,9 @@
       }
     }
     addMessage(text, sender) {
-      const messageElement = document.createElement("div");
-      messageElement.className = `message ${sender}-message`;
-      messageElement.id = `${this.widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      messageElement.innerHTML = text.replace(/\n/g, "<br>");
-      this.messagesContainer.appendChild(messageElement);
-      this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+      const messageObj = { text, sender, timestamp: Date.now() };
+      this.state.messages.push(messageObj);
+      appendMessage(this.messagesContainer, text, sender, this.widgetId);
     }
   };
 
