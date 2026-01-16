@@ -214,10 +214,10 @@ function createChatWidget(scriptElement) {
     `;
   }
   chatWindow.innerHTML = `
-    <div class="header">
+    <div class="header" id="${widgetId}-header">
       <h3>${title}</h3>
       ${
-        mode === "popup" ? '<button type="button" class="close">×</button>' : ""
+        mode === "popup" ? `<button type="button" class="close" id="${widgetId}-close">×</button>` : ""
       }
     </div>
     <div class="messages" id="${widgetId}-messages"></div>

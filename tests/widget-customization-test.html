@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Customization Test Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Widget Customization Test Page</h1>
+        <p>This page is used for testing widget customization options.</p>
+    </div>
+
+    <!-- Load the chat widget script once -->
+    <script src="../src/chat-widget.js"></script>
+    
+    <!-- First widget - bottom right, blue, "Chat with us" title -->
+    <script id="chat-widget-1" data-position="bottom-right" data-color="#007bff" data-title="Chat with us"></script>
+    
+    <!-- Second widget - bottom left, green, "Support Chat" title -->
+    <script id="chat-widget-2" data-position="bottom-left" data-color="#28a745" data-title="Support Chat"></script>
+</body>
+</html>

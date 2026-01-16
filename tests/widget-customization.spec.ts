@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Chat Widget - Customization', () => {
   test('should position widget at bottom-right', async ({ page }) => {
-    await page.goto('/demo.html');
+    await page.goto('/tests/widget-customization-test.html');
     
     const widgetButton = page.locator('#chat-widget-1-button');
     await expect(widgetButton).toBeVisible();
@@ -22,7 +22,7 @@ test.describe('Chat Widget - Customization', () => {
   });
 
   test('should position widget at bottom-left', async ({ page }) => {
-    await page.goto('/demo.html');
+    await page.goto('/tests/widget-customization-test.html');
     
     const widgetButton = page.locator('#chat-widget-2-button');
     await expect(widgetButton).toBeVisible();
@@ -42,7 +42,7 @@ test.describe('Chat Widget - Customization', () => {
   });
 
   test('should apply custom color to widget button', async ({ page }) => {
-    await page.goto('/demo.html');
+    await page.goto('/tests/widget-customization-test.html');
     
     const widgetButton1 = page.locator('#chat-widget-1-button');
     const widgetButton2 = page.locator('#chat-widget-2-button');
@@ -61,7 +61,7 @@ test.describe('Chat Widget - Customization', () => {
   });
 
   test('should display custom title in chat window', async ({ page }) => {
-    await page.goto('/demo.html');
+    await page.goto('/tests/widget-customization-test.html');
     
     const widgetButton1 = page.locator('#chat-widget-1-button');
     await widgetButton1.click();
@@ -89,7 +89,7 @@ test.describe('Chat Widget - Customization', () => {
   });
 
   test('should maintain custom color in chat window elements', async ({ page }) => {
-    await page.goto('/demo.html');
+    await page.goto('/tests/widget-customization-test.html');
     
     const widgetButton1 = page.locator('#chat-widget-1-button');
     await widgetButton1.click();

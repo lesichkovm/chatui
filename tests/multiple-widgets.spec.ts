@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Chat Widget - Multiple Widgets', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/demo.html');
+    await page.goto('/tests/multiple-widgets-test.html');
   });
 
   test('should load multiple widgets on same page', async ({ page }) => {
