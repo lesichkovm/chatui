@@ -335,18 +335,34 @@
 
   // src/modules/chat-widget.class.js
   var ChatWidget = class {
-    constructor(scriptElement) {
-      if (scriptElement._chatWidgetInitialized) return;
-      scriptElement._chatWidgetInitialized = true;
+    constructor(input) {
+      let config = {};
+      let scriptElement = null;
+      if (input instanceof HTMLElement && input.tagName === "SCRIPT") {
+        scriptElement = input;
+        if (scriptElement._chatWidgetInitialized) return;
+        scriptElement._chatWidgetInitialized = true;
+        config = {
+          id: scriptElement.id,
+          mode: scriptElement.getAttribute("data-mode"),
+          position: scriptElement.getAttribute("data-position"),
+          primaryColor: scriptElement.getAttribute("data-color"),
+          title: scriptElement.getAttribute("data-title"),
+          targetSelector: scriptElement.getAttribute("data-target"),
+          serverUrl: scriptElement.getAttribute("data-server-url")
+        };
+      } else {
+        config = input || {};
+      }
       this.scriptElement = scriptElement;
-      this.widgetId = scriptElement.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
+      this.widgetId = config.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
       this.config = {
-        mode: scriptElement.getAttribute("data-mode") || "popup",
-        position: scriptElement.getAttribute("data-position") || "bottom-right",
-        primaryColor: scriptElement.getAttribute("data-color") || "#007bff",
-        title: scriptElement.getAttribute("data-title") || "Chat with us",
-        targetSelector: scriptElement.getAttribute("data-target"),
-        serverUrl: scriptElement.getAttribute("data-server-url") || "http://localhost:3000"
+        mode: config.mode || "popup",
+        position: config.position || "bottom-right",
+        primaryColor: config.primaryColor || config.color || "#007bff",
+        title: config.title || "Chat with us",
+        targetSelector: config.targetSelector || config.target || null,
+        serverUrl: config.serverUrl || "http://localhost:3000"
       };
       this.api = new ChatAPI({ serverUrl: this.config.serverUrl });
       this.state = {
@@ -457,16 +473,18 @@
       `;
       }
     }
-    sendMessage() {
-      const message = this.textarea.value.trim();
+    sendMessage(text) {
+      const message = text || this.textarea.value.trim();
       if (message) {
         this.addMessage(message, "user");
         this.api.sendMessage(
           message,
-          (text, sender) => this.addMessage(text, sender)
+          (text2, sender) => this.addMessage(text2, sender)
         );
-        this.textarea.value = "";
-        this.textarea.style.height = "auto";
+        if (!text) {
+          this.textarea.value = "";
+          this.textarea.style.height = "auto";
+        }
       }
     }
     addMessage(text, sender) {
@@ -479,6 +497,11 @@
   // src/entry.js
   window.createChatWidget = function(scriptElement) {
     return new ChatWidget(scriptElement);
+  };
+  window.ChatUI = {
+    init: function(config) {
+      return new ChatWidget(config);
+    }
   };
   document.addEventListener("DOMContentLoaded", function() {
     const scripts = document.querySelectorAll('script[id^="chat-widget"]');

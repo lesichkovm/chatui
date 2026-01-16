@@ -1,8 +1,15 @@
 import { ChatWidget } from './modules/chat-widget.class.js';
 
-// Global factory function
+// Global factory function (legacy support)
 window.createChatWidget = function(scriptElement) {
     return new ChatWidget(scriptElement);
+};
+
+// Programmatic API
+window.ChatUI = {
+    init: function(config) {
+        return new ChatWidget(config);
+    }
 };
 
 // Auto-initialize based on script tags
