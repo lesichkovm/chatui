@@ -251,10 +251,25 @@ function createChatWidget(scriptElement) {
         // Close the chat
         chatWindow.classList.remove("window-open");
         chatButton.style.display = "flex";
+        // Reset button position when closing
+        chatButton.style.cssText = `
+          ${position.includes("bottom") ? "bottom: 20px;" : "top: 20px;"}
+          ${position.includes("right") ? "right: 20px;" : "left: 20px;"}
+        `;
       } else {
         // Open the chat
         chatWindow.classList.add("window-open");
         chatButton.style.display = "flex"; // Keep button visible for closing
+        // Move button to avoid overlap with send button
+        if (position.includes("bottom") && position.includes("right")) {
+          chatButton.style.cssText = "bottom: 520px; right: 20px;";
+        } else if (position.includes("bottom") && position.includes("left")) {
+          chatButton.style.cssText = "bottom: 520px; left: 20px;";
+        } else if (position.includes("top") && position.includes("right")) {
+          chatButton.style.cssText = "top: 20px; right: 380px;";
+        } else if (position.includes("top") && position.includes("left")) {
+          chatButton.style.cssText = "top: 20px; left: 380px;";
+        }
       }
     });
 
@@ -262,6 +277,11 @@ function createChatWidget(scriptElement) {
       chatWindow.querySelector(".close").addEventListener("click", () => {
         chatWindow.classList.remove("window-open");
         chatButton.style.display = "flex";
+        // Reset button position when closing
+        chatButton.style.cssText = `
+          ${position.includes("bottom") ? "bottom: 20px;" : "top: 20px;"}
+          ${position.includes("right") ? "right: 20px;" : "left: 20px;"}
+        `;
       });
     }
   }
