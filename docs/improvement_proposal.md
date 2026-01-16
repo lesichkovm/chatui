@@ -7,26 +7,22 @@ To enhance the maintainability, robustness, and professional quality of ChatUI t
 ## Current State
 
 - **Language:** Plain JavaScript.
-- **Architecture:** Monolithic function handling styling, DOM, state, and networking.
-- **Encapsulation:** Uses ID-rooted CSS, which is effective but currently bundled within a single large function.
-- **State:** Handled via direct DOM manipulation and scattered variables.
+- **Architecture:** Modular ES6 Class-based architecture. The code is split into focused modules (`api.js`, `ui.js`, `utils.js`) and orchestrated by a central `ChatWidget` class.
+- **Build System:** Uses `esbuild` to bundle modules into a single `chat-widget.js` distribution file.
+- **Encapsulation:** Uses ID-rooted CSS.
+- **State:** Managed within the `ChatWidget` class instance, improving tracking compared to the previous monolithic function approach.
 
 ## Proposed Pragmatic Improvements
 
-### 1. Refactor to ES6 Class Architecture
+### 1. Refactor to ES6 Class Architecture (Completed)
 
 **Why:** A single large function is difficult to extend and test. A class-based approach provides a cleaner way to manage state, settings, and methods.
-**Plan:**
-- Create a `ChatWidget` class to encapsulate all functionality.
-- Separate concerns into internal methods: `render()`, `handleEvents()`, `sendMessage()`, `addMessage()`.
-- Store widget-specific state (e.g., `isOpen`, `messages`, `sessionKey`) as class properties.
+**Status:** Implemented. Functionality is now encapsulated in the `ChatWidget` class.
 
-### 2. Modularize Logic (ES Modules)
+### 2. Modularize Logic (ES Modules) (Completed)
 
-**Why:** Maintaining a single 500+ line file becomes difficult as features are added.
-**Plan:**
-- Split logic into small, focused modules: `api.js` (networking), `ui.js` (DOM creation), `utils.js` (helpers).
-- Use a lightweight bundler (e.g., `esbuild`) for production to provide a single minified `chat-widget.js`.
+**Why:** Maintaining a single 500+ line file is difficult. Modularization allows for better separation of concerns.
+**Status:** Implemented. Code is split into `src/modules/` and bundled using `esbuild`.
 
 ### 3. Strict CSS Containment & Customization Support
 
@@ -67,11 +63,10 @@ To enhance the maintainability, robustness, and professional quality of ChatUI t
 
 ## Implementation Roadmap
 
-1.  **Refactor:** Convert the current function into a `ChatWidget` class.
-2.  **Style Architecture:** Implement the "Scoped Reset" and strictly ID-rooted styles to balance protection and customizability.
-3.  **Modularize:** Split into ES modules and set up a basic build script.
-4.  **Polish:** Add accessibility features and formalize the programmatic API.
+1.  **Refactor & Modularize:** Transitioned to Class structure and ES modules. (Completed)
+2.  **Style Architecture:** Implement the "Scoped Reset" and strictly ID-rooted styles to balance protection and customizability. (Next)
+3.  **Polish & API:** Add accessibility features and formalize the programmatic API (`ChatUI.init`). (Planned)
 
 ## Conclusion
 
-This proposal balances technical robustness with user flexibility. By using strict ID scoping instead of Shadow DOM, we protect the host site while treating the widget's customizability as a first-class feature.
+This proposal focuses on structural improvements and standard browser capabilities to create a robust, professional-grade widget while maintaining a lightweight and pragmatic footprint.

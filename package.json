@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A simple embedded chat UI widget with JSONP support",
   "scripts": {
+    "build": "node scripts/build.js",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
