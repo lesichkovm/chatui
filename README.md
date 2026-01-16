@@ -10,10 +10,13 @@ A simple, embedded, API-agnostic chat UI widget with JSONP support for cross-dom
 - **Customizable**: Configurable position, colors, and titles via data attributes or CSS.
 - **Multiple Modes**: Supports 'popup' (default) and 'fullpage' modes.
 - **Modular Architecture**: Built with modern ES6 classes and modules.
+- **Programmatic API**: Full control over the widget via JavaScript.
+- **Accessible**: Built-in ARIA support and focus management.
 
 ## Installation & Usage
 
-To add the chat widget to your website, include the script tag pointing to the bundled widget file:
+### 1. HTML Integration (Auto-initialize)
+Add the script tag to your HTML. The widget will automatically initialize based on the data attributes.
 
 ```html
 <script 
@@ -26,47 +29,72 @@ To add the chat widget to your website, include the script tag pointing to the b
 </script>
 ```
 
-### Configuration Options
+### 2. Programmatic API
+You can initialize and control the widget manually using the global `ChatUI` object.
 
-The widget is configured via data attributes on the script tag:
+```javascript
+// Initialize the widget
+const chat = ChatUI.init({
+  id: 'custom-chat',
+  title: 'Support Chat',
+  color: '#28a745',
+  position: 'bottom-left',
+  serverUrl: 'http://localhost:3000'
+});
 
-| Attribute | Description | Default |
-|-----------|-------------|---------|
-| `data-server-url` | Base URL of the chat backend API | `http://localhost:3000` |
-| `data-mode` | Display mode: `popup` or `fullpage` | `popup` |
-| `data-position` | Corner position: `bottom-right`, `bottom-left`, `top-right`, `top-left` | `bottom-right` |
-| `data-color` | Primary theme color (Hex code) | `#007bff` |
-| `data-title` | Title text displayed in the header | `Chat with us` |
-| `data-target` | Selector for container element (only for `fullpage` mode) | `null` |
+// Control the widget
+chat.open();
+chat.close();
+chat.toggle();
+chat.sendMessage('Hello from the API!');
+```
+
+## Configuration Options
+
+| Attribute | JS Option | Description | Default |
+|-----------|-----------|-------------|---------|
+| `data-server-url` | `serverUrl` | Base URL of the chat backend API | `http://localhost:3000` |
+| `data-mode` | `mode` | Display mode: `popup` or `fullpage` | `popup` |
+| `data-position` | `position` | Corner position: `bottom-right`, `bottom-left`, `top-right`, `top-left` | `bottom-right` |
+| `data-color` | `primaryColor` | Primary theme color (Hex code) | `#007bff` |
+| `data-title` | `title` | Title text displayed in the header | `Chat with us` |
+| `data-target` | `targetSelector` | Selector for container element (fullpage mode only) | `null` |
+
+## CSS Customization
+
+The widget uses strictly ID-rooted CSS selectors to prevent affecting your site's styles. You can easily theme it by targeting its classes in your own CSS:
+
+```css
+/* Override the widget header color */
+#chat-widget .header {
+    background-color: #333;
+    color: #fff;
+}
+
+/* Adjust message bubble styles */
+#chat-widget .message {
+    font-size: 16px;
+}
+```
 
 ## API Integration
 
 The widget expects a backend that supports the following endpoints (compatible with JSONP):
 
 ### Handshake
-`GET /api/handshake?callback=cb`
+`GET /api/handshake?callback=cb`  
 Response: `{ status: "success", session_key: "..." }`
 
 ### Send/Receive Messages
-`GET /api/messages?callback=cb&message=...&session_key=...`
+`GET /api/messages?callback=cb&message=...&session_key=...`  
 Response: `{ text: "Response message", sender: "bot" }`
 
 ## Development
 
-This project uses a modular architecture bundled with `esbuild`.
-
-### Prerequisites
-- Node.js installed
-
-### Setup
-```bash
-npm install
-```
-
 ### Build
 To build the distribution file (`dist/chat-widget.js`):
 ```bash
-node scripts/build.js
+npm run build
 ```
 
 ### Testing
@@ -77,14 +105,15 @@ npm test
 
 ## Architecture
 
-The project is structured as follows:
 - `src/modules/`: Individual source modules (API, UI, Utils, Class)
 - `src/entry.js`: Entry point for the bundler
-- `dist/chat-widget.js`: Generated bundle (do not edit directly)
+- `src/chat-widget.js`: Bundle used for local tests/demos
+- `dist/chat-widget.js`: Final distribution bundle
+- `dist/chat-widget.min.js`: Minified distribution bundle
 - `tests/`: Playwright test suites
 
 ## Security Features
 
-- Callback validation to prevent XSS
-- Message sanitization
-- Proper Content-Type headers
+- **JSONP Security**: Callback validation to prevent XSS.
+- **Scoped Reset**: Internal CSS reset prevents host styles from breaking the UI.
+- **Message Sanitization**: Proper handling of user-generated content.

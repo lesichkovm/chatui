@@ -16,9 +16,17 @@ async function build() {
     fs.mkdirSync('dist');
   }
 
-  // 3. Copy the built file to dist/ for the final distribution
-  // We can also minify the dist version if desired, but for now we keep them identical
+  // 3. Copy the built file to dist/ for the standard distribution
   fs.copyFileSync('src/chat-widget.js', 'dist/chat-widget.js');
+
+  // 4. Build minified version to dist/chat-widget.min.js
+  await esbuild.build({
+    entryPoints: ['src/entry.js'],
+    bundle: true,
+    outfile: 'dist/chat-widget.min.js',
+    format: 'iife',
+    minify: true,
+  });
 }
 
 build().catch((err) => {
