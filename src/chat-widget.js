@@ -11,14 +11,7 @@
     setSessionKey(key) {
       localStorage.setItem("chat_session_key", key);
     }
-    isDevEnvironment() {
-      return this.serverUrl === "http://localhost:3000" && typeof window !== "undefined" && window.location && window.location.hostname === "localhost";
-    }
     performHandshake(onSuccess) {
-      if (this.isDevEnvironment()) {
-        this.setSessionKey("test-session-key");
-        return;
-      }
       const callbackName = "handshakeCallback_" + Date.now();
       const url = `${this.serverUrl}/api/handshake?callback=${callbackName}`;
       this._injectScript(url, callbackName, (response) => {
@@ -29,9 +22,6 @@
       });
     }
     connect(onMessage) {
-      if (this.isDevEnvironment()) {
-        return;
-      }
       const sessionKey = this.getSessionKey();
       const callbackName = "connectCallback_" + Date.now();
       const url = `${this.serverUrl}/api/messages?callback=${callbackName}&type=connect&session_key=${encodeURIComponent(
@@ -42,9 +32,6 @@
       });
     }
     sendMessage(message, onResponse) {
-      if (this.isDevEnvironment()) {
-        return;
-      }
       const sessionKey = this.getSessionKey();
       const callbackName = "chatCallback_" + Date.now();
       const url = `${this.serverUrl}/api/messages?callback=${callbackName}&message=${encodeURIComponent(
@@ -57,6 +44,15 @@
     _injectScript(url, callbackName, handler) {
       const script = document.createElement("script");
       script.src = url;
+      script.onerror = () => {
+        console.error(`ChatWidget: Failed to load ${url}`);
+        if (window[callbackName]) {
+          delete window[callbackName];
+        }
+        if (document.body.contains(script)) {
+          document.body.removeChild(script);
+        }
+      };
       window[callbackName] = function(response) {
         handler(response);
         delete window[callbackName];

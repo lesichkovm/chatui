@@ -103,6 +103,16 @@ Run the Playwright end-to-end tests:
 npm test
 ```
 
+## Running the Demo
+
+To see the widget in action with a live backend:
+
+1. Start the demo API server:
+   ```bash
+   npm run start:demo
+   ```
+2. Open `demo/demo.html` in your browser.
+
 ## Architecture
 
 - `src/modules/`: Individual source modules (API, UI, Utils, Class)
