@@ -1,11 +1,12 @@
 const http = require('http');
-const url = require('url');
+const { URL } = require('url');
 
 const PORT = 3000;
 
 const server = http.createServer((req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  const { pathname, query } = parsedUrl;
+  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+  const pathname = parsedUrl.pathname;
+  const query = Object.fromEntries(parsedUrl.searchParams);
 
   // CORS headers (good practice, though JSONP bypasses)
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -63,13 +64,22 @@ function handleMessages(req, res, query) {
 
 function sendJSONP(res, callback, data) {
   const jsonData = JSON.stringify(data);
-  const content = `${callback}(${jsonData});`;
-
-  res.writeHead(200, {
-    'Content-Type': 'application/javascript',
-    'X-Content-Type-Options': 'nosniff'
-  });
-  res.end(content);
+  
+  if (callback) {
+    // JSONP response
+    const content = `${callback}(${jsonData});`;
+    res.writeHead(200, {
+      'Content-Type': 'application/javascript',
+      'X-Content-Type-Options': 'nosniff'
+    });
+    res.end(content);
+  } else {
+    // Regular JSON response
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    res.end(jsonData);
+  }
 }
 
 server.listen(PORT, () => {
