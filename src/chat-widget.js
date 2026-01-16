@@ -1,5 +1,10 @@
 // Function to create and inject the widget
 function createChatWidget(scriptElement) {
+  if (scriptElement._chatWidgetInitialized) {
+    return;
+  }
+  scriptElement._chatWidgetInitialized = true;
+
   // Get the ID from the script tag
   const widgetId =
     scriptElement.id ||

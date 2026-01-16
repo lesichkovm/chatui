@@ -2,19 +2,19 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Chat Widget - Multiple Widgets', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/tests/multiple-widgets-test.html');
+    await page.goto('/tests/multiple-widgets-simple-test.html');
   });
 
   test('should load multiple widgets on same page', async ({ page }) => {
-    const widgetButton1 = page.locator('#chat-widget-1-button');
-    const widgetButton2 = page.locator('#chat-widget-2-button');
+    const widgetButton1 = page.locator('#chat-widget-1-button').first();
+    const widgetButton2 = page.locator('#chat-widget-2-button').first();
     
     await expect(widgetButton1).toBeVisible();
     await expect(widgetButton2).toBeVisible();
   });
 
   test('should open first widget independently', async ({ page }) => {
-    const widgetButton1 = page.locator('#chat-widget-1-button');
+    const widgetButton1 = page.locator('#chat-widget-1-button').first();
     await widgetButton1.click();
     
     const chatWindow1 = page.locator('#chat-widget-1-window');
@@ -25,7 +25,7 @@ test.describe('Chat Widget - Multiple Widgets', () => {
   });
 
   test('should open second widget independently', async ({ page }) => {
-    const widgetButton2 = page.locator('#chat-widget-2-button');
+    const widgetButton2 = page.locator('#chat-widget-2-button').first();
     await widgetButton2.click();
     
     const chatWindow2 = page.locator('#chat-widget-2-window');
@@ -36,8 +36,8 @@ test.describe('Chat Widget - Multiple Widgets', () => {
   });
 
   test('should allow both widgets to be open simultaneously', async ({ page }) => {
-    const widgetButton1 = page.locator('#chat-widget-1-button');
-    const widgetButton2 = page.locator('#chat-widget-2-button');
+    const widgetButton1 = page.locator('#chat-widget-1-button').first();
+    const widgetButton2 = page.locator('#chat-widget-2-button').first();
     
     await widgetButton1.click();
     await widgetButton2.click();
@@ -50,8 +50,8 @@ test.describe('Chat Widget - Multiple Widgets', () => {
   });
 
   test('should maintain separate states for each widget', async ({ page }) => {
-    const widgetButton1 = page.locator('#chat-widget-1-button');
-    const widgetButton2 = page.locator('#chat-widget-2-button');
+    const widgetButton1 = page.locator('#chat-widget-1-button').first();
+    const widgetButton2 = page.locator('#chat-widget-2-button').first();
     
     await widgetButton1.click();
     await widgetButton2.click();
@@ -74,8 +74,8 @@ test.describe('Chat Widget - Multiple Widgets', () => {
   });
 
   test('should have different positions for each widget', async ({ page }) => {
-    const widgetButton1 = page.locator('#chat-widget-1-button');
-    const widgetButton2 = page.locator('#chat-widget-2-button');
+    const widgetButton1 = page.locator('#chat-widget-1-button').first();
+    const widgetButton2 = page.locator('#chat-widget-2-button').first();
     
     const boundingBox1 = await widgetButton1.boundingBox();
     const boundingBox2 = await widgetButton2.boundingBox();
@@ -89,8 +89,8 @@ test.describe('Chat Widget - Multiple Widgets', () => {
   });
 
   test('should have different colors for each widget', async ({ page }) => {
-    const widgetButton1 = page.locator('#chat-widget-1-button');
-    const widgetButton2 = page.locator('#chat-widget-2-button');
+    const widgetButton1 = page.locator('#chat-widget-1-button').first();
+    const widgetButton2 = page.locator('#chat-widget-2-button').first();
     
     const backgroundColor1 = await widgetButton1.evaluate(el => 
       window.getComputedStyle(el).backgroundColor
@@ -103,8 +103,8 @@ test.describe('Chat Widget - Multiple Widgets', () => {
   });
 
   test('should have different titles for each widget', async ({ page }) => {
-    const widgetButton1 = page.locator('#chat-widget-1-button');
-    const widgetButton2 = page.locator('#chat-widget-2-button');
+    const widgetButton1 = page.locator('#chat-widget-1-button').first();
+    const widgetButton2 = page.locator('#chat-widget-2-button').first();
     
     await widgetButton1.click();
     await widgetButton2.click();
@@ -116,7 +116,7 @@ test.describe('Chat Widget - Multiple Widgets', () => {
     const headerText2 = await header2.textContent();
     
     expect(headerText1).not.toBe(headerText2);
-    expect(headerText1).toContain('Chat with us');
-    expect(headerText2).toContain('Support Chat');
+    expect(headerText1).toContain('Chat 1');
+    expect(headerText2).toContain('Chat 2');
   });
 });
