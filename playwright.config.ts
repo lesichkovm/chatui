@@ -27,7 +27,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npx http-server -p 32000',
+    command: 'npx http-server -p 32000 --cors',
     url: 'http://localhost:32000',
     reuseExistingServer: !process.env.CI,
   },

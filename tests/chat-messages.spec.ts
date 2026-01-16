@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Chat Widget - Message Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/demo.html');
+    await page.goto('/tests/test.html');
   });
 
   test('should type message in input field', async ({ page }) => {
