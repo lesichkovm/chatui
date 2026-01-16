@@ -87,6 +87,14 @@
       --chat-primary-color: ${primaryColor};
       --chat-primary-color-dark: ${adjustColor(primaryColor, -20)};
     }
+
+    /* Scoped CSS Reset */
+    #${widgetId} * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+    }
     
     #${widgetId} .button {
       width: 60px;
