@@ -129,6 +129,10 @@ export class ChatWidget {
 
   open() {
     this.setState({ isOpen: true });
+    // Focus input after opening
+    setTimeout(() => {
+      if (this.textarea) this.textarea.focus();
+    }, 100);
   }
 
   close() {

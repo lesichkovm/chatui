@@ -215,13 +215,13 @@ export function createWidgetDOM(widgetId, config) {
     <div class="header" id="${widgetId}-header">
       <h3>${title}</h3>
       ${
-        mode === "popup" ? `<button type="button" class="close" id="${widgetId}-close">×</button>` : ""
+        mode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">×</button>` : ""
       }
     </div>
-    <div class="messages" id="${widgetId}-messages"></div>
+    <div class="messages" id="${widgetId}-messages" role="log" aria-live="polite" aria-atomic="false"></div>
     <div class="input">
-      <textarea class="textarea" id="${widgetId}-input" placeholder="Type your message... (Shift+Enter for new line)" rows="1"></textarea>
-      <button type="button" class="send" id="${widgetId}-send">Send</button>
+      <textarea class="textarea" id="${widgetId}-input" placeholder="Type your message... (Shift+Enter for new line)" rows="1" aria-label="Type a message"></textarea>
+      <button type="button" class="send" id="${widgetId}-send" aria-label="Send message">Send</button>
     </div>
   `;
 
@@ -233,6 +233,7 @@ export function createWidgetDOM(widgetId, config) {
     chatButton.className = "button";
     chatButton.id = `${widgetId}-button`;
     chatButton.type = "button";
+    chatButton.setAttribute("aria-label", "Toggle chat window");
     chatButton.style.cssText = `
       ${position.includes("bottom") ? "bottom: 20px;" : "top: 20px;"}
       ${position.includes("right") ? "right: 20px;" : "left: 20px;"}
