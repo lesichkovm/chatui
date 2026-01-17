@@ -47,14 +47,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_fullpage_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "btn1", text: "📊 View Statistics", value: "stats" },
-                    { id: "btn2", text: "🎨 Customize Theme", value: "theme" },
-                    { id: "btn3", text: "📝 Start Survey", value: "survey" },
-                    { id: "btn4", text: "💾 Save Conversation", value: "save" }
-                  ]
-                }
+                options: [
+                  { id: "btn1", text: "📊 View Statistics", value: "stats" },
+                  { id: "btn2", text: "🎨 Customize Theme", value: "theme" },
+                  { id: "btn3", text: "📝 Start Survey", value: "survey" },
+                  { id: "btn4", text: "💾 Save Conversation", value: "save" }
+                ]
               }
             };
           } else if (lowerMessage === 'stats') {
@@ -65,11 +63,9 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_fullpage_" + Date.now(),
               widget: {
                 type: "progress",
-                data: {
-                  value: 75,
-                  max: 100,
-                  show_percentage: true
-                }
+                value: 75,
+                max: 100,
+                show_percentage: true
               }
             };
           } else if (lowerMessage === 'theme') {
@@ -80,14 +76,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_fullpage_" + Date.now(),
               widget: {
                 type: "radio",
-                data: {
-                  options: [
-                    { id: "light", text: "Light Theme", value: "light" },
-                    { id: "dark", text: "Dark Theme", value: "dark" },
-                    { id: "auto", text: "Auto (System)", value: "auto" }
-                  ],
-                  name: "theme_choice"
-                }
+                options: [
+                  { id: "light", text: "Light Theme", value: "light" },
+                  { id: "dark", text: "Dark Theme", value: "dark" },
+                  { id: "auto", text: "Auto (System)", value: "auto" }
+                ],
+                name: "theme_choice"
               }
             };
           } else if (lowerMessage === 'survey') {
@@ -98,11 +92,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_fullpage_" + Date.now(),
               widget: {
                 type: "rating",
-                data: {
-                  max: 5,
-                  initial: 0,
-                  icon: "star"
-                }
+                maxRating: 5,
+                iconType: "stars"
               }
             };
           } else if (lowerMessage === 'save') {
@@ -113,11 +104,9 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_fullpage_" + Date.now(),
               widget: {
                 type: "input",
-                data: {
-                  placeholder: "Conversation name...",
-                  type: "text",
-                  required: true
-                }
+                placeholder: "Conversation name...",
+                inputType: "text",
+                buttonText: "Save"
               }
             };
           } else if (lowerMessage === 'light' || lowerMessage === 'dark' || lowerMessage === 'auto') {
