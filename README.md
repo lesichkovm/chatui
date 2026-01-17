@@ -1,5 +1,7 @@
 # ChatUI Widget
 
+![Tests](https://github.com/lesichkovm/chatui/workflows/Tests/badge.svg)
+
 A professional, **ultra-lightweight (~12KB)**, API-agnostic chat UI widget built with **pure Vanilla JavaScript**. Zero framework lock-in (no React/Vue/jQuery), zero external dependencies, and built-in JSONP support for seamless cross-domain integration.
 
 ## Strategic Position
