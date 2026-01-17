@@ -79,7 +79,7 @@ export class ChatWidget {
     if (this.state.isOpen) {
       this.chatWindow.classList.add("window-open");
       if (this.chatButton) {
-        this.chatButton.style.display = "flex";
+        this.chatButton.style.display = "none";
         this._updateButtonPosition(true);
       }
     } else {
