@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { HybridChatAPI } from '../src/modules/hybrid-api.js';
+import { HybridChatAPI } from '../src/modules/api.js';
 
 // Mock WebSocket for testing
 class MockWebSocket {

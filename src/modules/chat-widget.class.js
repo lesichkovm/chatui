@@ -1,4 +1,4 @@
-import { HybridChatAPI } from './hybrid-api.js';
+import { HybridChatAPI } from './api.js';
 import { injectStyles, createWidgetDOM, appendMessage } from './ui.js';
 import { ThemeManager } from './theme.js';
 import { adjustColor } from './utils.js';

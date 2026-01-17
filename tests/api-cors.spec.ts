@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { CorsAPI } from '../src/modules/cors-api.js';
+import { CorsAPI } from '../src/modules/api-cors.js';
 
 // Mock fetch for testing
 class MockResponse {
