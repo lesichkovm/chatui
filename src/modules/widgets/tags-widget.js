@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Tags Widget
  * Renders a tag input with autocomplete for multiple keywords
+ * Extends BaseWidget to provide tag-based interaction
  */
 export class TagsWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the tags widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid tags widget data');

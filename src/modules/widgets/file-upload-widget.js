@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * File Upload Widget
  * Renders a file upload with drag-and-drop support
+ * Extends BaseWidget to provide file upload interaction
  */
 export class FileUploadWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the file upload widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid file upload widget data');

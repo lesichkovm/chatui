@@ -1,6 +1,14 @@
 import { adjustColor } from './utils.js';
 import { WidgetFactory } from './widgets/index.js';
 
+/**
+ * Inject CSS styles for the chat widget
+ * @param {string} widgetId - Unique identifier for the widget instance
+ * @param {Object} themeConfig - Theme configuration object
+ * @param {string} themeConfig.theme - Theme name
+ * @param {string} themeConfig.mode - Theme mode ('light' or 'dark')
+ * @param {Object} themeConfig.colors - Color configuration
+ */
 export function injectStyles(widgetId, themeConfig) {
   const styleElement = document.createElement("style");
   styleElement.id = `${widgetId}-styles`;
@@ -432,6 +440,16 @@ export function injectStyles(widgetId, themeConfig) {
   document.head.appendChild(styleElement);
 }
 
+/**
+ * Create the DOM structure for the chat widget
+ * @param {string} widgetId - Unique identifier for the widget instance
+ * @param {Object} config - Widget configuration
+ * @param {string} config.displayMode - Display mode ('popup' or 'fullpage')
+ * @param {string} config.position - Position for popup mode
+ * @param {string} config.title - Widget title
+ * @param {string} config.targetSelector - Target element selector for fullpage mode
+ * @returns {Object} Object containing container, chatWindow, and chatButton elements
+ */
 export function createWidgetDOM(widgetId, config) {
   const { displayMode, position, title, targetSelector } = config;
 
@@ -504,6 +522,14 @@ export function createWidgetDOM(widgetId, config) {
   return { container, chatWindow, chatButton };
 }
 
+/**
+ * Append a message to the messages container
+ * @param {HTMLElement} container - Messages container element
+ * @param {string} text - Message text
+ * @param {string} sender - Message sender ('user' or 'bot')
+ * @param {string} widgetId - Widget ID for generating unique message IDs
+ * @param {Object} [widgetData] - Optional widget data for bot messages
+ */
 export function appendMessage(container, text, sender, widgetId, widgetData = null) {
   const messageElement = document.createElement("div");
   messageElement.className = `message ${sender}-message`;
@@ -524,6 +550,13 @@ export function appendMessage(container, text, sender, widgetId, widgetData = nu
   container.scrollTop = container.scrollHeight;
 }
 
+/**
+ * Create a widget element from widget data
+ * @private
+ * @param {Object} widgetData - Widget configuration data
+ * @param {string} widgetId - Widget ID for scoping
+ * @returns {HTMLElement|Comment} Widget element or comment for unsupported types
+ */
 function createWidgetElement(widgetData, widgetId) {
   const widget = WidgetFactory.createWidget(widgetData, widgetId);
 

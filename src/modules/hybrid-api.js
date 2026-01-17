@@ -1,6 +1,16 @@
 import { ChatAPI } from './api.js';
 
+/**
+ * HybridChatAPI extends ChatAPI with WebSocket support
+ * Automatically detects and uses WebSocket when available, falls back to JSONP
+ */
 export class HybridChatAPI extends ChatAPI {
+  /**
+   * Create a new HybridChatAPI instance
+   * @param {Object} config - Configuration object
+   * @param {string} config.serverUrl - Base URL for the chat server
+   * @param {boolean} [config.debug=false] - Enable debug logging
+   */
   constructor(config) {
     super(config);
     this.wsConnection = null;
@@ -11,6 +21,12 @@ export class HybridChatAPI extends ChatAPI {
     this.reconnectDelay = 1000;
   }
 
+  /**
+   * Detect connection type based on server URL protocol
+   * @private
+   * @param {string} serverUrl - Server URL to analyze
+   * @returns {string} Connection type ('websocket' or 'jsonp')
+   */
   detectConnectionType(serverUrl) {
     try {
       const url = new URL(serverUrl);
@@ -27,6 +43,10 @@ export class HybridChatAPI extends ChatAPI {
     return 'jsonp';
   }
 
+  /**
+   * Perform handshake using appropriate connection method
+   * @param {Function} onSuccess - Callback function called on successful handshake
+   */
   performHandshake(onSuccess) {
     if (this.connectionType === 'websocket') {
       this.performWebSocketHandshake(onSuccess);
@@ -35,6 +55,11 @@ export class HybridChatAPI extends ChatAPI {
     }
   }
 
+  /**
+   * Perform WebSocket-specific handshake
+   * @private
+   * @param {Function} onSuccess - Callback function called on successful handshake
+   */
   performWebSocketHandshake(onSuccess) {
     if (this.isTestEnvironment()) {
       this.setSessionKey('test-session-key');
@@ -62,6 +87,13 @@ export class HybridChatAPI extends ChatAPI {
     });
   }
 
+  /**
+   * Connect using appropriate connection method
+   * @param {Function} onMessage - Callback function for incoming messages
+   * @param {string} onMessage.text - Message text
+   * @param {string} onMessage.sender - Message sender ('bot')
+   * @param {Object} [onMessage.widget] - Optional widget data
+   */
   connect(onMessage) {
     if (this.connectionType === 'websocket') {
       this.connectWebSocket(onMessage);
@@ -70,6 +102,11 @@ export class HybridChatAPI extends ChatAPI {
     }
   }
 
+  /**
+   * Connect via WebSocket
+   * @private
+   * @param {Function} onMessage - Callback function for incoming messages
+   */
   connectWebSocket(onMessage) {
     if (this.isTestEnvironment()) {
       return;
@@ -126,6 +163,14 @@ export class HybridChatAPI extends ChatAPI {
     });
   }
 
+  /**
+   * Send message using appropriate connection method
+   * @param {string} message - The message to send
+   * @param {Function} onResponse - Callback function for server response
+   * @param {string} onResponse.text - Response text
+   * @param {string} onResponse.sender - Response sender ('bot')
+   * @param {Object} [onResponse.widget] - Optional widget data
+   */
   sendMessage(message, onResponse) {
     if (this.connectionType === 'websocket') {
       this.sendWebSocketMessage(message, onResponse);
@@ -134,6 +179,12 @@ export class HybridChatAPI extends ChatAPI {
     }
   }
 
+  /**
+   * Send message via WebSocket
+   * @private
+   * @param {string} message - The message to send
+   * @param {Function} onResponse - Callback function for server response
+   */
   sendWebSocketMessage(message, onResponse) {
     if (this.isTestEnvironment()) {
       return;
@@ -166,6 +217,10 @@ export class HybridChatAPI extends ChatAPI {
     }
   }
 
+  /**
+   * Send typing indicator via WebSocket
+   * @param {boolean} isTyping - Whether the user is typing
+   */
   sendTypingIndicator(isTyping) {
     if (this.connectionType === 'websocket' && this.wsConnection?.readyState === WebSocket.OPEN) {
       this.wsConnection.send(JSON.stringify({
@@ -177,6 +232,10 @@ export class HybridChatAPI extends ChatAPI {
     }
   }
 
+  /**
+   * Send read receipt via WebSocket
+   * @param {string} messageId - ID of the message to mark as read
+   */
   sendReadReceipt(messageId) {
     if (this.connectionType === 'websocket' && this.wsConnection?.readyState === WebSocket.OPEN) {
       this.wsConnection.send(JSON.stringify({
@@ -188,6 +247,11 @@ export class HybridChatAPI extends ChatAPI {
     }
   }
 
+  /**
+   * Initialize WebSocket connection
+   * @private
+   * @returns {Promise} Promise that resolves when connection is established
+   */
   initWebSocket() {
     return new Promise((resolve, reject) => {
       if (this.wsConnection?.readyState === WebSocket.OPEN) {
@@ -223,6 +287,10 @@ export class HybridChatAPI extends ChatAPI {
     });
   }
 
+  /**
+   * Send queued messages when WebSocket reconnects
+   * @private
+   */
   flushMessageQueue() {
     while (this.messageQueue.length > 0) {
       const { message, onResponse } = this.messageQueue.shift();
@@ -230,6 +298,11 @@ export class HybridChatAPI extends ChatAPI {
     }
   }
 
+  /**
+   * Handle typing indicator events
+   * @private
+   * @param {Object} data - Typing indicator data
+   */
   handleTypingIndicator(data) {
     const event = new CustomEvent('chatwidget:typing', {
       detail: { typing: data.payload.typing }
@@ -237,6 +310,11 @@ export class HybridChatAPI extends ChatAPI {
     window.dispatchEvent(event);
   }
 
+  /**
+   * Handle read receipt events
+   * @private
+   * @param {Object} data - Read receipt data
+   */
   handleReadReceipt(data) {
     const event = new CustomEvent('chatwidget:read_receipt', {
       detail: { message_id: data.payload.message_id }
@@ -244,6 +322,9 @@ export class HybridChatAPI extends ChatAPI {
     window.dispatchEvent(event);
   }
 
+  /**
+   * Close WebSocket connection
+   */
   disconnect() {
     if (this.wsConnection) {
       this.wsConnection.close();

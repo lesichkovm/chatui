@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Input Form Widget
  * Renders a simple input form with a submit button
+ * Extends BaseWidget to provide text input interaction
  */
 export class InputWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the input widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid input widget data');
@@ -62,6 +67,10 @@ export class InputWidget extends BaseWidget {
     return widgetContainer;
   }
 
+  /**
+   * Validate input widget data structure
+   * @returns {boolean} True if data contains required properties for input widget
+   */
   validate() {
     return super.validate() && 
            this.widgetData.type === 'input';

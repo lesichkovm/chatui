@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Toggle Widget
  * Renders an on/off switch for binary choices
+ * Extends BaseWidget to provide toggle-based interaction
  */
 export class ToggleWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the toggle widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid toggle widget data');

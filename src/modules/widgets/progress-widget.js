@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Progress Widget
  * Renders a read-only progress indicator
+ * Extends BaseWidget to provide progress display functionality
  */
 export class ProgressWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the progress widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid progress widget data');

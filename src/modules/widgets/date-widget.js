@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Date Widget
  * Renders a date picker for selecting dates
+ * Extends BaseWidget to provide date selection interaction
  */
 export class DateWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the date widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid date widget data');

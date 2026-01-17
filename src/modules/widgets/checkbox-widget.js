@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Checkbox Widget
  * Renders multiple checkboxes for multi-select options
+ * Extends BaseWidget to provide checkbox-based interaction
  */
 export class CheckboxWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the checkbox widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid checkbox widget data');

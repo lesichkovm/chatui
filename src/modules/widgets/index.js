@@ -1,6 +1,6 @@
 /**
  * Widget System Entry Point
- * Exports all widget-related functionality
+ * Exports all widget-related functionality and provides convenience functions
  */
 
 export { BaseWidget } from './base-widget.js';
@@ -21,7 +21,12 @@ export { RadioWidget } from './radio-widget.js';
 export { ProgressWidget } from './progress-widget.js';
 export { WidgetFactory } from './widget-factory.js';
 
-// Convenience function for creating widgets
+/**
+ * Convenience function for creating widgets
+ * @param {Object} widgetData - Widget configuration data
+ * @param {string} widgetId - Widget ID for scoping
+ * @returns {BaseWidget|null} Widget instance or null if type not supported
+ */
 export function createWidget(widgetData, widgetId) {
   return WidgetFactory.createWidget(widgetData, widgetId);
 }

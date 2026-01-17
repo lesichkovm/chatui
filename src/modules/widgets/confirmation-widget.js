@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Confirmation Widget
  * Renders a confirm/cancel action dialog
+ * Extends BaseWidget to provide confirmation-based interaction
  */
 export class ConfirmationWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the confirmation widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid confirmation widget data');

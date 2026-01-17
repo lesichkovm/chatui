@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Radio Widget
  * Renders radio buttons for single selection from multiple options
+ * Extends BaseWidget to provide radio button-based interaction
  */
 export class RadioWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the radio widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid radio widget data');

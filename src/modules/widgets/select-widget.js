@@ -2,9 +2,14 @@ import { BaseWidget } from './base-widget.js';
 
 /**
  * Select Dropdown Widget
- * Renders a dropdown select menu
+ * Renders a dropdown select menu for user selection
+ * Extends BaseWidget to provide dropdown-based interaction
  */
 export class SelectWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the select widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid select widget data');
@@ -64,6 +69,10 @@ export class SelectWidget extends BaseWidget {
     return widgetContainer;
   }
 
+  /**
+   * Validate select widget data structure
+   * @returns {boolean} True if data contains required properties for select widget
+   */
   validate() {
     return super.validate() && 
            this.widgetData.type === 'select' && 

@@ -2,9 +2,14 @@ import { BaseWidget } from './base-widget.js';
 
 /**
  * Buttons Widget
- * Renders clickable button options
+ * Renders clickable button options for user selection
+ * Extends BaseWidget to provide button-based interaction
  */
 export class ButtonsWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the buttons widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid buttons widget data');
@@ -50,6 +55,10 @@ export class ButtonsWidget extends BaseWidget {
     return widgetContainer;
   }
 
+  /**
+   * Validate buttons widget data structure
+   * @returns {boolean} True if data contains required properties for buttons widget
+   */
   validate() {
     return super.validate() && 
            this.widgetData.type === 'buttons' && 

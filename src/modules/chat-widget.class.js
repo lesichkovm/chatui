@@ -3,7 +3,23 @@ import { injectStyles, createWidgetDOM, appendMessage } from './ui.js';
 import { ThemeManager } from './theme.js';
 import { adjustColor } from './utils.js';
 
+/**
+ * Main ChatWidget class that orchestrates the entire chat interface
+ * Handles initialization, UI rendering, message management, and user interactions
+ */
 export class ChatWidget {
+  /**
+   * Create a new ChatWidget instance
+   * @param {HTMLElement|Object} input - Script element or configuration object
+   * @param {Object} [input.config] - Configuration if input is an object
+   * @param {string} [input.config.id] - Widget ID
+   * @param {string} [input.config.displayMode] - Display mode ('popup' or 'fullpage')
+   * @param {string} [input.config.position] - Position for popup mode
+   * @param {string} [input.config.primaryColor] - Primary color for the widget
+   * @param {string} [input.config.title] - Widget title
+   * @param {string} [input.config.targetSelector] - Target element selector for fullpage mode
+   * @param {string} [input.config.serverUrl] - Server URL for chat API
+   */
   constructor(input) {
     let config = {};
     let scriptElement = null;
@@ -68,6 +84,10 @@ export class ChatWidget {
     }
   }
 
+  /**
+   * Initialize the widget
+   * @private
+   */
   init() {
     injectStyles(this.widgetId, this.config);
     const { container, chatWindow, chatButton } = createWidgetDOM(
@@ -168,11 +188,19 @@ export class ChatWidget {
     }
   }
 
+  /**
+   * Update widget state and trigger re-render
+   * @param {Object} newState - New state properties to merge
+   */
   setState(newState) {
     this.state = { ...this.state, ...newState };
     this.render();
   }
 
+  /**
+   * Render the widget based on current state
+   * @private
+   */
   render() {
     if (this.state.isOpen) {
       this.chatWindow.classList.add("window-open");
@@ -189,6 +217,10 @@ export class ChatWidget {
     }
   }
 
+  /**
+   * Bind event handlers to DOM elements
+   * @private
+   */
   bindEvents() {
     this.handlers = {
       toggle: () => this.toggle(),
@@ -217,6 +249,10 @@ export class ChatWidget {
     this.setupTextareaAutoResize();
   }
 
+  /**
+   * Setup auto-resize behavior for textarea
+   * @private
+   */
   setupTextareaAutoResize() {
     // Set initial height
     this.textarea.style.height = "auto";
@@ -235,10 +271,16 @@ export class ChatWidget {
     this.resizeObserver = resizeObserver;
   }
 
+  /**
+   * Toggle widget open/closed state
+   */
   toggle() {
     this.setState({ isOpen: !this.state.isOpen });
   }
 
+  /**
+   * Open the chat widget
+   */
   open() {
     this.setState({ isOpen: true });
     // Focus input after opening
@@ -247,10 +289,18 @@ export class ChatWidget {
     }, 100);
   }
 
+  /**
+   * Close the chat widget
+   */
   close() {
     this.setState({ isOpen: false });
   }
 
+  /**
+   * Update button position based on widget state
+   * @private
+   * @param {boolean} isOpen - Whether the widget is open
+   */
   _updateButtonPosition(isOpen) {
     const { position } = this.config;
     if (isOpen) {
@@ -271,6 +321,10 @@ export class ChatWidget {
     }
   }
 
+  /**
+   * Send a message to the chat server
+   * @param {string} [text] - Optional message text (uses textarea value if not provided)
+   */
   sendMessage(text) {
     const message = text || this.textarea.value.trim();
     if (message) {
@@ -285,6 +339,11 @@ export class ChatWidget {
     }
   }
 
+  /**
+   * Handle widget interaction events
+   * @private
+   * @param {Object} interaction - Interaction data from widget
+   */
   handleWidgetInteraction(interaction) {
     // Send the selected option value as a message
     const messageText = interaction.optionText;
@@ -296,6 +355,12 @@ export class ChatWidget {
     );
   }
 
+  /**
+   * Add a message to the chat
+   * @param {string} text - Message text
+   * @param {string} sender - Message sender ('user' or 'bot')
+   * @param {Object} [widgetData] - Optional widget data for bot messages
+   */
   addMessage(text, sender, widgetData = null) {
     const messageObj = { text, sender, timestamp: Date.now(), widgetData };
     this.state.messages.push(messageObj);

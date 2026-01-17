@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Color Picker Widget
  * Renders a color selection for visual preferences
+ * Extends BaseWidget to provide color selection interaction
  */
 export class ColorPickerWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the color picker widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid color picker widget data');

@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Textarea Widget
  * Renders a multi-line text input for longer responses
+ * Extends BaseWidget to provide textarea-based interaction
  */
 export class TextareaWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the textarea widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid textarea widget data');

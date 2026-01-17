@@ -16,9 +16,15 @@ import { ProgressWidget } from './progress-widget.js';
 
 /**
  * Widget Factory
- * Creates appropriate widget instances based on widget data
+ * Creates appropriate widget instances based on widget data type
+ * Provides registration system for custom widget types
  */
 export class WidgetFactory {
+  /**
+   * Map of widget type identifiers to their corresponding classes
+   * @static
+   * @type {Map<string, BaseWidget>}
+   */
   static widgetTypes = new Map([
     ['buttons', ButtonsWidget],
     ['select', SelectWidget],
@@ -39,17 +45,20 @@ export class WidgetFactory {
 
   /**
    * Register a new widget type
+   * @static
    * @param {string} type - Widget type identifier
-   * @param {class} WidgetClass - Widget class constructor
+   * @param {class} WidgetClass - Widget class constructor extending BaseWidget
    */
   static registerWidget(type, WidgetClass) {
     this.widgetTypes.set(type, WidgetClass);
   }
 
   /**
-   * Create a widget instance
+   * Create a widget instance based on data type
+   * @static
    * @param {Object} widgetData - Widget configuration data
-   * @param {string} widgetId - Widget container ID
+   * @param {string} widgetData.type - Widget type identifier
+   * @param {string} widgetId - Widget container ID for scoping
    * @returns {BaseWidget|null} Widget instance or null if type not supported
    */
   static createWidget(widgetData, widgetId) {
@@ -74,7 +83,8 @@ export class WidgetFactory {
   }
 
   /**
-   * Get list of supported widget types
+   * Get list of all supported widget types
+   * @static
    * @returns {string[]} Array of supported widget type names
    */
   static getSupportedTypes() {

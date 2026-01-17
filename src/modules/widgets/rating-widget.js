@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Rating Widget
  * Renders a star or emoji-based rating system
+ * Extends BaseWidget to provide rating-based interaction
  */
 export class RatingWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the rating widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid rating widget data');

@@ -3,8 +3,13 @@ import { BaseWidget } from './base-widget.js';
 /**
  * Slider Widget
  * Renders a numeric range slider for selecting values
+ * Extends BaseWidget to provide slider-based interaction
  */
 export class SliderWidget extends BaseWidget {
+  /**
+   * Create the DOM element for the slider widget
+   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid slider widget data');
