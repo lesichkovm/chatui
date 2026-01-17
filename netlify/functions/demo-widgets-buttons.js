@@ -47,14 +47,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_buttons_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "btn1", text: "🚀 Quick Actions", value: "quick" },
-                    { id: "btn2", text: "🎨 Style Options", value: "style" },
-                    { id: "btn3", text: "📊 Button Types", value: "types" },
-                    { id: "btn4", text: "⚡ Interactive Demo", value: "interactive" }
-                  ]
-                }
+                options: [
+                  { id: "btn1", text: "🚀 Quick Actions", value: "quick" },
+                  { id: "btn2", text: "🎨 Style Options", value: "style" },
+                  { id: "btn3", text: "⚙️ Settings", value: "settings" },
+                  { id: "btn4", text: "📊 Analytics", value: "analytics" }
+                ]
               }
             };
           } else if (lowerMessage === 'quick') {
@@ -65,14 +63,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_buttons_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "save", text: "💾 Save", value: "save_action" },
-                    { id: "cancel", text: "❌ Cancel", value: "cancel_action" },
-                    { id: "submit", text: "✅ Submit", value: "submit_action" },
-                    { id: "reset", text: "🔄 Reset", value: "reset_action" }
-                  ]
-                }
+                options: [
+                  { id: "save", text: "💾 Save", value: "save_action" },
+                  { id: "cancel", text: "❌ Cancel", value: "cancel_action" },
+                  { id: "submit", text: "✅ Submit", value: "submit_action" },
+                  { id: "reset", text: "🔄 Reset", value: "reset_action" }
+                ]
               }
             };
           } else if (lowerMessage === 'style') {
@@ -83,14 +79,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_buttons_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "primary", text: "🔵 Primary", value: "primary_style" },
-                    { id: "secondary", text: "⚪ Secondary", value: "secondary_style" },
-                    { id: "success", text: "🟢 Success", value: "success_style" },
-                    { id: "danger", text: "🔴 Danger", value: "danger_style" }
-                  ]
-                }
+                options: [
+                  { id: "primary", text: "🔵 Primary", value: "primary_style" },
+                  { id: "secondary", text: "⚪ Secondary", value: "secondary_style" },
+                  { id: "success", text: "🟢 Success", value: "success_style" },
+                  { id: "danger", text: "🔴 Danger", value: "danger_style" }
+                ]
               }
             };
           } else if (lowerMessage === 'types') {
@@ -101,14 +95,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_buttons_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "icon", text: "🎨 Icon Button", value: "icon_button" },
-                    { id: "text", text: "📝 Text Only", value: "text_button" },
-                    { id: "emoji", text: "😀 Emoji Button", value: "emoji_button" },
-                    { id: "mixed", text: "🎯 Mixed Content", value: "mixed_button" }
-                  ]
-                }
+                options: [
+                  { id: "icon", text: "🎨 Icon Button", value: "icon_button" },
+                  { id: "text", text: "📝 Text Only", value: "text_button" },
+                  { id: "emoji", text: "😀 Emoji Button", value: "emoji_button" },
+                  { id: "mixed", text: "🎯 Mixed Content", value: "mixed_button" }
+                ]
               }
             };
           } else if (lowerMessage === 'interactive') {
@@ -119,14 +111,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_buttons_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "click1", text: "👆 Click Me!", value: "click_demo_1" },
-                    { id: "click2", text: "🎯 Try This", value: "click_demo_2" },
-                    { id: "click3", text: "⚡ Quick Action", value: "click_demo_3" },
-                    { id: "click4", text: "🔄 Refresh", value: "click_demo_4" }
-                  ]
-                }
+                options: [
+                  { id: "click1", text: "👆 Click Me!", value: "click_demo_1" },
+                  { id: "click2", text: "🎯 Try This", value: "click_demo_2" },
+                  { id: "click3", text: "⚡ Quick Action", value: "click_demo_3" },
+                  { id: "click4", text: "🔄 Refresh", value: "click_demo_4" }
+                ]
               }
             };
           } else {

@@ -64,11 +64,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_session_" + Date.now(),
               widget: {
                 type: "rating",
-                data: {
-                  max: 5,
-                  initial: 0,
-                  icon: "star"
-                }
+                maxRating: 5,
+                iconType: "star"
               }
             };
           } else if (lowerMessage === 'feedback' || lowerMessage === 'comment') {
@@ -79,11 +76,9 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_session_" + Date.now(),
               widget: {
                 type: "textarea",
-                data: {
-                  placeholder: "Enter your feedback here...",
-                  rows: 4,
-                  required: true
-                }
+                placeholder: "Please share your feedback:",
+                rows: 4,
+                required: true
               }
             };
           } else if (lowerMessage === 'schedule' || lowerMessage === 'date') {
@@ -94,10 +89,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_session_" + Date.now(),
               widget: {
                 type: "date",
-                data: {
-                  value: new Date().toISOString().split('T')[0],
-                  required: true
-                }
+                value: new Date().toISOString().split('T')[0],
+                required: true
               }
             };
           } else if (lowerMessage === 'color' || lowerMessage === 'theme') {
@@ -108,10 +101,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_session_" + Date.now(),
               widget: {
                 type: "color_picker",
-                data: {
-                  value: "#667eea",
-                  preset_colors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"]
-                }
+                defaultColor: "#667eea",
+                presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"]
               }
             };
           } else {
@@ -215,11 +206,8 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               widget: {
                 type: "rating",
-                data: {
-                  max: 5,
-                  initial: 0,
-                  icon: "star"
-                }
+                maxRating: 5,
+                iconType: "star"
               }
             };
           } else if (lowerMessage === 'feedback' || lowerMessage === 'comment') {
@@ -229,11 +217,9 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               widget: {
                 type: "textarea",
-                data: {
-                  placeholder: "Enter your feedback here...",
-                  rows: 4,
-                  required: true
-                }
+                placeholder: "Please share your feedback:",
+                rows: 4,
+                required: true
               }
             };
           } else if (lowerMessage === 'schedule' || lowerMessage === 'date') {
@@ -243,10 +229,8 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               widget: {
                 type: "date",
-                data: {
-                  value: new Date().toISOString().split('T')[0],
-                  required: true
-                }
+                value: new Date().toISOString().split('T')[0],
+                required: true
               }
             };
           } else if (lowerMessage === 'color' || lowerMessage === 'theme') {
@@ -256,10 +240,8 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               widget: {
                 type: "color_picker",
-                data: {
-                  value: "#667eea",
-                  preset_colors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"]
-                }
+                defaultColor: "#667eea",
+                presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"]
               }
             };
           } else {

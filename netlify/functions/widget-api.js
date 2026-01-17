@@ -43,22 +43,17 @@ const handler = async (event, context) => {
             case 'rating':
               responseData = {
                 type: 'rating',
-                data: {
-                  max: 5,
-                  initial: 0,
-                  icon: 'star'
-                }
+                maxRating: 5,
+                iconType: 'star'
               };
               break;
               
             case 'input':
               responseData = {
                 type: 'input',
-                data: {
-                  placeholder: 'Enter your message...',
-                  type: 'text',
-                  required: true
-                }
+                placeholder: 'Enter your message...',
+                inputType: 'text',
+                required: true
               };
               break;
               
@@ -89,86 +84,70 @@ const handler = async (event, context) => {
             case 'textarea':
               responseData = {
                 type: 'textarea',
-                data: {
-                  placeholder: 'Enter your detailed feedback...',
-                  rows: 4,
-                  required: true
-                }
+                placeholder: 'Enter your detailed feedback...',
+                rows: 4,
+                required: true
               };
               break;
               
             case 'slider':
               responseData = {
                 type: 'slider',
-                data: {
-                  min: 0,
-                  max: 100,
-                  value: 50,
-                  step: 1
-                }
+                min: 0,
+                max: 100,
+                defaultValue: 50,
+                step: 1
               };
               break;
               
             case 'toggle':
               responseData = {
                 type: 'toggle',
-                data: {
-                  checked: false,
-                  label: 'Enable notifications'
-                }
+                defaultValue: false,
+                label: 'Enable notifications'
               };
               break;
               
             case 'date':
               responseData = {
                 type: 'date',
-                data: {
-                  value: new Date().toISOString().split('T')[0],
-                  required: false
-                }
+                value: new Date().toISOString().split('T')[0],
+                required: false
               };
               break;
               
             case 'tags':
               responseData = {
                 type: 'tags',
-                data: {
-                  placeholder: 'Add tags...',
-                  suggestions: ['javascript', 'chat', 'widget', 'demo', 'netlify']
-                }
+                placeholder: 'Add tags...',
+                suggestions: ['javascript', 'chat', 'widget', 'demo', 'netlify']
               };
               break;
               
             case 'file_upload':
               responseData = {
                 type: 'file_upload',
-                data: {
-                  accept: '.jpg,.png,.pdf,.doc',
-                  multiple: false,
-                  max_size: '5MB'
-                }
+                accept: '.jpg,.png,.pdf,.doc',
+                multiple: false,
+                maxSize: '5MB'
               };
               break;
               
             case 'color_picker':
               responseData = {
                 type: 'color_picker',
-                data: {
-                  value: '#667eea',
-                  preset_colors: ['#667eea', '#764ba2', '#f093fb', '#4facfe']
-                }
+                defaultColor: '#667eea',
+                presetColors: ['#667eea', '#764ba2', '#f093fb', '#4facfe']
               };
               break;
               
             case 'confirmation':
               responseData = {
                 type: 'confirmation',
-                data: {
-                  title: 'Confirm Action',
-                  message: 'Are you sure you want to proceed?',
-                  confirm_text: 'Yes',
-                  cancel_text: 'No'
-                }
+                title: 'Confirm Action',
+                message: 'Are you sure you want to proceed?',
+                confirmText: 'Yes',
+                cancelText: 'No'
               };
               break;
               
@@ -187,11 +166,9 @@ const handler = async (event, context) => {
             case 'progress':
               responseData = {
                 type: 'progress',
-                data: {
-                  value: 75,
-                  max: 100,
-                  show_percentage: true
-                }
+                value: 75,
+                max: 100,
+                showPercentage: true
               };
               break;
               

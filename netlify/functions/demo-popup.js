@@ -63,10 +63,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_popup_" + Date.now(),
               widget: {
                 type: "color_picker",
-                data: {
-                  value: "#007bff",
-                  preset_colors: ["#007bff", "#28a745", "#dc3545", "#ffc107", "#6610f2", "#e83e8c"]
-                }
+                defaultColor: "#007bff",
+                presetColors: ["#007bff", "#28a745", "#dc3545", "#ffc107", "#6610f2", "#e83e8c"]
               }
             };
           } else if (lowerMessage === 'position') {
@@ -94,10 +92,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_popup_" + Date.now(),
               widget: {
                 type: "toggle",
-                data: {
-                  checked: false,
-                  label: "Notification Sounds"
-                }
+                defaultValue: false,
+                label: "Notification Sounds"
               }
             };
           } else {

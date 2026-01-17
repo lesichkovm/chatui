@@ -63,11 +63,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "rating",
-                data: {
-                  max: 5,
-                  initial: 0,
-                  icon: "star"
-                }
+                maxRating: 5,
+                iconType: "star"
               }
             };
           } else if (lowerMessage === 'forms') {
@@ -95,11 +92,9 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "input",
-                data: {
-                  placeholder: "Enter your name...",
-                  type: "text",
-                  required: true
-                }
+                placeholder: "Enter your name...",
+                inputType: "text",
+                required: true
               }
             };
           } else if (lowerMessage === 'textarea') {
@@ -110,11 +105,9 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "textarea",
-                data: {
-                  placeholder: "Enter your detailed feedback here...",
-                  rows: 4,
-                  required: true
-                }
+                placeholder: "Enter your detailed feedback here...",
+                rows: 4,
+                required: true
               }
             };
           } else if (lowerMessage === 'select') {
@@ -194,10 +187,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "color_picker",
-                data: {
-                  value: "#667eea",
-                  preset_colors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4", "#ffd93d", "#6bcf7f"]
-                }
+                defaultColor: "#667eea",
+                presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4", "#ffd93d", "#6bcf7f"]
               }
             };
           } else if (lowerMessage === 'date') {
@@ -208,10 +199,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "date",
-                data: {
-                  value: new Date().toISOString().split('T')[0],
-                  required: true
-                }
+                value: new Date().toISOString().split('T')[0],
+                required: true
               }
             };
           } else if (lowerMessage === 'file') {
@@ -222,11 +211,9 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "file_upload",
-                data: {
-                  accept: ".jpg,.png,.pdf,.doc,.txt",
-                  multiple: false,
-                  max_size: "5MB"
-                }
+                accept: ".jpg,.png,.pdf,.doc,.txt",
+                multiple: false,
+                maxSize: "5MB"
               }
             };
           } else if (lowerMessage === 'slider') {
@@ -237,12 +224,10 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "slider",
-                data: {
-                  min: 0,
-                  max: 100,
-                  value: 50,
-                  step: 1
-                }
+                min: 0,
+                max: 100,
+                defaultValue: 50,
+                step: 1
               }
             };
           } else if (lowerMessage === 'toggle') {
@@ -253,10 +238,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "toggle",
-                data: {
-                  checked: false,
-                  label: "Push Notifications"
-                }
+                defaultValue: false,
+                label: "Push Notifications"
               }
             };
           } else if (lowerMessage === 'data') {
@@ -282,11 +265,9 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "progress",
-                data: {
-                  value: 65,
-                  max: 100,
-                  show_percentage: true
-                }
+                value: 65,
+                max: 100,
+                showPercentage: true
               }
             };
           } else if (lowerMessage === 'tags') {
@@ -297,10 +278,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "tags",
-                data: {
-                  placeholder: "Add tags...",
-                  suggestions: ["javascript", "widgets", "demo", "chat", "ui", "interactive", "frontend"]
-                }
+                placeholder: "Add tags...",
+                suggestions: ["javascript", "widgets", "demo", "chat", "ui", "interactive", "frontend"]
               }
             };
           } else if (lowerMessage === 'confirmation') {
@@ -311,12 +290,10 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "confirmation",
-                data: {
-                  title: "Confirm Action",
-                  message: "Are you sure you want to proceed with this demo action?",
-                  confirm_text: "Yes, proceed",
-                  cancel_text: "Cancel"
-                }
+                title: "Confirm Action",
+                message: "Are you sure you want to proceed with this demo action?",
+                confirmText: "Yes, proceed",
+                cancelText: "Cancel"
               }
             };
           } else if (lowerMessage === 'all') {
