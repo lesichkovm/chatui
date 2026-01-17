@@ -1825,9 +1825,22 @@
         [`data-text-color${suffix}`]: "text",
         [`data-border-color${suffix}`]: "border"
       };
+      const genericColorMap = {
+        "data-color": "primary",
+        "data-bg-color": "bg",
+        "data-surface-color": "surface",
+        "data-text-color": "text",
+        "data-border-color": "border"
+      };
       for (const [attr, prop] of Object.entries(colorMap)) {
         const value = this.scriptElement.getAttribute(attr);
         if (value) {
+          colors[prop] = value;
+        }
+      }
+      for (const [attr, prop] of Object.entries(genericColorMap)) {
+        const value = this.scriptElement.getAttribute(attr);
+        if (value && !colors[prop]) {
           colors[prop] = value;
         }
       }
@@ -1967,23 +1980,48 @@
      * Apply custom colors from data attributes via inline styles
      */
     applyCustomColors() {
-      if (!this.scriptElement) return;
       const mode = this.config.themeMode;
       const suffix = mode === "light" ? "-light" : "-dark";
-      const colorMap = {
-        [`data-color${suffix}`]: "--chat-primary",
-        [`data-bg-color${suffix}`]: "--chat-bg",
-        [`data-surface-color${suffix}`]: "--chat-surface",
-        [`data-text-color${suffix}`]: "--chat-text",
-        [`data-border-color${suffix}`]: "--chat-border"
-      };
-      for (const [attr, cssVar] of Object.entries(colorMap)) {
-        const value = this.scriptElement.getAttribute(attr);
-        if (value) {
-          this.container.style.setProperty(cssVar, value);
-          if (cssVar === "--chat-primary") {
-            this.container.style.setProperty("--chat-primary-dark", adjustColor(value, -20));
+      
+      // If we have a script element, apply colors from data attributes
+      if (this.scriptElement) {
+        const colorMap = {
+          [`data-color${suffix}`]: "--chat-primary",
+          [`data-bg-color${suffix}`]: "--chat-bg",
+          [`data-surface-color${suffix}`]: "--chat-surface",
+          [`data-text-color${suffix}`]: "--chat-text",
+          [`data-border-color${suffix}`]: "--chat-border"
+        };
+        const genericColorMap = {
+          "data-color": "--chat-primary",
+          "data-bg-color": "--chat-bg",
+          "data-surface-color": "--chat-surface",
+          "data-text-color": "--chat-text",
+          "data-border-color": "--chat-border"
+        };
+        for (const [attr, cssVar] of Object.entries(colorMap)) {
+          const value = this.scriptElement.getAttribute(attr);
+          if (value) {
+            this.container.style.setProperty(cssVar, value);
+            if (cssVar === "--chat-primary") {
+              this.container.style.setProperty("--chat-primary-dark", adjustColor(value, -20));
+            }
           }
+        }
+        for (const [attr, cssVar] of Object.entries(genericColorMap)) {
+          const value = this.scriptElement.getAttribute(attr);
+          if (value && !this.container.style.getPropertyValue(cssVar)) {
+            this.container.style.setProperty(cssVar, value);
+            if (cssVar === "--chat-primary") {
+              this.container.style.setProperty("--chat-primary-dark", adjustColor(value, -20));
+            }
+          }
+        }
+      } else {
+        // For programmatic API, apply colors from config
+        if (this.config.primaryColor) {
+          this.container.style.setProperty("--chat-primary", this.config.primaryColor);
+          this.container.style.setProperty("--chat-primary-dark", adjustColor(this.config.primaryColor, -20));
         }
       }
     }

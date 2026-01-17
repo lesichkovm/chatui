@@ -138,9 +138,27 @@ export class ThemeManager {
       [`data-border-color${suffix}`]: 'border',
     };
 
+    // Also check for generic attributes without mode suffix (fallback)
+    const genericColorMap = {
+      'data-color': 'primary',
+      'data-bg-color': 'bg',
+      'data-surface-color': 'surface',
+      'data-text-color': 'text',
+      'data-border-color': 'border',
+    };
+
+    // First check mode-specific attributes
     for (const [attr, prop] of Object.entries(colorMap)) {
       const value = this.scriptElement.getAttribute(attr);
       if (value) {
+        colors[prop] = value;
+      }
+    }
+
+    // Then check generic attributes as fallback
+    for (const [attr, prop] of Object.entries(genericColorMap)) {
+      const value = this.scriptElement.getAttribute(attr);
+      if (value && !colors[prop]) {
         colors[prop] = value;
       }
     }

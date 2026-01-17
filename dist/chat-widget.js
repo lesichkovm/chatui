@@ -1825,9 +1825,22 @@
         [`data-text-color${suffix}`]: "text",
         [`data-border-color${suffix}`]: "border"
       };
+      const genericColorMap = {
+        "data-color": "primary",
+        "data-bg-color": "bg",
+        "data-surface-color": "surface",
+        "data-text-color": "text",
+        "data-border-color": "border"
+      };
       for (const [attr, prop] of Object.entries(colorMap)) {
         const value = this.scriptElement.getAttribute(attr);
         if (value) {
+          colors[prop] = value;
+        }
+      }
+      for (const [attr, prop] of Object.entries(genericColorMap)) {
+        const value = this.scriptElement.getAttribute(attr);
+        if (value && !colors[prop]) {
           colors[prop] = value;
         }
       }
@@ -1977,9 +1990,25 @@
         [`data-text-color${suffix}`]: "--chat-text",
         [`data-border-color${suffix}`]: "--chat-border"
       };
+      const genericColorMap = {
+        "data-color": "--chat-primary",
+        "data-bg-color": "--chat-bg",
+        "data-surface-color": "--chat-surface",
+        "data-text-color": "--chat-text",
+        "data-border-color": "--chat-border"
+      };
       for (const [attr, cssVar] of Object.entries(colorMap)) {
         const value = this.scriptElement.getAttribute(attr);
         if (value) {
+          this.container.style.setProperty(cssVar, value);
+          if (cssVar === "--chat-primary") {
+            this.container.style.setProperty("--chat-primary-dark", adjustColor(value, -20));
+          }
+        }
+      }
+      for (const [attr, cssVar] of Object.entries(genericColorMap)) {
+        const value = this.scriptElement.getAttribute(attr);
+        if (value && !this.container.style.getPropertyValue(cssVar)) {
           this.container.style.setProperty(cssVar, value);
           if (cssVar === "--chat-primary") {
             this.container.style.setProperty("--chat-primary-dark", adjustColor(value, -20));

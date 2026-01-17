@@ -120,9 +120,32 @@ export class ChatWidget {
       [`data-border-color${suffix}`]: '--chat-border',
     };
 
+    // Also check for generic attributes without mode suffix (fallback)
+    const genericColorMap = {
+      'data-color': '--chat-primary',
+      'data-bg-color': '--chat-bg',
+      'data-surface-color': '--chat-surface',
+      'data-text-color': '--chat-text',
+      'data-border-color': '--chat-border',
+    };
+
+    // First check mode-specific attributes
     for (const [attr, cssVar] of Object.entries(colorMap)) {
       const value = this.scriptElement.getAttribute(attr);
       if (value) {
+        this.container.style.setProperty(cssVar, value);
+
+        // Also set --chat-primary-dark if primary color is customized
+        if (cssVar === '--chat-primary') {
+          this.container.style.setProperty('--chat-primary-dark', adjustColor(value, -20));
+        }
+      }
+    }
+
+    // Then check generic attributes as fallback
+    for (const [attr, cssVar] of Object.entries(genericColorMap)) {
+      const value = this.scriptElement.getAttribute(attr);
+      if (value && !this.container.style.getPropertyValue(cssVar)) {
         this.container.style.setProperty(cssVar, value);
 
         // Also set --chat-primary-dark if primary color is customized
