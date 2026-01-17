@@ -12,12 +12,7 @@
       localStorage.setItem("chat_session_key", key);
     }
     isTestEnvironment() {
-      const isLocalTest = typeof window !== "undefined" && window.location && window.location.hostname === "localhost" && window.location.port === "32000";
-      if (!isLocalTest) return false;
-      if (this.serverUrl && (this.serverUrl.startsWith("ws://") || this.serverUrl.startsWith("wss://"))) {
-        return false;
-      }
-      return true;
+      return typeof window !== "undefined" && window.location && window.location.hostname === "localhost" && window.location.port === "32000";
     }
     performHandshake(onSuccess) {
       if (this.isTestEnvironment()) {
@@ -133,6 +128,7 @@
         return;
       }
       this.initWebSocket().then(() => {
+        if (!this.wsConnection) return;
         this.wsConnection.send(JSON.stringify({
           type: "handshake",
           timestamp: Date.now()
