@@ -26,6 +26,13 @@ export class ButtonsWidget extends BaseWidget {
         button.setAttribute("data-option-value", option.value);
         
         button.addEventListener("click", () => {
+          // Disable all buttons in this widget after one is clicked
+          const allButtons = buttonsContainer.querySelectorAll('.widget-button');
+          allButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('widget-button-disabled');
+          });
+          
           this.handleInteraction({
             optionId: option.id,
             optionValue: option.value,

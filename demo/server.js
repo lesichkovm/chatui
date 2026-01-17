@@ -40,10 +40,16 @@ function handleMessages(req, res, query) {
   const type = query.type;
   const referer = req.headers.referer || '';
 
+  // Debug logging
+  console.log('Request details:');
+  console.log('- Message:', message);
+  console.log('- Type:', type);
+  console.log('- Referer:', referer);
+
   let responseData;
 
   if (type === 'connect') {
-    // Check if this is the widget demo
+    // Welcome message - check if this is the widget demo for special welcome
     if (referer.includes('widget-demo.html')) {
       responseData = {
         text: 'Hello! I\'m your virtual assistant. Type "menu" to see interactive options, or just ask me anything!',
@@ -58,11 +64,11 @@ function handleMessages(req, res, query) {
   } else if (message) {
     console.log('Received message:', message);
     
-    // Check if this is the widget demo
-    if (referer.includes('widget-demo.html')) {
-      // Widget demo responses with interactive buttons
-      const lowerMessage = message.toLowerCase();
-      
+    // Check for widget trigger keywords regardless of page
+    const lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage === 'menu' || lowerMessage === 'options' || lowerMessage === 'help') {
+      // Widget responses - triggered by specific keywords
       if (lowerMessage === 'menu') {
         responseData = {
           text: 'Welcome! How can I help you today?',
@@ -88,67 +94,81 @@ function handleMessages(req, res, query) {
             ]
           }
         };
-      } else if (lowerMessage === 'support') {
+      } else if (lowerMessage === 'help') {
         responseData = {
-          text: 'Connecting you to customer support... Our team will help you with any issues you\'re experiencing.',
+          text: 'I can help you with:',
           widget: {
             type: 'buttons',
             options: [
-              { id: 'urgent', text: 'Urgent Issue', value: 'urgent_support' },
-              { id: 'callback', text: 'Request Callback', value: 'callback' },
-              { id: 'email', text: 'Email Support', value: 'email_support' }
+              { id: 'help1', text: 'Customer Service', value: 'support' },
+              { id: 'help2', text: 'Sales Information', value: 'sales' },
+              { id: 'help3', text: 'Technical Support', value: 'technical' },
+              { id: 'help4', text: 'Billing Questions', value: 'billing' }
             ]
           }
         };
-      } else if (lowerMessage === 'sales') {
+      }
+    } else if (lowerMessage === 'support') {
+      responseData = {
+        text: 'Connecting you to customer support... Our team will help you with any issues you\'re experiencing.',
+        widget: {
+          type: 'buttons',
+          options: [
+            { id: 'urgent', text: 'Urgent Issue', value: 'urgent_support' },
+            { id: 'callback', text: 'Request Callback', value: 'callback' },
+            { id: 'email', text: 'Email Support', value: 'email_support' }
+          ]
+        }
+      };
+    } else if (lowerMessage === 'sales') {
+      responseData = {
+        text: 'Our sales team is ready to help! What are you interested in?',
+        widget: {
+          type: 'buttons',
+          options: [
+            { id: 'pricing', text: 'Pricing Information', value: 'pricing' },
+            { id: 'demo', text: 'Product Demo', value: 'demo_request' },
+            { id: 'enterprise', text: 'Enterprise Plans', value: 'enterprise' }
+          ]
+        }
+      };
+    } else if (lowerMessage === 'technical') {
+      responseData = {
+        text: 'Let me help you with technical issues. What seems to be the problem?',
+        widget: {
+          type: 'buttons',
+          options: [
+            { id: 'login', text: 'Login Problems', value: 'login_help' },
+            { id: 'performance', text: 'Performance Issues', value: 'performance_help' },
+            { id: 'bug', text: 'Report a Bug', value: 'bug_report' }
+          ]
+        }
+      };
+    } else if (lowerMessage === 'billing') {
+      responseData = {
+        text: 'I can help with billing questions. What do you need assistance with?',
+        widget: {
+          type: 'buttons',
+          options: [
+            { id: 'invoice', text: 'Invoice Questions', value: 'invoice_help' },
+            { id: 'payment', text: 'Payment Issues', value: 'payment_help' },
+            { id: 'refund', text: 'Refund Request', value: 'refund_request' }
+          ]
+        }
+      };
+    } else {
+      // Default echo response
+      if (referer.includes('widget-demo.html')) {
         responseData = {
-          text: 'Our sales team is ready to help! What are you interested in?',
-          widget: {
-            type: 'buttons',
-            options: [
-              { id: 'pricing', text: 'Pricing Information', value: 'pricing' },
-              { id: 'demo', text: 'Product Demo', value: 'demo_request' },
-              { id: 'enterprise', text: 'Enterprise Plans', value: 'enterprise' }
-            ]
-          }
-        };
-      } else if (lowerMessage === 'technical') {
-        responseData = {
-          text: 'Let me help you with technical issues. What seems to be the problem?',
-          widget: {
-            type: 'buttons',
-            options: [
-              { id: 'login', text: 'Login Problems', value: 'login_help' },
-              { id: 'performance', text: 'Performance Issues', value: 'performance_help' },
-              { id: 'bug', text: 'Report a Bug', value: 'bug_report' }
-            ]
-          }
-        };
-      } else if (lowerMessage === 'billing') {
-        responseData = {
-          text: 'I can help with billing questions. What do you need assistance with?',
-          widget: {
-            type: 'buttons',
-            options: [
-              { id: 'invoice', text: 'Invoice Questions', value: 'invoice_help' },
-              { id: 'payment', text: 'Payment Issues', value: 'payment_help' },
-              { id: 'refund', text: 'Refund Request', value: 'refund_request' }
-            ]
-          }
+          text: `You said: "${message}". Try typing "menu", "options", or "help" to see interactive buttons!`,
+          sender: 'bot'
         };
       } else {
-        // Default echo response for widget demo
         responseData = {
-          text: `You said: "${message}". Try typing "menu" or "options" to see interactive buttons!`,
+          text: `Echo: ${message}`,
           sender: 'bot'
         };
       }
-    } else {
-      // Regular demo responses (popup.html, full_page.htm, etc.)
-      responseData = {
-        text: `Echo: ${message}`,
-        sender: 'bot'
-      };
     }
   } else {
     responseData = {

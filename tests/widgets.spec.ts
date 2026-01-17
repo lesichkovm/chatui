@@ -111,6 +111,13 @@ test.describe('Widget System Tests', () => {
               button.setAttribute('data-option-value', option.value);
               
               button.addEventListener('click', () => {
+                // Disable all buttons in this widget after one is clicked
+                const allButtons = buttonsContainer.querySelectorAll('.widget-button');
+                allButtons.forEach((btn: any) => {
+                  btn.disabled = true;
+                  btn.classList.add('widget-button-disabled');
+                });
+                
                 // Dispatch widget interaction event
                 const event = new CustomEvent('widgetInteraction', {
                   detail: {
@@ -308,8 +315,13 @@ test.describe('Widget System Tests', () => {
     // Wait for widget to appear
     await page.waitForSelector('.widget');
     
+    // Get the menu widget (should be in the first bot message with widgets)
+    const botMessages = page.locator('.bot-message');
+    const menuBotMessage = botMessages.filter({ has: page.locator('.widget') }).first();
+    const menuButtons = menuBotMessage.locator('.widget-button');
+    
     // Click on "Customer Support" button
-    const supportButton = page.locator('.widget-button').filter({ hasText: 'Customer Support' });
+    const supportButton = menuButtons.filter({ hasText: 'Customer Support' });
     await supportButton.click();
     
     // Check if button text appears as user message
@@ -325,6 +337,12 @@ test.describe('Widget System Tests', () => {
     await expect(supportButtons.nth(0)).toContainText('Urgent Issue');
     await expect(supportButtons.nth(1)).toContainText('Request Callback');
     await expect(supportButtons.nth(2)).toContainText('Email Support');
+    
+    // Check that the original menu buttons are now disabled
+    await expect(menuButtons.nth(0)).toBeDisabled();
+    await expect(menuButtons.nth(1)).toBeDisabled();
+    await expect(menuButtons.nth(2)).toBeDisabled();
+    await expect(menuButtons.nth(3)).toBeDisabled();
   });
 
   test('should handle multi-level widget navigation', async ({ page }) => {

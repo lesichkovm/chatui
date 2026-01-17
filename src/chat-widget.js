@@ -152,6 +152,11 @@
           button.setAttribute("data-option-id", option.id);
           button.setAttribute("data-option-value", option.value);
           button.addEventListener("click", () => {
+            const allButtons = buttonsContainer.querySelectorAll(".widget-button");
+            allButtons.forEach((btn) => {
+              btn.disabled = true;
+              btn.classList.add("widget-button-disabled");
+            });
             this.handleInteraction({
               optionId: option.id,
               optionValue: option.value,
@@ -539,6 +544,23 @@
     
     #${widgetId} .widget-button:active {
       transform: translateY(1px);
+    }
+    
+    #${widgetId} .widget-button:disabled,
+    #${widgetId} .widget-button-disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #f8f9fa;
+      color: #6c757d;
+      border-color: #dee2e6;
+    }
+    
+    #${widgetId} .widget-button:disabled:hover,
+    #${widgetId} .widget-button-disabled:hover {
+      background: #f8f9fa;
+      color: #6c757d;
+      border-color: #dee2e6;
+      transform: none;
     }
     
     #${widgetId} .widget-select {
