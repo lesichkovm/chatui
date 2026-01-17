@@ -47,14 +47,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "btn1", text: "🌓 Switch Theme", value: "switch" },
-                    { id: "btn2", text: "🎨 Custom Colors", value: "colors" },
-                    { id: "btn3", text: "📋 Presets", value: "presets" },
-                    { id: "btn4", text: "⚙️ Advanced", value: "advanced" }
-                  ]
-                }
+                options: [
+                  { id: "btn1", text: "", value: "switch" },
+                  { id: "btn2", text: "", value: "colors" },
+                  { id: "btn3", text: "", value: "typography" },
+                  { id: "btn4", text: "", value: "effects" }
+                ]
               }
             };
           } else if (lowerMessage === 'switch' || lowerMessage === 'toggle') {
@@ -65,14 +63,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
                 type: "radio",
-                data: {
-                  options: [
-                    { id: "light", text: "☀️ Light Theme", value: "light" },
-                    { id: "dark", text: "🌙 Dark Theme", value: "dark" },
-                    { id: "auto", text: "🔄 Auto (System)", value: "auto" }
-                  ],
-                  name: "theme_mode"
-                }
+                options: [
+                  { id: "light", text: "", value: "light" },
+                  { id: "dark", text: "", value: "dark" },
+                  { id: "auto", text: "", value: "auto" }
+                ],
+                name: "theme_selection"
               }
             };
           } else if (lowerMessage === 'colors' || lowerMessage === 'custom') {
@@ -82,11 +78,14 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
-                type: "color_picker",
-                data: {
-                  value: "#667eea",
-                  preset_colors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4", "#ffd93d", "#6bcf7f"]
-                }
+                type: "select",
+                options: [
+                  { value: "default", text: "Default (Blue)" },
+                  { value: "branded", text: "Branded (Purple)" },
+                  { value: "nature", text: "Nature (Green)" },
+                  { value: "sunset", text: "Sunset (Orange)" }
+                ],
+                placeholder: "Select color scheme..."
               }
             };
           } else if (lowerMessage === 'presets') {
@@ -97,17 +96,14 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
                 type: "select",
-                data: {
-                  options: [
-                    { value: "default", text: "Default (Blue)" },
-                    { value: "branded", text: "Branded (Purple)" },
-                    { value: "nature", text: "Nature (Green)" },
-                    { value: "sunset", text: "Sunset (Orange)" },
-                    { value: "ocean", text: "Ocean (Teal)" },
-                    { value: "monochrome", text: "Monochrome (Gray)" }
-                  ],
-                  placeholder: "Select a preset theme..."
-                }
+                options: [
+                  { value: "default", text: "Default (Blue)" },
+                  { value: "branded", text: "Branded (Purple)" },
+                  { value: "nature", text: "Nature (Green)" },
+                  { value: "sunset", text: "Sunset (Orange)" },
+                  { value: "monochrome", text: "Monochrome (Gray)" }
+                ],
+                placeholder: "Select a preset theme..."
               }
             };
           } else if (lowerMessage === 'advanced') {
@@ -118,14 +114,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "border", text: "🔲 Border Radius", value: "border" },
-                    { id: "shadow", text: "🌑 Shadows", value: "shadow" },
-                    { id: "animation", text: "✨ Animations", value: "animation" },
-                    { id: "typography", text: "📝 Typography", value: "typography" }
-                  ]
-                }
+                options: [
+                  { id: "border", text: "🔲 Border Radius", value: "border" },
+                  { id: "shadow", text: "🌑 Shadows", value: "shadow" },
+                  { id: "animation", text: "✨ Animations", value: "animation" },
+                  { id: "typography", text: "📝 Typography", value: "typography" }
+                ]
               }
             };
           } else if (lowerMessage === 'border') {
@@ -136,12 +130,10 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
                 type: "slider",
-                data: {
-                  min: 0,
-                  max: 20,
-                  value: 8,
-                  step: 1
-                }
+                min: 0,
+                max: 20,
+                defaultValue: 8,
+                step: 1
               }
             };
           } else if (lowerMessage === 'shadow') {
@@ -152,12 +144,10 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
                 type: "slider",
-                data: {
-                  min: 0,
-                  max: 50,
-                  value: 15,
-                  step: 5
-                }
+                min: 0,
+                max: 50,
+                defaultValue: 15,
+                step: 5
               }
             };
           } else if (lowerMessage === 'animation') {
@@ -168,10 +158,8 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
                 type: "toggle",
-                data: {
-                  checked: true,
-                  label: "Smooth Transitions"
-                }
+                defaultValue: true,
+                label: "Smooth Transitions"
               }
             };
           } else if (lowerMessage === 'typography') {
@@ -182,15 +170,13 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_theme_" + Date.now(),
               widget: {
                 type: "radio",
-                data: {
-                  options: [
-                    { id: "system", text: "System Default", value: "system" },
-                    { id: "modern", text: "Modern (Sans-serif)", value: "modern" },
-                    { id: "classic", text: "Classic (Serif)", value: "classic" },
-                    { id: "mono", text: "Monospace", value: "mono" }
-                  ],
-                  name: "font_style"
-                }
+                options: [
+                  { id: "system", text: "System Default", value: "system" },
+                  { id: "modern", text: "Modern (Sans-serif)", value: "modern" },
+                  { id: "classic", text: "Classic (Serif)", value: "classic" },
+                  { id: "mono", text: "Monospace", value: "mono" }
+                ],
+                name: "font_style"
               }
             };
           } else if (lowerMessage === 'light') {
