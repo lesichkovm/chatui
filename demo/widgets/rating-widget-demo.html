@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rating Widget Demo - ChatUI</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .api-response {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rating Widget Demo</h1>
+        
+        <div class="demo-section">
+            <h2>Overview</h2>
+            <p>The Rating Widget renders a star or emoji-based rating system. Users can click on stars to rate something on a scale.</p>
+            
+            <h3>Key Features:</h3>
+            <ul class="feature-list">
+                <li>Customizable maximum rating</li>
+                <li>Star or emoji icons</li>
+                <li>Hover preview effect</li>
+                <li>Instant submission on click</li>
+                <li>Custom label text</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>Backend Response Format</h2>
+            <p>To trigger a rating widget, the backend should respond with:</p>
+            <div class="api-response">{
+  "text": "How would you rate our service?",
+  "widget": {
+    "type": "rating",
+    "label": "Rate your experience",
+    "maxRating": 5,
+    "iconType": "stars"
+  }
+}</div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Widget Data Structure</h2>
+            <div class="api-response">{
+  "type": "rating",
+  "label": "Rate this",
+  "maxRating": 5,
+  "iconType": "stars"
+}</div>
+            
+            <h3>Fields:</h3>
+            <ul class="feature-list">
+                <li><strong>type:</strong> Must be "rating"</li>
+                <li><strong>label:</strong> Label text for the rating (default: "Rate this")</li>
+                <li><strong>maxRating:</strong> Maximum rating value (default: 5)</li>
+                <li><strong>iconType:</strong> Icon type - "stars" or "emojis" (default: "stars")</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>Usage Examples</h2>
+            
+            <h3>5-Star Rating</h3>
+            <div class="api-response">{
+  "type": "rating",
+  "label": "Rate your satisfaction",
+  "maxRating": 5,
+  "iconType": "stars"
+}</div>
+            
+            <h3>10-Star Rating</h3>
+            <div class="api-response">{
+  "type": "rating",
+  "label": "Rate on a scale of 1-10",
+  "maxRating": 10,
+  "iconType": "stars"
+}</div>
+            
+            <h3>Emoji Rating</h3>
+            <div class="api-response">{
+  "type": "rating",
+  "label": "How much do you like this?",
+  "maxRating": 5,
+  "iconType": "emojis"
+}</div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Try It Yourself</h2>
+            <p>Type "show rating" in the chat to see the rating widget in action!</p>
+            <p>The demo simulates backend responses with rating widget data. Try hovering over stars and clicking to submit a rating.</p>
+        </div>
+
+        <a href="../index.html" class="back-link">← Back to Demo Index</a>
+    </div>
+
+    <!-- Load the chat widget -->
+    <script 
+        id="chat-widget"
+        src="../../dist/chat-widget.js"
+        data-server-url="http://localhost:3000"
+        data-position="bottom-right"
+        data-color="#007bff"
+        data-title="Rating Widget Demo">
+    </script>
+</body>
+</html>
