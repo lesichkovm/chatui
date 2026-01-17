@@ -1,15 +1,53 @@
 import { adjustColor } from './utils.js';
 import { WidgetFactory } from './widgets/index.js';
 
-export function injectStyles(widgetId, primaryColor, mode) {
+export function injectStyles(widgetId, themeConfig) {
   const styleElement = document.createElement("style");
+  styleElement.id = `${widgetId}-styles`;
   styleElement.textContent = `
     /* Scope all styles to the widget ID */
     #${widgetId} {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      /* Add CSS variables scoped to this widget */
-      --chat-primary-color: ${primaryColor};
-      --chat-primary-color-dark: ${adjustColor(primaryColor, -20)};
+    }
+
+    /* Theme: Default - Light Mode */
+    #${widgetId}[data-theme="default"][data-mode="light"] {
+      --chat-primary: #007bff;
+      --chat-bg: #ffffff;
+      --chat-surface: #f8f9fa;
+      --chat-text: #212529;
+      --chat-border: #e9ecef;
+      --chat-primary-dark: ${adjustColor('#007bff', -20)};
+    }
+
+    /* Theme: Default - Dark Mode */
+    #${widgetId}[data-theme="default"][data-mode="dark"] {
+      --chat-primary: #4dabf7;
+      --chat-bg: #1a1a1a;
+      --chat-surface: #2d2d2d;
+      --chat-text: #ffffff;
+      --chat-border: #404040;
+      --chat-primary-dark: ${adjustColor('#4dabf7', -20)};
+    }
+
+    /* Theme: Branded - Light Mode */
+    #${widgetId}[data-theme="branded"][data-mode="light"] {
+      --chat-primary: #6366f1;
+      --chat-bg: #ffffff;
+      --chat-surface: #f5f3ff;
+      --chat-text: #1e1b4b;
+      --chat-border: #e0e7ff;
+      --chat-primary-dark: ${adjustColor('#6366f1', -20)};
+    }
+
+    /* Theme: Branded - Dark Mode */
+    #${widgetId}[data-theme="branded"][data-mode="dark"] {
+      --chat-primary: #818cf8;
+      --chat-bg: #0f172a;
+      --chat-surface: #1e293b;
+      --chat-text: #f1f5f9;
+      --chat-border: #334155;
+      --chat-primary-dark: ${adjustColor('#818cf8', -20)};
     }
 
     /* Scoped CSS Reset */
@@ -26,7 +64,7 @@ export function injectStyles(widgetId, primaryColor, mode) {
       border-radius: 50%;
       border: none;
       cursor: pointer;
-      background-color: var(--chat-primary-color);
+      background-color: var(--chat-primary);
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
@@ -38,14 +76,14 @@ export function injectStyles(widgetId, primaryColor, mode) {
     
     #${widgetId} .button:hover {
       transform: scale(1.1);
-      background-color: var(--chat-primary-color-dark);
+      background-color: var(--chat-primary-dark);
     }
     
     #${widgetId} .window {
       display: none;
       width: 350px;
       height: 500px;
-      background: white;
+      background: var(--chat-bg);
       border-radius: 12px;
       box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
       flex-direction: column;
@@ -84,8 +122,8 @@ export function injectStyles(widgetId, primaryColor, mode) {
     
     #${widgetId} .header {
       padding: 16px;
-      background: #f8f9fa;
-      border-bottom: 1px solid #e9ecef;
+      background: var(--chat-surface);
+      border-bottom: 1px solid var(--chat-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -95,7 +133,7 @@ export function injectStyles(widgetId, primaryColor, mode) {
     #${widgetId} .header h3 {
       margin: 0;
       font-size: 16px;
-      color: #212529;
+      color: var(--chat-text);
     }
     
     #${widgetId} .close {
@@ -103,10 +141,15 @@ export function injectStyles(widgetId, primaryColor, mode) {
       border: none;
       font-size: 24px;
       cursor: pointer;
-      color: #6c757d;
+      color: var(--chat-text);
+      opacity: 0.6;
       padding: 0;
       line-height: 1;
-      display: ${mode === "fullpage" ? "none" : "block"};
+      display: block;
+    }
+    
+    #${widgetId}.fullpage .close {
+      display: none;
     }
     
     #${widgetId} .messages {
@@ -130,33 +173,33 @@ export function injectStyles(widgetId, primaryColor, mode) {
     }
     
     #${widgetId} .user-message {
-      background: var(--chat-primary-color);
+      background: var(--chat-primary);
       color: white;
       align-self: flex-end;
       border-bottom-right-radius: 4px;
     }
     
     #${widgetId} .bot-message {
-      background: #f1f3f5;
-      color: #212529;
+      background: var(--chat-surface);
+      color: var(--chat-text);
       align-self: flex-start;
       border-bottom-left-radius: 4px;
     }
     
     #${widgetId} .input {
       padding: 16px;
-      border-top: 1px solid #e9ecef;
+      border-top: 1px solid var(--chat-border);
       display: flex;
       gap: 8px;
       align-items: flex-end;
       flex-shrink: 0;
-      background: white;
+      background: var(--chat-bg);
     }
     
     #${widgetId} .textarea {
       flex: 1;
       padding: 8px 12px;
-      border: 1px solid #dee2e6;
+      border: 1px solid var(--chat-border);
       border-radius: 6px;
       font-size: 14px;
       outline: none;
@@ -165,16 +208,18 @@ export function injectStyles(widgetId, primaryColor, mode) {
       max-height: 150px;
       font-family: inherit;
       line-height: 1.4;
-      overflow-y: auto; /* Allow scrolling in textarea */
+      overflow-y: auto;
+      background: var(--chat-bg);
+      color: var(--chat-text);
     }
     
     #${widgetId} .textarea:focus {
-      border-color: var(--chat-primary-color);
+      border-color: var(--chat-primary);
     }
     
     #${widgetId} .send {
       padding: 8px 16px;
-      background: var(--chat-primary-color);
+      background: var(--chat-primary);
       color: white;
       border: none;
       border-radius: 6px;
@@ -186,15 +231,15 @@ export function injectStyles(widgetId, primaryColor, mode) {
     }
     
     #${widgetId} .send:hover {
-      background: var(--chat-primary-color-dark);
+      background: var(--chat-primary-dark);
     }
     
     #${widgetId} .widget {
       margin-top: 8px;
       padding: 12px;
-      background: #f8f9fa;
+      background: var(--chat-surface);
       border-radius: 8px;
-      border: 1px solid #e9ecef;
+      border: 1px solid var(--chat-border);
     }
     
     #${widgetId} .widget-buttons {
@@ -205,19 +250,20 @@ export function injectStyles(widgetId, primaryColor, mode) {
     
     #${widgetId} .widget-button {
       padding: 8px 12px;
-      background: white;
-      border: 1px solid #dee2e6;
+      background: var(--chat-bg);
+      border: 1px solid var(--chat-border);
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
       text-align: left;
       transition: all 0.2s ease;
+      color: var(--chat-text);
     }
     
     #${widgetId} .widget-button:hover {
-      background: var(--chat-primary-color);
+      background: var(--chat-primary);
       color: white;
-      border-color: var(--chat-primary-color);
+      border-color: var(--chat-primary);
     }
     
     #${widgetId} .widget-button:active {
@@ -226,18 +272,18 @@ export function injectStyles(widgetId, primaryColor, mode) {
     
     #${widgetId} .widget-button:disabled,
     #${widgetId} .widget-button-disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
-      background: #f8f9fa;
-      color: #6c757d;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      color: var(--chat-text);
+      border-color: var(--chat-border);
     }
     
     #${widgetId} .widget-button:disabled:hover,
     #${widgetId} .widget-button-disabled:hover {
-      background: #f8f9fa;
-      color: #6c757d;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      color: var(--chat-text);
+      border-color: var(--chat-border);
       transform: none;
     }
     
@@ -248,30 +294,31 @@ export function injectStyles(widgetId, primaryColor, mode) {
     #${widgetId} .widget-select-element {
       width: 100%;
       padding: 8px 12px;
-      border: 1px solid #dee2e6;
+      border: 1px solid var(--chat-border);
       border-radius: 6px;
       font-size: 14px;
-      background: white;
+      background: var(--chat-bg);
+      color: var(--chat-text);
       outline: none;
       cursor: pointer;
     }
     
     #${widgetId} .widget-select-element:focus {
-      border-color: var(--chat-primary-color);
+      border-color: var(--chat-primary);
     }
     
     #${widgetId} .widget-select-element:disabled,
     #${widgetId} .widget-select-disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
-      background: #f8f9fa;
-      color: #6c757d;
+      background: var(--chat-surface);
+      color: var(--chat-text);
     }
     
     #${widgetId} .widget-select-element:disabled:hover,
     #${widgetId} .widget-select-disabled:hover {
-      background: #f8f9fa;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      border-color: var(--chat-border);
     }
     
     #${widgetId} .widget-input {
@@ -284,19 +331,21 @@ export function injectStyles(widgetId, primaryColor, mode) {
     #${widgetId} .widget-input-element {
       flex: 1;
       padding: 8px 12px;
-      border: 1px solid #dee2e6;
+      border: 1px solid var(--chat-border);
       border-radius: 6px;
       font-size: 14px;
+      background: var(--chat-bg);
+      color: var(--chat-text);
       outline: none;
     }
     
     #${widgetId} .widget-input-element:focus {
-      border-color: var(--chat-primary-color);
+      border-color: var(--chat-primary);
     }
     
     #${widgetId} .widget-input-submit {
       padding: 8px 16px;
-      background: var(--chat-primary-color);
+      background: var(--chat-primary);
       color: white;
       border: none;
       border-radius: 6px;
@@ -306,26 +355,26 @@ export function injectStyles(widgetId, primaryColor, mode) {
     }
     
     #${widgetId} .widget-input-submit:hover {
-      background: var(--chat-primary-color-dark);
+      background: var(--chat-primary-dark);
     }
     
     #${widgetId} .widget-input-element:disabled,
     #${widgetId} .widget-input-element.widget-input-disabled,
     #${widgetId} .widget-input-submit:disabled,
     #${widgetId} .widget-input-submit.widget-input-disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
-      background: #f8f9fa;
-      color: #6c757d;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      color: var(--chat-text);
+      border-color: var(--chat-border);
     }
     
     #${widgetId} .widget-input-element:disabled:hover,
     #${widgetId} .widget-input-element.widget-input-disabled:hover,
     #${widgetId} .widget-input-submit:disabled:hover,
     #${widgetId} .widget-input-submit.widget-input-disabled:hover {
-      background: #f8f9fa;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      border-color: var(--chat-border);
     }
   `;
   document.head.appendChild(styleElement);
@@ -343,20 +392,19 @@ export function createWidgetDOM(widgetId, config) {
   const chatWindow = document.createElement("div");
   chatWindow.className = "window";
   chatWindow.id = `${widgetId}-window`;
-  
+
   if (mode === "popup") {
     chatWindow.style.cssText = `
       ${position.includes("bottom") ? "bottom: 20px;" : "top: 20px;"}
       ${position.includes("right") ? "right: 20px;" : "left: 20px;"}
     `;
   }
-  
+
   chatWindow.innerHTML = `
     <div class="header" id="${widgetId}-header">
       <h3>${title}</h3>
-      ${
-        mode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">×</button>` : ""
-      }
+      ${mode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">×</button>` : ""
+    }
     </div>
     <div class="messages" id="${widgetId}-messages" role="log" aria-live="polite" aria-atomic="false"></div>
     <div class="input">
@@ -408,25 +456,25 @@ export function appendMessage(container, text, sender, widgetId, widgetData = nu
   const messageElement = document.createElement("div");
   messageElement.className = `message ${sender}-message`;
   messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  
+
   // Create message content
   const messageContent = document.createElement("div");
   messageContent.innerHTML = text.replace(/\n/g, "<br>");
   messageElement.appendChild(messageContent);
-  
+
   // Add widget if present
   if (widgetData && sender === "bot") {
     const widgetElement = createWidgetElement(widgetData, widgetId);
     messageElement.appendChild(widgetElement);
   }
-  
+
   container.appendChild(messageElement);
   container.scrollTop = container.scrollHeight;
 }
 
 function createWidgetElement(widgetData, widgetId) {
   const widget = WidgetFactory.createWidget(widgetData, widgetId);
-  
+
   if (!widget) {
     return document.createComment(`Unsupported widget type: ${widgetData?.type}`);
   }

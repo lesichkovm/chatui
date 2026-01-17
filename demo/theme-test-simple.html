@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Test - Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+
+        #widgetInfo {
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎨 Theme System Test</h1>
+
+    <div class="controls">
+        <h2>Controls</h2>
+        <div>
+            <button onclick="setTheme('default')">Default Theme</button>
+            <button onclick="setTheme('branded')">Branded Theme</button>
+        </div>
+        <div>
+            <button onclick="setMode('light')">Light Mode</button>
+            <button onclick="setMode('dark')">Dark Mode</button>
+            <button onclick="toggleMode()">Toggle Mode</button>
+        </div>
+        <div>
+            <button onclick="showInfo()">Show Widget Info</button>
+            <button onclick="openWidget()">Open Widget</button>
+        </div>
+    </div>
+
+    <div class="status">
+        <strong>Status:</strong>
+        <div id="widgetInfo">Widget loading...</div>
+    </div>
+
+    <!-- Default Light Widget -->
+    <script id="chat-widget" src="../dist/chat-widget.js" data-server-url="http://localhost:3000"
+        data-position="bottom-right" data-theme="default" data-mode="light" data-title="Test Chat">
+        </script>
+
+    <script>
+        let widget = null;
+
+        // Wait for widget to initialize
+        setTimeout(() => {
+            const scriptElement = document.getElementById('chat-widget');
+            widget = scriptElement._chatWidgetInstance;
+
+            if (widget) {
+                document.getElementById('widgetInfo').innerHTML = `
+          ✅ Widget initialized successfully!<br>
+          ID: ${widget.widgetId}<br>
+          Theme: ${widget.config.theme}<br>
+          Mode: ${widget.config.themeMode}<br>
+          Primary Color: ${widget.config.themeColors.primary}
+        `;
+            } else {
+                document.getElementById('widgetInfo').innerHTML = '❌ Widget not found!';
+            }
+        }, 1000);
+
+        function setTheme(theme) {
+            if (widget) {
+                widget.setTheme(theme);
+                showInfo();
+            }
+        }
+
+        function setMode(mode) {
+            if (widget) {
+                widget.setThemeMode(mode);
+                showInfo();
+            }
+        }
+
+        function toggleMode() {
+            if (widget) {
+                const newMode = widget.toggleThemeMode();
+                alert(`Switched to ${newMode} mode`);
+                showInfo();
+            }
+        }
+
+        function showInfo() {
+            if (widget) {
+                const config = widget.getThemeConfig();
+                document.getElementById('widgetInfo').innerHTML = `
+          ✅ Widget Status:<br>
+          ID: ${widget.widgetId}<br>
+          Theme: ${config.theme}<br>
+          Mode: ${config.mode}<br>
+          Primary Color: ${config.colors.primary}<br>
+          Background: ${config.colors.bg}<br>
+          Surface: ${config.colors.surface}<br>
+          Text: ${config.colors.text}<br>
+          Border: ${config.colors.border}
+        `;
+            }
+        }
+
+        function openWidget() {
+            if (widget) {
+                widget.open();
+            }
+        }
+    </script>
+</body>
+
+</html>

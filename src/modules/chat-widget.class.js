@@ -1,5 +1,7 @@
 import { ChatAPI } from './api.js';
 import { injectStyles, createWidgetDOM, appendMessage } from './ui.js';
+import { ThemeManager } from './theme.js';
+import { adjustColor } from './utils.js';
 
 export class ChatWidget {
   constructor(input) {
@@ -28,13 +30,20 @@ export class ChatWidget {
     this.widgetId =
       config.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
 
+    // Initialize theme manager
+    this.themeManager = new ThemeManager(this.widgetId, scriptElement);
+    const themeConfig = this.themeManager.getThemeConfig();
+
     this.config = {
       mode: config.mode || "popup",
       position: config.position || "bottom-right",
-      primaryColor: config.primaryColor || config.color || "#007bff",
+      primaryColor: config.primaryColor || config.color || themeConfig.colors.primary,
       title: config.title || "Chat with us",
       targetSelector: config.targetSelector || config.target || null,
       serverUrl: config.serverUrl || "http://localhost:3000",
+      theme: themeConfig.theme,
+      themeMode: themeConfig.mode,
+      themeColors: themeConfig.colors,
     };
 
     this.api = new ChatAPI({ serverUrl: this.config.serverUrl });
@@ -46,10 +55,15 @@ export class ChatWidget {
     };
 
     this.init();
+
+    // Store instance on script element for external access
+    if (this.scriptElement) {
+      this.scriptElement._chatWidgetInstance = this;
+    }
   }
 
   init() {
-    injectStyles(this.widgetId, this.config.primaryColor, this.config.mode);
+    injectStyles(this.widgetId, this.config);
     const { container, chatWindow, chatButton } = createWidgetDOM(
       this.widgetId,
       this.config
@@ -58,6 +72,13 @@ export class ChatWidget {
     this.container = container;
     this.chatWindow = chatWindow;
     this.chatButton = chatButton;
+
+    // Set theme data attributes
+    this.container.setAttribute('data-theme', this.config.theme);
+    this.container.setAttribute('data-mode', this.config.themeMode);
+
+    // Apply custom colors from data attributes if present
+    this.applyCustomColors();
 
     // Get elements
     this.messagesContainer = this.chatWindow.querySelector(".messages");
@@ -68,13 +89,48 @@ export class ChatWidget {
     this.bindEvents();
     this.api.performHandshake();
     this.api.connect((text, sender, widgetData) => this.addMessage(text, sender, widgetData));
-    
+
     // Listen for widget interactions
     document.addEventListener("widgetInteraction", (event) => {
       if (event.detail.widgetId === this.widgetId) {
         this.handleWidgetInteraction(event.detail);
       }
     });
+
+    // Watch for system theme changes
+    this.themeManager.watchSystemTheme((newMode) => {
+      this.setThemeMode(newMode);
+    });
+  }
+
+  /**
+   * Apply custom colors from data attributes via inline styles
+   */
+  applyCustomColors() {
+    if (!this.scriptElement) return;
+
+    const mode = this.config.themeMode;
+    const suffix = mode === 'light' ? '-light' : '-dark';
+
+    const colorMap = {
+      [`data-color${suffix}`]: '--chat-primary',
+      [`data-bg-color${suffix}`]: '--chat-bg',
+      [`data-surface-color${suffix}`]: '--chat-surface',
+      [`data-text-color${suffix}`]: '--chat-text',
+      [`data-border-color${suffix}`]: '--chat-border',
+    };
+
+    for (const [attr, cssVar] of Object.entries(colorMap)) {
+      const value = this.scriptElement.getAttribute(attr);
+      if (value) {
+        this.container.style.setProperty(cssVar, value);
+
+        // Also set --chat-primary-dark if primary color is customized
+        if (cssVar === '--chat-primary') {
+          this.container.style.setProperty('--chat-primary-dark', adjustColor(value, -20));
+        }
+      }
+    }
   }
 
   setState(newState) {
@@ -198,7 +254,7 @@ export class ChatWidget {
     // Send the selected option value as a message
     const messageText = interaction.optionText;
     this.addMessage(messageText, "user");
-    
+
     // Send the option value to the API
     this.api.sendMessage(interaction.optionValue, (text, sender, widgetData) =>
       this.addMessage(text, sender, widgetData)
@@ -209,5 +265,52 @@ export class ChatWidget {
     const messageObj = { text, sender, timestamp: Date.now(), widgetData };
     this.state.messages.push(messageObj);
     appendMessage(this.messagesContainer, text, sender, this.widgetId, widgetData);
+  }
+
+  /**
+   * Set the theme (default or branded)
+   * @param {string} theme - Theme name ('default' or 'branded')
+   */
+  setTheme(theme) {
+    this.themeManager.setTheme(theme);
+    this.container.setAttribute('data-theme', theme);
+    this.config.theme = theme;
+  }
+
+  /**
+   * Set the theme mode (light or dark)
+   * @param {string} mode - Mode name ('light' or 'dark')
+   */
+  setThemeMode(mode) {
+    this.themeManager.setMode(mode);
+    this.container.setAttribute('data-mode', mode);
+    this.config.themeMode = mode;
+    // Reapply custom colors for the new mode
+    this.applyCustomColors();
+  }
+
+  /**
+   * Toggle between light and dark mode
+   * @returns {string} The new mode
+   */
+  toggleThemeMode() {
+    const newMode = this.themeManager.toggleMode();
+    this.container.setAttribute('data-mode', newMode);
+    this.config.themeMode = newMode;
+    // Reapply custom colors for the new mode
+    this.applyCustomColors();
+    return newMode;
+  }
+
+  /**
+   * Get current theme configuration
+   * @returns {Object} Theme configuration
+   */
+  getThemeConfig() {
+    return {
+      theme: this.config.theme,
+      mode: this.config.themeMode,
+      colors: this.config.themeColors,
+    };
   }
 }

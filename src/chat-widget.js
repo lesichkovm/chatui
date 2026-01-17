@@ -1263,15 +1263,53 @@
   };
 
   // src/modules/ui.js
-  function injectStyles(widgetId, primaryColor, mode) {
+  function injectStyles(widgetId, themeConfig) {
     const styleElement = document.createElement("style");
+    styleElement.id = `${widgetId}-styles`;
     styleElement.textContent = `
     /* Scope all styles to the widget ID */
     #${widgetId} {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      /* Add CSS variables scoped to this widget */
-      --chat-primary-color: ${primaryColor};
-      --chat-primary-color-dark: ${adjustColor(primaryColor, -20)};
+    }
+
+    /* Theme: Default - Light Mode */
+    #${widgetId}[data-theme="default"][data-mode="light"] {
+      --chat-primary: #007bff;
+      --chat-bg: #ffffff;
+      --chat-surface: #f8f9fa;
+      --chat-text: #212529;
+      --chat-border: #e9ecef;
+      --chat-primary-dark: ${adjustColor("#007bff", -20)};
+    }
+
+    /* Theme: Default - Dark Mode */
+    #${widgetId}[data-theme="default"][data-mode="dark"] {
+      --chat-primary: #4dabf7;
+      --chat-bg: #1a1a1a;
+      --chat-surface: #2d2d2d;
+      --chat-text: #ffffff;
+      --chat-border: #404040;
+      --chat-primary-dark: ${adjustColor("#4dabf7", -20)};
+    }
+
+    /* Theme: Branded - Light Mode */
+    #${widgetId}[data-theme="branded"][data-mode="light"] {
+      --chat-primary: #6366f1;
+      --chat-bg: #ffffff;
+      --chat-surface: #f5f3ff;
+      --chat-text: #1e1b4b;
+      --chat-border: #e0e7ff;
+      --chat-primary-dark: ${adjustColor("#6366f1", -20)};
+    }
+
+    /* Theme: Branded - Dark Mode */
+    #${widgetId}[data-theme="branded"][data-mode="dark"] {
+      --chat-primary: #818cf8;
+      --chat-bg: #0f172a;
+      --chat-surface: #1e293b;
+      --chat-text: #f1f5f9;
+      --chat-border: #334155;
+      --chat-primary-dark: ${adjustColor("#818cf8", -20)};
     }
 
     /* Scoped CSS Reset */
@@ -1288,7 +1326,7 @@
       border-radius: 50%;
       border: none;
       cursor: pointer;
-      background-color: var(--chat-primary-color);
+      background-color: var(--chat-primary);
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
@@ -1300,14 +1338,14 @@
     
     #${widgetId} .button:hover {
       transform: scale(1.1);
-      background-color: var(--chat-primary-color-dark);
+      background-color: var(--chat-primary-dark);
     }
     
     #${widgetId} .window {
       display: none;
       width: 350px;
       height: 500px;
-      background: white;
+      background: var(--chat-bg);
       border-radius: 12px;
       box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
       flex-direction: column;
@@ -1346,8 +1384,8 @@
     
     #${widgetId} .header {
       padding: 16px;
-      background: #f8f9fa;
-      border-bottom: 1px solid #e9ecef;
+      background: var(--chat-surface);
+      border-bottom: 1px solid var(--chat-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -1357,7 +1395,7 @@
     #${widgetId} .header h3 {
       margin: 0;
       font-size: 16px;
-      color: #212529;
+      color: var(--chat-text);
     }
     
     #${widgetId} .close {
@@ -1365,10 +1403,15 @@
       border: none;
       font-size: 24px;
       cursor: pointer;
-      color: #6c757d;
+      color: var(--chat-text);
+      opacity: 0.6;
       padding: 0;
       line-height: 1;
-      display: ${mode === "fullpage" ? "none" : "block"};
+      display: block;
+    }
+    
+    #${widgetId}.fullpage .close {
+      display: none;
     }
     
     #${widgetId} .messages {
@@ -1392,33 +1435,33 @@
     }
     
     #${widgetId} .user-message {
-      background: var(--chat-primary-color);
+      background: var(--chat-primary);
       color: white;
       align-self: flex-end;
       border-bottom-right-radius: 4px;
     }
     
     #${widgetId} .bot-message {
-      background: #f1f3f5;
-      color: #212529;
+      background: var(--chat-surface);
+      color: var(--chat-text);
       align-self: flex-start;
       border-bottom-left-radius: 4px;
     }
     
     #${widgetId} .input {
       padding: 16px;
-      border-top: 1px solid #e9ecef;
+      border-top: 1px solid var(--chat-border);
       display: flex;
       gap: 8px;
       align-items: flex-end;
       flex-shrink: 0;
-      background: white;
+      background: var(--chat-bg);
     }
     
     #${widgetId} .textarea {
       flex: 1;
       padding: 8px 12px;
-      border: 1px solid #dee2e6;
+      border: 1px solid var(--chat-border);
       border-radius: 6px;
       font-size: 14px;
       outline: none;
@@ -1427,16 +1470,18 @@
       max-height: 150px;
       font-family: inherit;
       line-height: 1.4;
-      overflow-y: auto; /* Allow scrolling in textarea */
+      overflow-y: auto;
+      background: var(--chat-bg);
+      color: var(--chat-text);
     }
     
     #${widgetId} .textarea:focus {
-      border-color: var(--chat-primary-color);
+      border-color: var(--chat-primary);
     }
     
     #${widgetId} .send {
       padding: 8px 16px;
-      background: var(--chat-primary-color);
+      background: var(--chat-primary);
       color: white;
       border: none;
       border-radius: 6px;
@@ -1448,15 +1493,15 @@
     }
     
     #${widgetId} .send:hover {
-      background: var(--chat-primary-color-dark);
+      background: var(--chat-primary-dark);
     }
     
     #${widgetId} .widget {
       margin-top: 8px;
       padding: 12px;
-      background: #f8f9fa;
+      background: var(--chat-surface);
       border-radius: 8px;
-      border: 1px solid #e9ecef;
+      border: 1px solid var(--chat-border);
     }
     
     #${widgetId} .widget-buttons {
@@ -1467,19 +1512,20 @@
     
     #${widgetId} .widget-button {
       padding: 8px 12px;
-      background: white;
-      border: 1px solid #dee2e6;
+      background: var(--chat-bg);
+      border: 1px solid var(--chat-border);
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
       text-align: left;
       transition: all 0.2s ease;
+      color: var(--chat-text);
     }
     
     #${widgetId} .widget-button:hover {
-      background: var(--chat-primary-color);
+      background: var(--chat-primary);
       color: white;
-      border-color: var(--chat-primary-color);
+      border-color: var(--chat-primary);
     }
     
     #${widgetId} .widget-button:active {
@@ -1488,18 +1534,18 @@
     
     #${widgetId} .widget-button:disabled,
     #${widgetId} .widget-button-disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
-      background: #f8f9fa;
-      color: #6c757d;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      color: var(--chat-text);
+      border-color: var(--chat-border);
     }
     
     #${widgetId} .widget-button:disabled:hover,
     #${widgetId} .widget-button-disabled:hover {
-      background: #f8f9fa;
-      color: #6c757d;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      color: var(--chat-text);
+      border-color: var(--chat-border);
       transform: none;
     }
     
@@ -1510,30 +1556,31 @@
     #${widgetId} .widget-select-element {
       width: 100%;
       padding: 8px 12px;
-      border: 1px solid #dee2e6;
+      border: 1px solid var(--chat-border);
       border-radius: 6px;
       font-size: 14px;
-      background: white;
+      background: var(--chat-bg);
+      color: var(--chat-text);
       outline: none;
       cursor: pointer;
     }
     
     #${widgetId} .widget-select-element:focus {
-      border-color: var(--chat-primary-color);
+      border-color: var(--chat-primary);
     }
     
     #${widgetId} .widget-select-element:disabled,
     #${widgetId} .widget-select-disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
-      background: #f8f9fa;
-      color: #6c757d;
+      background: var(--chat-surface);
+      color: var(--chat-text);
     }
     
     #${widgetId} .widget-select-element:disabled:hover,
     #${widgetId} .widget-select-disabled:hover {
-      background: #f8f9fa;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      border-color: var(--chat-border);
     }
     
     #${widgetId} .widget-input {
@@ -1546,19 +1593,21 @@
     #${widgetId} .widget-input-element {
       flex: 1;
       padding: 8px 12px;
-      border: 1px solid #dee2e6;
+      border: 1px solid var(--chat-border);
       border-radius: 6px;
       font-size: 14px;
+      background: var(--chat-bg);
+      color: var(--chat-text);
       outline: none;
     }
     
     #${widgetId} .widget-input-element:focus {
-      border-color: var(--chat-primary-color);
+      border-color: var(--chat-primary);
     }
     
     #${widgetId} .widget-input-submit {
       padding: 8px 16px;
-      background: var(--chat-primary-color);
+      background: var(--chat-primary);
       color: white;
       border: none;
       border-radius: 6px;
@@ -1568,26 +1617,26 @@
     }
     
     #${widgetId} .widget-input-submit:hover {
-      background: var(--chat-primary-color-dark);
+      background: var(--chat-primary-dark);
     }
     
     #${widgetId} .widget-input-element:disabled,
     #${widgetId} .widget-input-element.widget-input-disabled,
     #${widgetId} .widget-input-submit:disabled,
     #${widgetId} .widget-input-submit.widget-input-disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
-      background: #f8f9fa;
-      color: #6c757d;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      color: var(--chat-text);
+      border-color: var(--chat-border);
     }
     
     #${widgetId} .widget-input-element:disabled:hover,
     #${widgetId} .widget-input-element.widget-input-disabled:hover,
     #${widgetId} .widget-input-submit:disabled:hover,
     #${widgetId} .widget-input-submit.widget-input-disabled:hover {
-      background: #f8f9fa;
-      border-color: #dee2e6;
+      background: var(--chat-surface);
+      border-color: var(--chat-border);
     }
   `;
     document.head.appendChild(styleElement);
@@ -1671,6 +1720,175 @@
     return widget.createElement();
   }
 
+  // src/modules/theme.js
+  var THEMES = {
+    default: {
+      light: {
+        primary: "#007bff",
+        bg: "#ffffff",
+        surface: "#f8f9fa",
+        text: "#212529",
+        border: "#e9ecef"
+      },
+      dark: {
+        primary: "#4dabf7",
+        bg: "#1a1a1a",
+        surface: "#2d2d2d",
+        text: "#ffffff",
+        border: "#404040"
+      }
+    },
+    branded: {
+      light: {
+        primary: "#6366f1",
+        bg: "#ffffff",
+        surface: "#f5f3ff",
+        text: "#1e1b4b",
+        border: "#e0e7ff"
+      },
+      dark: {
+        primary: "#818cf8",
+        bg: "#0f172a",
+        surface: "#1e293b",
+        text: "#f1f5f9",
+        border: "#334155"
+      }
+    }
+  };
+  var ThemeManager = class {
+    constructor(widgetId, scriptElement) {
+      this.widgetId = widgetId;
+      this.scriptElement = scriptElement;
+      this.storageKey = `chat-widget-${widgetId}-theme`;
+      this.modeStorageKey = `chat-widget-${widgetId}-mode`;
+    }
+    /**
+     * Get theme configuration from data attributes or defaults
+     */
+    getThemeConfig() {
+      const theme = this.getTheme();
+      const mode = this.getMode();
+      const customColors = this.getCustomColors(mode);
+      const defaultColors = THEMES[theme]?.[mode] || THEMES.default[mode];
+      return {
+        theme,
+        mode,
+        colors: { ...defaultColors, ...customColors }
+      };
+    }
+    /**
+     * Get theme name from data attribute, localStorage, or default
+     */
+    getTheme() {
+      if (this.scriptElement) {
+        const dataTheme = this.scriptElement.getAttribute("data-theme");
+        if (dataTheme && THEMES[dataTheme]) {
+          return dataTheme;
+        }
+      }
+      const savedTheme = localStorage.getItem(this.storageKey);
+      if (savedTheme && THEMES[savedTheme]) {
+        return savedTheme;
+      }
+      return "default";
+    }
+    /**
+     * Get mode (light/dark) from data attribute, localStorage, system preference, or default
+     */
+    getMode() {
+      if (this.scriptElement) {
+        const dataMode = this.scriptElement.getAttribute("data-mode");
+        if (dataMode === "light" || dataMode === "dark") {
+          return dataMode;
+        }
+      }
+      const savedMode = localStorage.getItem(this.modeStorageKey);
+      if (savedMode === "light" || savedMode === "dark") {
+        return savedMode;
+      }
+      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        return "dark";
+      }
+      return "light";
+    }
+    /**
+     * Get custom colors from data attributes
+     */
+    getCustomColors(mode) {
+      if (!this.scriptElement) return {};
+      const colors = {};
+      const suffix = mode === "light" ? "-light" : "-dark";
+      const colorMap = {
+        [`data-color${suffix}`]: "primary",
+        [`data-bg-color${suffix}`]: "bg",
+        [`data-surface-color${suffix}`]: "surface",
+        [`data-text-color${suffix}`]: "text",
+        [`data-border-color${suffix}`]: "border"
+      };
+      for (const [attr, prop] of Object.entries(colorMap)) {
+        const value = this.scriptElement.getAttribute(attr);
+        if (value) {
+          colors[prop] = value;
+        }
+      }
+      return colors;
+    }
+    /**
+     * Set theme and persist to localStorage
+     */
+    setTheme(theme) {
+      if (!THEMES[theme]) {
+        console.warn(`Unknown theme: ${theme}`);
+        return;
+      }
+      localStorage.setItem(this.storageKey, theme);
+    }
+    /**
+     * Set mode and persist to localStorage
+     */
+    setMode(mode) {
+      if (mode !== "light" && mode !== "dark") {
+        console.warn(`Invalid mode: ${mode}`);
+        return;
+      }
+      localStorage.setItem(this.modeStorageKey, mode);
+    }
+    /**
+     * Toggle between light and dark mode
+     */
+    toggleMode() {
+      const currentMode = this.getMode();
+      const newMode = currentMode === "light" ? "dark" : "light";
+      this.setMode(newMode);
+      return newMode;
+    }
+    /**
+     * Listen for system theme changes
+     */
+    watchSystemTheme(callback) {
+      if (!window.matchMedia) return;
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handler = (e) => {
+        if (!localStorage.getItem(this.modeStorageKey)) {
+          const newMode = e.matches ? "dark" : "light";
+          callback(newMode);
+        }
+      };
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener("change", handler);
+      } else {
+        mediaQuery.addListener(handler);
+      }
+      return () => {
+        if (mediaQuery.removeEventListener) {
+          mediaQuery.removeEventListener("change", handler);
+        } else {
+          mediaQuery.removeListener(handler);
+        }
+      };
+    }
+  };
+
   // src/modules/chat-widget.class.js
   var ChatWidget = class {
     constructor(input) {
@@ -1694,13 +1912,18 @@
       }
       this.scriptElement = scriptElement;
       this.widgetId = config.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
+      this.themeManager = new ThemeManager(this.widgetId, scriptElement);
+      const themeConfig = this.themeManager.getThemeConfig();
       this.config = {
         mode: config.mode || "popup",
         position: config.position || "bottom-right",
-        primaryColor: config.primaryColor || config.color || "#007bff",
+        primaryColor: config.primaryColor || config.color || themeConfig.colors.primary,
         title: config.title || "Chat with us",
         targetSelector: config.targetSelector || config.target || null,
-        serverUrl: config.serverUrl || "http://localhost:3000"
+        serverUrl: config.serverUrl || "http://localhost:3000",
+        theme: themeConfig.theme,
+        themeMode: themeConfig.mode,
+        themeColors: themeConfig.colors
       };
       this.api = new ChatAPI({ serverUrl: this.config.serverUrl });
       this.state = {
@@ -1708,9 +1931,12 @@
         messages: []
       };
       this.init();
+      if (this.scriptElement) {
+        this.scriptElement._chatWidgetInstance = this;
+      }
     }
     init() {
-      injectStyles(this.widgetId, this.config.primaryColor, this.config.mode);
+      injectStyles(this.widgetId, this.config);
       const { container, chatWindow, chatButton } = createWidgetDOM(
         this.widgetId,
         this.config
@@ -1718,6 +1944,9 @@
       this.container = container;
       this.chatWindow = chatWindow;
       this.chatButton = chatButton;
+      this.container.setAttribute("data-theme", this.config.theme);
+      this.container.setAttribute("data-mode", this.config.themeMode);
+      this.applyCustomColors();
       this.messagesContainer = this.chatWindow.querySelector(".messages");
       this.textarea = this.chatWindow.querySelector(".textarea");
       this.sendButton = this.chatWindow.querySelector(".send");
@@ -1730,6 +1959,33 @@
           this.handleWidgetInteraction(event.detail);
         }
       });
+      this.themeManager.watchSystemTheme((newMode) => {
+        this.setThemeMode(newMode);
+      });
+    }
+    /**
+     * Apply custom colors from data attributes via inline styles
+     */
+    applyCustomColors() {
+      if (!this.scriptElement) return;
+      const mode = this.config.themeMode;
+      const suffix = mode === "light" ? "-light" : "-dark";
+      const colorMap = {
+        [`data-color${suffix}`]: "--chat-primary",
+        [`data-bg-color${suffix}`]: "--chat-bg",
+        [`data-surface-color${suffix}`]: "--chat-surface",
+        [`data-text-color${suffix}`]: "--chat-text",
+        [`data-border-color${suffix}`]: "--chat-border"
+      };
+      for (const [attr, cssVar] of Object.entries(colorMap)) {
+        const value = this.scriptElement.getAttribute(attr);
+        if (value) {
+          this.container.style.setProperty(cssVar, value);
+          if (cssVar === "--chat-primary") {
+            this.container.style.setProperty("--chat-primary-dark", adjustColor(value, -20));
+          }
+        }
+      }
     }
     setState(newState) {
       this.state = { ...this.state, ...newState };
@@ -1842,6 +2098,47 @@
       const messageObj = { text, sender, timestamp: Date.now(), widgetData };
       this.state.messages.push(messageObj);
       appendMessage(this.messagesContainer, text, sender, this.widgetId, widgetData);
+    }
+    /**
+     * Set the theme (default or branded)
+     * @param {string} theme - Theme name ('default' or 'branded')
+     */
+    setTheme(theme) {
+      this.themeManager.setTheme(theme);
+      this.container.setAttribute("data-theme", theme);
+      this.config.theme = theme;
+    }
+    /**
+     * Set the theme mode (light or dark)
+     * @param {string} mode - Mode name ('light' or 'dark')
+     */
+    setThemeMode(mode) {
+      this.themeManager.setMode(mode);
+      this.container.setAttribute("data-mode", mode);
+      this.config.themeMode = mode;
+      this.applyCustomColors();
+    }
+    /**
+     * Toggle between light and dark mode
+     * @returns {string} The new mode
+     */
+    toggleThemeMode() {
+      const newMode = this.themeManager.toggleMode();
+      this.container.setAttribute("data-mode", newMode);
+      this.config.themeMode = newMode;
+      this.applyCustomColors();
+      return newMode;
+    }
+    /**
+     * Get current theme configuration
+     * @returns {Object} Theme configuration
+     */
+    getThemeConfig() {
+      return {
+        theme: this.config.theme,
+        mode: this.config.themeMode,
+        colors: this.config.themeColors
+      };
     }
   };
 
