@@ -32,13 +32,11 @@ const handler = async (event, context) => {
             case 'buttons':
               responseData = {
                 type: 'buttons',
-                data: {
-                  buttons: [
-                    { id: 'btn1', text: 'Option 1', value: 'option1' },
-                    { id: 'btn2', text: 'Option 2', value: 'option2' },
-                    { id: 'btn3', text: 'Option 3', value: 'option3' }
-                  ]
-                }
+                options: [
+                  { id: 'btn1', text: 'Option 1', value: 'option1' },
+                  { id: 'btn2', text: 'Option 2', value: 'option2' },
+                  { id: 'btn3', text: 'Option 3', value: 'option3' }
+                ]
               };
               break;
               
@@ -67,27 +65,24 @@ const handler = async (event, context) => {
             case 'select':
               responseData = {
                 type: 'select',
-                data: {
-                  options: [
-                    { value: 'option1', text: 'First Option' },
-                    { value: 'option2', text: 'Second Option' },
-                    { value: 'option3', text: 'Third Option' }
-                  ],
-                  placeholder: 'Choose an option...'
-                }
+                options: [
+                  { value: 'option1', text: 'First Option' },
+                  { value: 'option2', text: 'Second Option' },
+                  { value: 'option3', text: 'Third Option' }
+                ],
+                placeholder: 'Choose an option...'
               };
               break;
               
             case 'checkbox':
               responseData = {
                 type: 'checkbox',
-                data: {
-                  options: [
-                    { id: 'chk1', text: 'Feature A', value: 'feature_a' },
-                    { id: 'chk2', text: 'Feature B', value: 'feature_b' },
-                    { id: 'chk3', text: 'Feature C', value: 'feature_c' }
-                  ]
-                }
+                options: [
+                  { id: 'chk1', text: 'Feature A', value: 'feature_a' },
+                  { id: 'chk2', text: 'Feature B', value: 'feature_b' },
+                  { id: 'chk3', text: 'Feature C', value: 'feature_c' }
+                ],
+                buttonText: 'Submit Selection'
               };
               break;
               
@@ -180,14 +175,12 @@ const handler = async (event, context) => {
             case 'radio':
               responseData = {
                 type: 'radio',
-                data: {
-                  options: [
-                    { id: 'rad1', text: 'Choice A', value: 'choice_a' },
-                    { id: 'rad2', text: 'Choice B', value: 'choice_b' },
-                    { id: 'rad3', text: 'Choice C', value: 'choice_c' }
-                  ],
-                  name: 'demo_radio'
-                }
+                options: [
+                  { id: 'rad1', text: 'Choice A', value: 'choice_a' },
+                  { id: 'rad2', text: 'Choice B', value: 'choice_b' },
+                  { id: 'rad3', text: 'Choice C', value: 'choice_c' }
+                ],
+                buttonText: 'Submit Choice'
               };
               break;
               

@@ -77,15 +77,13 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_popup_" + Date.now(),
               widget: {
                 type: "select",
-                data: {
-                  options: [
-                    { value: "bottom-right", text: "Bottom Right (Default)" },
-                    { value: "bottom-left", text: "Bottom Left" },
-                    { value: "top-right", text: "Top Right" },
-                    { value: "top-left", text: "Top Left" }
-                  ],
-                  placeholder: "Select position..."
-                }
+                options: [
+                  { value: "bottom-right", text: "Bottom Right (Default)" },
+                  { value: "bottom-left", text: "Bottom Left" },
+                  { value: "top-right", text: "Top Right" },
+                  { value: "top-left", text: "Top Left" }
+                ],
+                placeholder: "Select position..."
               }
             };
           } else if (lowerMessage === 'sound') {

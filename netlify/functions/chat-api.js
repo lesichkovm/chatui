@@ -48,14 +48,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_session_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "btn1", text: "📝 Rate Service", value: "rate" },
-                    { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
-                    { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
-                    { id: "btn4", text: "📋 View Options", value: "more_options" }
-                  ]
-                }
+                options: [
+                  { id: "btn1", text: "📝 Rate Service", value: "rate" },
+                  { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
+                  { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
+                  { id: "btn4", text: "📋 View Options", value: "more_options" }
+                ]
               }
             };
           } else if (lowerMessage === 'rate' || lowerMessage === 'rating') {
@@ -202,14 +200,12 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "btn1", text: "📝 Rate Service", value: "rate" },
-                    { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
-                    { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
-                    { id: "btn4", text: "📋 View Options", value: "more_options" }
-                  ]
-                }
+                options: [
+                  { id: "btn1", text: "📝 Rate Service", value: "rate" },
+                  { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
+                  { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
+                  { id: "btn4", text: "📋 View Options", value: "more_options" }
+                ]
               }
             };
           } else if (lowerMessage === 'rate' || lowerMessage === 'rating') {

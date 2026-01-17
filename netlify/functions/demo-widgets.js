@@ -47,15 +47,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "btn1", text: "⭐ Rating Widget", value: "rating" },
-                    { id: "btn2", text: "📝 Form Widgets", value: "forms" },
-                    { id: "btn3", text: "🎨 Visual Widgets", value: "visual" },
-                    { id: "btn4", text: "📊 Data Widgets", value: "data" },
-                    { id: "btn5", text: "🔘 All Widgets", value: "all" }
-                  ]
-                }
+                options: [
+                  { id: "btn1", text: "⭐ Rating Widget", value: "rating" },
+                  { id: "btn2", text: "📝 Form Widgets", value: "forms" },
+                  { id: "btn3", text: "🎨 Visual Widgets", value: "visual" },
+                  { id: "btn4", text: "🔧 Advanced Widgets", value: "advanced" }
+                ]
               }
             };
           } else if (lowerMessage === 'rating' || lowerMessage === 'rate') {
@@ -81,15 +78,13 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "input", text: "📝 Text Input", value: "input" },
-                    { id: "textarea", text: "📄 Textarea", value: "textarea" },
-                    { id: "select", text: "📋 Dropdown", value: "select" },
-                    { id: "checkbox", text: "☑️ Checkboxes", value: "checkbox" },
-                    { id: "radio", text: "🔘 Radio Buttons", value: "radio" }
-                  ]
-                }
+                options: [
+                  { id: "input", text: "📝 Text Input", value: "input" },
+                  { id: "textarea", text: "📄 Textarea", value: "textarea" },
+                  { id: "select", text: "📋 Dropdown", value: "select" },
+                  { id: "checkbox", text: "☑️ Checkboxes", value: "checkbox" },
+                  { id: "radio", text: "🔘 Radio Buttons", value: "radio" }
+                ]
               }
             };
           } else if (lowerMessage === 'input') {
@@ -130,16 +125,14 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "select",
-                data: {
-                  options: [
-                    { value: "javascript", text: "JavaScript" },
-                    { value: "python", text: "Python" },
-                    { value: "java", text: "Java" },
-                    { value: "csharp", text: "C#" },
-                    { value: "go", text: "Go" }
-                  ],
-                  placeholder: "Select a language..."
-                }
+                options: [
+                  { value: "javascript", text: "JavaScript" },
+                  { value: "python", text: "Python" },
+                  { value: "java", text: "Java" },
+                  { value: "csharp", text: "C#" },
+                  { value: "go", text: "Go" }
+                ],
+                placeholder: "Select a language..."
               }
             };
           } else if (lowerMessage === 'checkbox') {
@@ -150,15 +143,13 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "checkbox",
-                data: {
-                  options: [
-                    { id: "web", text: "Web Development", value: "web_dev" },
-                    { id: "mobile", text: "Mobile Development", value: "mobile_dev" },
-                    { id: "ai", text: "Artificial Intelligence", value: "ai" },
-                    { id: "cloud", text: "Cloud Computing", value: "cloud" },
-                    { id: "devops", text: "DevOps", value: "devops" }
-                  ]
-                }
+                options: [
+                  { id: "web", text: "Web Development", value: "web_dev" },
+                  { id: "mobile", text: "Mobile Development", value: "mobile_dev" },
+                  { id: "ai", text: "Artificial Intelligence", value: "ai" },
+                  { id: "cloud", text: "Cloud Computing", value: "cloud" },
+                  { id: "devops", text: "DevOps", value: "devops" }
+                ]
               }
             };
           } else if (lowerMessage === 'radio') {
@@ -169,15 +160,13 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "radio",
-                data: {
-                  options: [
-                    { id: "beginner", text: "Beginner", value: "beginner" },
-                    { id: "intermediate", text: "Intermediate", value: "intermediate" },
-                    { id: "advanced", text: "Advanced", value: "advanced" },
-                    { id: "expert", text: "Expert", value: "expert" }
-                  ],
-                  name: "experience_level"
-                }
+                options: [
+                  { id: "beginner", text: "Beginner", value: "beginner" },
+                  { id: "intermediate", text: "Intermediate", value: "intermediate" },
+                  { id: "advanced", text: "Advanced", value: "advanced" },
+                  { id: "expert", text: "Expert", value: "expert" }
+                ],
+                name: "experience_level"
               }
             };
           } else if (lowerMessage === 'visual') {
