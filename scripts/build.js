@@ -11,22 +11,36 @@ async function build() {
     minify: false,
   });
 
-  // 2. Ensure dist directory exists
-  if (!fs.existsSync('dist')) {
-    fs.mkdirSync('dist');
+  // 2. Ensure dist and netlify/dist directories exist
+  ['dist', 'netlify/dist'].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+
+  // 3. Build unminified versions
+  const unminifiedTargets = ['dist/chat-widget.js', 'netlify/dist/chat-widget.js'];
+  for (const outfile of unminifiedTargets) {
+    await esbuild.build({
+      entryPoints: ['src/entry.js'],
+      bundle: true,
+      outfile: outfile,
+      format: 'iife',
+      minify: false,
+    });
   }
 
-  // 3. Copy the built file to dist/ for the standard distribution
-  fs.copyFileSync('src/chat-widget.js', 'dist/chat-widget.js');
-
-  // 4. Build minified version to dist/chat-widget.min.js
-  await esbuild.build({
-    entryPoints: ['src/entry.js'],
-    bundle: true,
-    outfile: 'dist/chat-widget.min.js',
-    format: 'iife',
-    minify: true,
-  });
+  // 4. Build minified versions
+  const minifiedTargets = ['dist/chat-widget.min.js', 'netlify/dist/chat-widget.min.js'];
+  for (const outfile of minifiedTargets) {
+    await esbuild.build({
+      entryPoints: ['src/entry.js'],
+      bundle: true,
+      outfile: outfile,
+      format: 'iife',
+      minify: true,
+    });
+  }
 }
 
 build().catch((err) => {

@@ -321,6 +321,58 @@ export function injectStyles(widgetId, themeConfig) {
       border-color: var(--chat-border);
     }
     
+    #${widgetId} .widget-rating {
+      margin-top: 8px;
+    }
+    
+    #${widgetId} .widget-rating-label {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--chat-text);
+    }
+    
+    #${widgetId} .widget-rating-stars {
+      display: flex;
+      gap: 4px;
+    }
+    
+    #${widgetId} .widget-rating-star {
+      background: var(--chat-bg);
+      border: 1px solid var(--chat-border);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 24px;
+      padding: 4px 8px;
+      color: var(--chat-text);
+      transition: all 0.2s ease;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      min-height: 40px;
+    }
+    
+    #${widgetId} .widget-rating-star:hover,
+    #${widgetId} .widget-rating-star-hover {
+      background: var(--chat-surface);
+      border-color: var(--chat-primary);
+      color: var(--chat-primary);
+      transform: scale(1.05);
+    }
+    
+    #${widgetId} .widget-rating-star-selected {
+      background: var(--chat-primary) !important;
+      color: white !important;
+      border-color: var(--chat-primary) !important;
+    }
+    
+    #${widgetId} .widget-rating-disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
     #${widgetId} .widget-input {
       margin-top: 8px;
       display: flex;
