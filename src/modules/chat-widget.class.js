@@ -329,9 +329,15 @@ export class ChatWidget {
     const message = text || this.textarea.value.trim();
     if (message) {
       this.addMessage(message, "user");
-      this.api.sendMessage(message, (text2, sender, widgetData) =>
-        this.addMessage(text2, sender, widgetData)
-      );
+      
+      // Add waiting placeholder message
+      const waitingMessageId = this.addWaitingMessage();
+      
+      this.api.sendMessage(message, (text2, sender, widgetData) => {
+        // Remove waiting message and add real response
+        this.removeWaitingMessage(waitingMessageId);
+        this.addMessage(text2, sender, widgetData);
+      });
       if (!text) {
         this.textarea.value = "";
         this.textarea.style.height = "auto";
@@ -349,10 +355,15 @@ export class ChatWidget {
     const messageText = interaction.optionText;
     this.addMessage(messageText, "user");
 
+    // Add waiting placeholder message
+    const waitingMessageId = this.addWaitingMessage();
+
     // Send the option value to the API
-    this.api.sendMessage(interaction.optionValue, (text, sender, widgetData) =>
-      this.addMessage(text, sender, widgetData)
-    );
+    this.api.sendMessage(interaction.optionValue, (text, sender, widgetData) => {
+      // Remove waiting message and add real response
+      this.removeWaitingMessage(waitingMessageId);
+      this.addMessage(text, sender, widgetData);
+    });
   }
 
   /**
@@ -365,6 +376,45 @@ export class ChatWidget {
     const messageObj = { text, sender, timestamp: Date.now(), widgetData };
     this.state.messages.push(messageObj);
     appendMessage(this.messagesContainer, text, sender, this.widgetId, widgetData);
+  }
+
+  /**
+   * Add a waiting placeholder message
+   * @private
+   * @returns {string} The ID of the waiting message element
+   */
+  addWaitingMessage() {
+    const waitingMessageId = `${this.widgetId}-waiting-${Date.now()}`;
+    const waitingElement = document.createElement("div");
+    waitingElement.className = "message bot-message waiting-message";
+    waitingElement.id = waitingMessageId;
+    
+    // Create animated dots indicator
+    const dotsContainer = document.createElement("div");
+    dotsContainer.className = "waiting-dots";
+    dotsContainer.innerHTML = `
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    `;
+    
+    waitingElement.appendChild(dotsContainer);
+    this.messagesContainer.appendChild(waitingElement);
+    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+    
+    return waitingMessageId;
+  }
+
+  /**
+   * Remove a waiting placeholder message
+   * @private
+   * @param {string} waitingMessageId - The ID of the waiting message to remove
+   */
+  removeWaitingMessage(waitingMessageId) {
+    const waitingElement = document.getElementById(waitingMessageId);
+    if (waitingElement) {
+      waitingElement.remove();
+    }
   }
 
   /**

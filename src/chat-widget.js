@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-17T18:03:49.597Z
+ * Generated on: 2026-01-17T19:05:16.015Z
  */
 
 
@@ -101,6 +101,11 @@
      */
     sendMessage(message, onResponse) {
       if (this.isTestEnvironment()) {
+        setTimeout(() => {
+          if (onResponse) {
+            onResponse(`Test response to: ${message}`, "bot");
+          }
+        }, 100);
         return;
       }
       const sessionKey = this.getSessionKey();
@@ -2650,6 +2655,54 @@
       margin-bottom: 8px;
       color: var(--chat-text);
     }
+
+    /* Waiting message styles */
+    #${widgetId} .waiting-message {
+      background: var(--chat-surface);
+      color: var(--chat-text);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      padding: 12px 16px;
+      min-width: 60px;
+    }
+
+    #${widgetId} .waiting-dots {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    #${widgetId} .waiting-dots .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--chat-text);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: waitingDotPulse 1.4s infinite ease-in-out both;
+    }
+
+    #${widgetId} .waiting-dots .dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    #${widgetId} .waiting-dots .dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    #${widgetId} .waiting-dots .dot:nth-child(3) {
+      animation-delay: 0s;
+    }
+
+    @keyframes waitingDotPulse {
+      0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+      }
+      40% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
   `;
     document.head.appendChild(styleElement);
   }
@@ -3180,10 +3233,11 @@
       const message = text || this.textarea.value.trim();
       if (message) {
         this.addMessage(message, "user");
-        this.api.sendMessage(
-          message,
-          (text2, sender, widgetData) => this.addMessage(text2, sender, widgetData)
-        );
+        const waitingMessageId = this.addWaitingMessage();
+        this.api.sendMessage(message, (text2, sender, widgetData) => {
+          this.removeWaitingMessage(waitingMessageId);
+          this.addMessage(text2, sender, widgetData);
+        });
         if (!text) {
           this.textarea.value = "";
           this.textarea.style.height = "auto";
@@ -3198,10 +3252,11 @@
     handleWidgetInteraction(interaction) {
       const messageText = interaction.optionText;
       this.addMessage(messageText, "user");
-      this.api.sendMessage(
-        interaction.optionValue,
-        (text, sender, widgetData) => this.addMessage(text, sender, widgetData)
-      );
+      const waitingMessageId = this.addWaitingMessage();
+      this.api.sendMessage(interaction.optionValue, (text, sender, widgetData) => {
+        this.removeWaitingMessage(waitingMessageId);
+        this.addMessage(text, sender, widgetData);
+      });
     }
     /**
      * Add a message to the chat
@@ -3213,6 +3268,39 @@
       const messageObj = { text, sender, timestamp: Date.now(), widgetData };
       this.state.messages.push(messageObj);
       appendMessage(this.messagesContainer, text, sender, this.widgetId, widgetData);
+    }
+    /**
+     * Add a waiting placeholder message
+     * @private
+     * @returns {string} The ID of the waiting message element
+     */
+    addWaitingMessage() {
+      const waitingMessageId = `${this.widgetId}-waiting-${Date.now()}`;
+      const waitingElement = document.createElement("div");
+      waitingElement.className = "message bot-message waiting-message";
+      waitingElement.id = waitingMessageId;
+      const dotsContainer = document.createElement("div");
+      dotsContainer.className = "waiting-dots";
+      dotsContainer.innerHTML = `
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    `;
+      waitingElement.appendChild(dotsContainer);
+      this.messagesContainer.appendChild(waitingElement);
+      this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+      return waitingMessageId;
+    }
+    /**
+     * Remove a waiting placeholder message
+     * @private
+     * @param {string} waitingMessageId - The ID of the waiting message to remove
+     */
+    removeWaitingMessage(waitingMessageId) {
+      const waitingElement = document.getElementById(waitingMessageId);
+      if (waitingElement) {
+        waitingElement.remove();
+      }
     }
     /**
      * Get the underlying WebSocket connection

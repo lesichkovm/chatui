@@ -105,6 +105,13 @@ export class ChatAPI {
    */
   sendMessage(message, onResponse) {
     if (this.isTestEnvironment()) {
+      // Simulate a delayed response in test environment
+      setTimeout(() => {
+        if (onResponse) {
+          // Simple test response
+          onResponse(`Test response to: ${message}`, "bot");
+        }
+      }, 100);
       return;
     }
 

@@ -951,6 +951,54 @@ export function injectStyles(widgetId, themeConfig) {
       margin-bottom: 8px;
       color: var(--chat-text);
     }
+
+    /* Waiting message styles */
+    #${widgetId} .waiting-message {
+      background: var(--chat-surface);
+      color: var(--chat-text);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      padding: 12px 16px;
+      min-width: 60px;
+    }
+
+    #${widgetId} .waiting-dots {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    #${widgetId} .waiting-dots .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--chat-text);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: waitingDotPulse 1.4s infinite ease-in-out both;
+    }
+
+    #${widgetId} .waiting-dots .dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    #${widgetId} .waiting-dots .dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    #${widgetId} .waiting-dots .dot:nth-child(3) {
+      animation-delay: 0s;
+    }
+
+    @keyframes waitingDotPulse {
+      0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+      }
+      40% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
   `;
   document.head.appendChild(styleElement);
 }
