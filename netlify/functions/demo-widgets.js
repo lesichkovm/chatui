@@ -177,15 +177,13 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "color", text: "🎨 Color Picker", value: "color" },
-                    { id: "date", text: "📅 Date Picker", value: "date" },
-                    { id: "file", text: "📎 File Upload", value: "file" },
-                    { id: "slider", text: "🎚️ Slider", value: "slider" },
-                    { id: "toggle", text: "🔘 Toggle", value: "toggle" }
-                  ]
-                }
+                options: [
+                  { id: "color", text: "🎨 Color Picker", value: "color" },
+                  { id: "date", text: "📅 Date Picker", value: "date" },
+                  { id: "file", text: "📎 File Upload", value: "file" },
+                  { id: "slider", text: "🎚️ Slider", value: "slider" },
+                  { id: "toggle", text: "🔘 Toggle", value: "toggle" }
+                ]
               }
             };
           } else if (lowerMessage === 'color') {
@@ -269,13 +267,11 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "progress", text: "📊 Progress Bar", value: "progress" },
-                    { id: "tags", text: "🏷️ Tags Input", value: "tags" },
-                    { id: "confirmation", text: "✅ Confirmation", value: "confirmation" }
-                  ]
-                }
+                options: [
+                  { id: "progress", text: "📊 Progress Bar", value: "progress" },
+                  { id: "tags", text: "🏷️ Tags Input", value: "tags" },
+                  { id: "confirmation", text: "✅ Confirmation", value: "confirmation" }
+                ]
               }
             };
           } else if (lowerMessage === 'progress') {
@@ -331,14 +327,13 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "rating_demo", text: "⭐ Try Rating", value: "rating" },
-                    { id: "color_demo", text: "🎨 Try Color", value: "color" },
-                    { id: "form_demo", text: "📝 Try Forms", value: "forms" },
-                    { id: "data_demo", text: "📊 Try Data", value: "data" }
-                  ]
-                }
+                options: [
+                  { id: "rating_demo", text: "⭐ Try Rating", value: "rating" },
+                  { id: "color_demo", text: "🎨 Try Color", value: "color" },
+                  { id: "form_demo", text: "📝 Try Forms", value: "forms" },
+                  { id: "visual_demo", text: "🎨 Try Visual", value: "visual" },
+                  { id: "advanced_demo", text: "🔧 Try Advanced", value: "advanced" }
+                ]
               }
             };
           } else {
