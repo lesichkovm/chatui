@@ -299,6 +299,17 @@ const handler = async (event, context) => {
           };
           break;
           
+        case 'connect':
+          responseData = {
+            type: 'connect',
+            status: 'success',
+            text: "Welcome to ChatUI Widget Demo! I'm here to help you explore the features. Try typing 'menu' to see interactive widgets, or just say hello!",
+            sender: 'bot',
+            timestamp: Date.now(),
+            session_key: session_key || "demo_session_" + Date.now()
+          };
+          break;
+          
         case 'message':
           const responses = [
             "That's interesting! Tell me more.",

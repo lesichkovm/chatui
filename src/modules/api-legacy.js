@@ -123,11 +123,16 @@ export class ChatAPI {
 
     this._injectScript(url, callbackName, (response) => {
       if (onResponse) {
-        // Check if response contains widget data
-        if (response.widget) {
-          onResponse(response.text, "bot", response.widget);
+        // Check if response has text field to prevent undefined errors
+        if (response.text !== undefined && response.text !== null) {
+          // Check if response contains widget data
+          if (response.widget) {
+            onResponse(response.text, "bot", response.widget);
+          } else {
+            onResponse(response.text, "bot");
+          }
         } else {
-          onResponse(response.text, "bot");
+          console.error('ChatWidget: Legacy API received response without text field', response);
         }
       }
     });

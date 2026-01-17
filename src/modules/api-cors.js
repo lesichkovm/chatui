@@ -157,10 +157,16 @@ export class CorsAPI {
       });
 
       if (onMessage) {
-        if (response.widget) {
-          onMessage(response.text, "bot", response.widget);
-        } else {
-          onMessage(response.text, "bot");
+        // Check if response is successful and has text field
+        if (response.status === "success" && response.text) {
+          if (response.widget) {
+            onMessage(response.text, "bot", response.widget);
+          } else {
+            onMessage(response.text, "bot");
+          }
+        } else if (response.status === "error") {
+          // Don't call onMessage for error responses, let onError handle it
+          throw new Error(response.message || 'Server returned error response');
         }
       }
     } catch (error) {
@@ -206,10 +212,16 @@ export class CorsAPI {
       });
 
       if (onResponse) {
-        if (response.widget) {
-          onResponse(response.text, "bot", response.widget);
-        } else {
-          onResponse(response.text, "bot");
+        // Check if response is successful and has text field
+        if (response.status === "success" && response.text) {
+          if (response.widget) {
+            onResponse(response.text, "bot", response.widget);
+          } else {
+            onResponse(response.text, "bot");
+          }
+        } else if (response.status === "error") {
+          // Don't call onResponse for error responses, let onError handle it
+          throw new Error(response.message || 'Server returned error response');
         }
       }
     } catch (error) {

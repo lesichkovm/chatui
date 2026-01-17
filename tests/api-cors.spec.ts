@@ -172,9 +172,9 @@ test.describe('CorsAPI', () => {
     test('should handle connect request', async () => {
       mockLocalStorage['chat_session_key'] = 'test-session-key';
       
-      // Mock connect response
+      // Mock connect response with proper status field
       mockFetch = () => Promise.resolve(
-        new MockResponse({ text: 'Hello from bot', sender: 'bot' })
+        new MockResponse({ status: 'success', text: 'Hello from bot', sender: 'bot' })
       );
       (global as any).fetch = mockFetch;
       
@@ -197,9 +197,9 @@ test.describe('CorsAPI', () => {
     test('should send message', async () => {
       mockLocalStorage['chat_session_key'] = 'test-session-key';
       
-      // Mock message response
+      // Mock message response with proper status field
       mockFetch = () => Promise.resolve(
-        new MockResponse({ text: 'Bot response', sender: 'bot' })
+        new MockResponse({ status: 'success', text: 'Bot response', sender: 'bot' })
       );
       (global as any).fetch = mockFetch;
       
@@ -223,9 +223,10 @@ test.describe('CorsAPI', () => {
     });
 
     test('should handle widget data in responses', async () => {
-      // Mock widget response
+      // Mock widget response with proper status field
       mockFetch = () => Promise.resolve(
         new MockResponse({ 
+          status: 'success',
           text: 'Select an option',
           widget: { type: 'buttons', options: [{ id: '1', text: 'Option 1' }] }
         })
@@ -280,6 +281,38 @@ test.describe('CorsAPI', () => {
 
       expect(errorCalled).toBe(true);
       expect(errorDetails?.message).toContain('Failed to fetch');
+    });
+
+    test('should handle error response without text field', async () => {
+      mockLocalStorage['chat_session_key'] = 'test-session-key';
+      
+      // Mock error response (like {"status":"error","message":"No message provided"})
+      mockFetch = () => Promise.resolve(
+        new MockResponse({ status: 'error', message: 'No message provided' })
+      );
+      (global as any).fetch = mockFetch;
+      
+      let onMessageCalled = false;
+      let onErrorCalled = false;
+      let errorMessage: string | undefined;
+      
+      await new Promise<void>((resolve) => {
+        api.connect(
+          (text: string, sender: string, widget: any) => {
+            onMessageCalled = true;
+            resolve();
+          },
+          (error: Error) => {
+            onErrorCalled = true;
+            errorMessage = error.message;
+            resolve();
+          }
+        );
+      });
+
+      expect(onMessageCalled).toBe(false);
+      expect(onErrorCalled).toBe(true);
+      expect(errorMessage).toBe('No message provided');
     });
 
     test('should handle timeout errors', async () => {
@@ -440,6 +473,48 @@ test.describe('CorsAPI', () => {
       });
 
       expect(fetchCalled).toBe(false);
+    });
+
+    test('should handle connect request in non-test environment', async () => {
+      // Override test environment detection to force actual API calls
+      api.isTestEnvironment = () => false;
+      api.setSessionKey('demo-session-1768694022744');
+
+      let connectSuccess = false;
+      let connectResponse: { text: string; sender: string } | null = null;
+
+      mockFetch = (url: string, options: any) => {
+        const body = JSON.parse(options.body);
+        expect(body.type).toBe('connect');
+        expect(body.session_key).toBe('demo-session-1768694022744');
+        expect(body.timestamp).toBeDefined();
+
+        // Mock successful connect response
+        return Promise.resolve(new MockResponse({
+          type: 'connect',
+          status: 'success',
+          text: "Welcome to ChatUI Widget Demo! I'm here to help you explore the features. Try typing 'menu' to see interactive widgets, or just say hello!",
+          sender: 'bot',
+          timestamp: Date.now(),
+          session_key: 'demo-session-1768694022744'
+        }));
+      };
+      (global as any).fetch = mockFetch;
+
+      await new Promise<void>((resolve) => {
+        api.connect((text: string, sender: string) => {
+          connectSuccess = true;
+          connectResponse = { text, sender };
+          resolve();
+        }, (error: any) => {
+          resolve();
+        });
+      });
+
+      expect(connectSuccess).toBe(true);
+      expect(connectResponse).not.toBeNull();
+      expect(connectResponse!.text).toContain("Welcome to ChatUI Widget Demo");
+      expect(connectResponse!.sender).toBe('bot');
     });
   });
 

@@ -1,5 +1,5 @@
 (() => {
-  // src/modules/api.js
+  // src/modules/api-legacy.js
   var ChatAPI = class {
     /**
      * Create a new ChatAPI instance
@@ -101,10 +101,14 @@
       )}&type=message&session_key=${encodeURIComponent(sessionKey)}`;
       this._injectScript(url, callbackName, (response) => {
         if (onResponse) {
-          if (response.widget) {
-            onResponse(response.text, "bot", response.widget);
+          if (response.text !== void 0 && response.text !== null) {
+            if (response.widget) {
+              onResponse(response.text, "bot", response.widget);
+            } else {
+              onResponse(response.text, "bot");
+            }
           } else {
-            onResponse(response.text, "bot");
+            console.error("ChatWidget: Legacy API received response without text field", response);
           }
         }
       });
@@ -139,7 +143,7 @@
     }
   };
 
-  // src/modules/cors-api.js
+  // src/modules/api-cors.js
   var CorsAPI = class {
     /**
      * Create a new CorsAPI instance
@@ -269,10 +273,14 @@
           })
         });
         if (onMessage) {
-          if (response.widget) {
-            onMessage(response.text, "bot", response.widget);
-          } else {
-            onMessage(response.text, "bot");
+          if (response.status === "success" && response.text) {
+            if (response.widget) {
+              onMessage(response.text, "bot", response.widget);
+            } else {
+              onMessage(response.text, "bot");
+            }
+          } else if (response.status === "error") {
+            throw new Error(response.message || "Server returned error response");
           }
         }
       } catch (error) {
@@ -313,10 +321,14 @@
           })
         });
         if (onResponse) {
-          if (response.widget) {
-            onResponse(response.text, "bot", response.widget);
-          } else {
-            onResponse(response.text, "bot");
+          if (response.status === "success" && response.text) {
+            if (response.widget) {
+              onResponse(response.text, "bot", response.widget);
+            } else {
+              onResponse(response.text, "bot");
+            }
+          } else if (response.status === "error") {
+            throw new Error(response.message || "Server returned error response");
           }
         }
       } catch (error) {
@@ -328,7 +340,7 @@
     }
   };
 
-  // src/modules/hybrid-api.js
+  // src/modules/api.js
   var HybridChatAPI = class extends ChatAPI {
     /**
      * Create a new HybridChatAPI instance
@@ -396,12 +408,13 @@
     /**
      * Perform handshake using appropriate connection method
      * @param {Function} onSuccess - Callback function called on successful handshake
+     * @param {Function} onError - Callback function called on handshake error
      */
-    performHandshake(onSuccess) {
+    performHandshake(onSuccess, onError) {
       if (this.connectionType === "websocket") {
-        this.performWebSocketHandshake(onSuccess);
+        this.performWebSocketHandshake(onSuccess, onError);
       } else if (this.apiType === "cors") {
-        this.performCorsHandshake(onSuccess);
+        this.performCorsHandshake(onSuccess, onError);
       } else {
         super.performHandshake(onSuccess);
       }
@@ -410,8 +423,9 @@
      * Perform CORS handshake with fallback to JSONP
      * @private
      * @param {Function} onSuccess - Callback function called on successful handshake
+     * @param {Function} onError - Callback function called on handshake error
      */
-    performCorsHandshake(onSuccess) {
+    performCorsHandshake(onSuccess, onError) {
       this.corsApi.performHandshake(
         () => {
           this.setSessionKey(this.corsApi.getSessionKey());
@@ -423,6 +437,7 @@
             super.performHandshake(onSuccess);
           } else {
             console.error("ChatWidget: Handshake failed", error);
+            if (onError) onError(error);
           }
         }
       );
@@ -451,8 +466,9 @@
      * Perform WebSocket-specific handshake
      * @private
      * @param {Function} onSuccess - Callback function called on successful handshake
+     * @param {Function} onError - Callback function called on handshake error
      */
-    performWebSocketHandshake(onSuccess) {
+    performWebSocketHandshake(onSuccess, onError) {
       if (this.isTestEnvironment()) {
         this.setSessionKey("test-session-key");
         if (onSuccess) onSuccess();
@@ -473,6 +489,7 @@
         };
       }).catch((error) => {
         console.error("ChatWidget: WebSocket handshake failed", error);
+        if (onError) onError(error);
       });
     }
     /**
