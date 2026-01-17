@@ -1,4 +1,5 @@
 import { adjustColor } from './utils.js';
+import { WidgetFactory } from './widgets/index.js';
 
 export function injectStyles(widgetId, primaryColor, mode) {
   const styleElement = document.createElement("style");
@@ -222,6 +223,60 @@ export function injectStyles(widgetId, primaryColor, mode) {
     #${widgetId} .widget-button:active {
       transform: translateY(1px);
     }
+    
+    #${widgetId} .widget-select {
+      margin-top: 8px;
+    }
+    
+    #${widgetId} .widget-select-element {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 14px;
+      background: white;
+      outline: none;
+      cursor: pointer;
+    }
+    
+    #${widgetId} .widget-select-element:focus {
+      border-color: var(--chat-primary-color);
+    }
+    
+    #${widgetId} .widget-input {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    #${widgetId} .widget-input-element {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+    
+    #${widgetId} .widget-input-element:focus {
+      border-color: var(--chat-primary-color);
+    }
+    
+    #${widgetId} .widget-input-submit {
+      padding: 8px 16px;
+      background: var(--chat-primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+    
+    #${widgetId} .widget-input-submit:hover {
+      background: var(--chat-primary-color-dark);
+    }
   `;
   document.head.appendChild(styleElement);
 }
@@ -320,39 +375,11 @@ export function appendMessage(container, text, sender, widgetId, widgetData = nu
 }
 
 function createWidgetElement(widgetData, widgetId) {
-  const widgetContainer = document.createElement("div");
-  widgetContainer.className = "widget";
+  const widget = WidgetFactory.createWidget(widgetData, widgetId);
   
-  if (widgetData.type === "buttons" && widgetData.options) {
-    const buttonsContainer = document.createElement("div");
-    buttonsContainer.className = "widget-buttons";
-    
-    widgetData.options.forEach(option => {
-      const button = document.createElement("button");
-      button.className = "widget-button";
-      button.textContent = option.text;
-      button.setAttribute("data-widget-id", widgetId);
-      button.setAttribute("data-option-id", option.id);
-      button.setAttribute("data-option-value", option.value);
-      
-      button.addEventListener("click", () => {
-        // Dispatch custom event for widget interaction
-        const event = new CustomEvent("widgetInteraction", {
-          detail: {
-            widgetId: widgetId,
-            optionId: option.id,
-            optionValue: option.value,
-            optionText: option.text
-          }
-        });
-        document.dispatchEvent(event);
-      });
-      
-      buttonsContainer.appendChild(button);
-    });
-    
-    widgetContainer.appendChild(buttonsContainer);
+  if (!widget) {
+    return document.createComment(`Unsupported widget type: ${widgetData?.type}`);
   }
-  
-  return widgetContainer;
+
+  return widget.createElement();
 }

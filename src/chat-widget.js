@@ -98,6 +98,225 @@
     ).replace(/^/, "#");
   }
 
+  // src/modules/widgets/base-widget.js
+  var BaseWidget = class {
+    constructor(widgetData, widgetId) {
+      this.widgetData = widgetData;
+      this.widgetId = widgetId;
+    }
+    /**
+     * Create the DOM element for this widget
+     * @returns {HTMLElement} The widget DOM element
+     */
+    createElement() {
+      throw new Error("createElement() must be implemented by subclass");
+    }
+    /**
+     * Handle widget interaction
+     * @param {Object} interaction - Interaction data
+     */
+    handleInteraction(interaction) {
+      const event = new CustomEvent("widgetInteraction", {
+        detail: {
+          widgetId: this.widgetId,
+          ...interaction
+        }
+      });
+      document.dispatchEvent(event);
+    }
+    /**
+     * Validate widget data
+     * @returns {boolean} True if data is valid
+     */
+    validate() {
+      return this.widgetData && this.widgetData.type;
+    }
+  };
+
+  // src/modules/widgets/buttons-widget.js
+  var ButtonsWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid buttons widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "buttons" && this.widgetData.options) {
+        const buttonsContainer = document.createElement("div");
+        buttonsContainer.className = "widget-buttons";
+        this.widgetData.options.forEach((option) => {
+          const button = document.createElement("button");
+          button.className = "widget-button";
+          button.textContent = option.text;
+          button.setAttribute("data-widget-id", this.widgetId);
+          button.setAttribute("data-option-id", option.id);
+          button.setAttribute("data-option-value", option.value);
+          button.addEventListener("click", () => {
+            this.handleInteraction({
+              optionId: option.id,
+              optionValue: option.value,
+              optionText: option.text,
+              widgetType: "buttons"
+            });
+          });
+          buttonsContainer.appendChild(button);
+        });
+        widgetContainer.appendChild(buttonsContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "buttons" && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
+    }
+  };
+
+  // src/modules/widgets/select-widget.js
+  var SelectWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid select widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "select" && this.widgetData.options) {
+        const selectContainer = document.createElement("div");
+        selectContainer.className = "widget-select";
+        const select = document.createElement("select");
+        select.className = "widget-select-element";
+        select.setAttribute("data-widget-id", this.widgetId);
+        if (this.widgetData.placeholder) {
+          const placeholderOption = document.createElement("option");
+          placeholderOption.value = "";
+          placeholderOption.textContent = this.widgetData.placeholder;
+          placeholderOption.disabled = true;
+          placeholderOption.selected = true;
+          select.appendChild(placeholderOption);
+        }
+        this.widgetData.options.forEach((option) => {
+          const optionElement = document.createElement("option");
+          optionElement.value = option.value;
+          optionElement.textContent = option.text;
+          optionElement.setAttribute("data-option-id", option.id);
+          select.appendChild(optionElement);
+        });
+        select.addEventListener("change", () => {
+          const selectedOption = select.options[select.selectedIndex];
+          const optionData = this.widgetData.options.find((opt) => opt.id === selectedOption.getAttribute("data-option-id"));
+          if (optionData) {
+            this.handleInteraction({
+              optionId: optionData.id,
+              optionValue: optionData.value,
+              optionText: optionData.text,
+              widgetType: "select"
+            });
+          }
+        });
+        selectContainer.appendChild(select);
+        widgetContainer.appendChild(selectContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "select" && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
+    }
+  };
+
+  // src/modules/widgets/input-widget.js
+  var InputWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid input widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "input") {
+        const formContainer = document.createElement("div");
+        formContainer.className = "widget-input";
+        const input = document.createElement("input");
+        input.type = this.widgetData.inputType || "text";
+        input.className = "widget-input-element";
+        input.placeholder = this.widgetData.placeholder || "Enter your response...";
+        input.setAttribute("data-widget-id", this.widgetId);
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-input-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        const handleSubmit = () => {
+          const value = input.value.trim();
+          if (value) {
+            this.handleInteraction({
+              optionId: "input-submit",
+              optionValue: value,
+              optionText: value,
+              widgetType: "input"
+            });
+            input.value = "";
+          }
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        input.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit();
+          }
+        });
+        formContainer.appendChild(input);
+        formContainer.appendChild(submitButton);
+        widgetContainer.appendChild(formContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "input";
+    }
+  };
+
+  // src/modules/widgets/widget-factory.js
+  var WidgetFactory2 = class {
+    static widgetTypes = /* @__PURE__ */ new Map([
+      ["buttons", ButtonsWidget],
+      ["select", SelectWidget],
+      ["input", InputWidget]
+    ]);
+    /**
+     * Register a new widget type
+     * @param {string} type - Widget type identifier
+     * @param {class} WidgetClass - Widget class constructor
+     */
+    static registerWidget(type, WidgetClass) {
+      this.widgetTypes.set(type, WidgetClass);
+    }
+    /**
+     * Create a widget instance
+     * @param {Object} widgetData - Widget configuration data
+     * @param {string} widgetId - Widget container ID
+     * @returns {BaseWidget|null} Widget instance or null if type not supported
+     */
+    static createWidget(widgetData, widgetId) {
+      if (!widgetData || !widgetData.type) {
+        console.warn("Invalid widget data:", widgetData);
+        return null;
+      }
+      const WidgetClass = this.widgetTypes.get(widgetData.type);
+      if (!WidgetClass) {
+        console.warn(`Unsupported widget type: ${widgetData.type}`);
+        return null;
+      }
+      try {
+        return new WidgetClass(widgetData, widgetId);
+      } catch (error) {
+        console.error(`Error creating widget of type ${widgetData.type}:`, error);
+        return null;
+      }
+    }
+    /**
+     * Get list of supported widget types
+     * @returns {string[]} Array of supported widget type names
+     */
+    static getSupportedTypes() {
+      return Array.from(this.widgetTypes.keys());
+    }
+  };
+
   // src/modules/ui.js
   function injectStyles(widgetId, primaryColor, mode) {
     const styleElement = document.createElement("style");
@@ -321,6 +540,60 @@
     #${widgetId} .widget-button:active {
       transform: translateY(1px);
     }
+    
+    #${widgetId} .widget-select {
+      margin-top: 8px;
+    }
+    
+    #${widgetId} .widget-select-element {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 14px;
+      background: white;
+      outline: none;
+      cursor: pointer;
+    }
+    
+    #${widgetId} .widget-select-element:focus {
+      border-color: var(--chat-primary-color);
+    }
+    
+    #${widgetId} .widget-input {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    #${widgetId} .widget-input-element {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+    
+    #${widgetId} .widget-input-element:focus {
+      border-color: var(--chat-primary-color);
+    }
+    
+    #${widgetId} .widget-input-submit {
+      padding: 8px 16px;
+      background: var(--chat-primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+    
+    #${widgetId} .widget-input-submit:hover {
+      background: var(--chat-primary-color-dark);
+    }
   `;
     document.head.appendChild(styleElement);
   }
@@ -396,34 +669,11 @@
     container.scrollTop = container.scrollHeight;
   }
   function createWidgetElement(widgetData, widgetId) {
-    const widgetContainer = document.createElement("div");
-    widgetContainer.className = "widget";
-    if (widgetData.type === "buttons" && widgetData.options) {
-      const buttonsContainer = document.createElement("div");
-      buttonsContainer.className = "widget-buttons";
-      widgetData.options.forEach((option) => {
-        const button = document.createElement("button");
-        button.className = "widget-button";
-        button.textContent = option.text;
-        button.setAttribute("data-widget-id", widgetId);
-        button.setAttribute("data-option-id", option.id);
-        button.setAttribute("data-option-value", option.value);
-        button.addEventListener("click", () => {
-          const event = new CustomEvent("widgetInteraction", {
-            detail: {
-              widgetId,
-              optionId: option.id,
-              optionValue: option.value,
-              optionText: option.text
-            }
-          });
-          document.dispatchEvent(event);
-        });
-        buttonsContainer.appendChild(button);
-      });
-      widgetContainer.appendChild(buttonsContainer);
+    const widget = WidgetFactory2.createWidget(widgetData, widgetId);
+    if (!widget) {
+      return document.createComment(`Unsupported widget type: ${widgetData?.type}`);
     }
-    return widgetContainer;
+    return widget.createElement();
   }
 
   // src/modules/chat-widget.class.js
