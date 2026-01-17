@@ -14,17 +14,13 @@ We have successfully modernized the core infrastructure. The following features 
 - **Multi-Mode Support**: Seamless switching between Popup and Full-page Embedded modes.
 - **E2E Testing**: Industrial-grade coverage with Playwright.
 - **✅ Dynamic Theme Engine**: Data-attributes-first theming with CSS variables, runtime switching, and localStorage persistence.
+- **✅ WebSocket & Real-time Pipeline**: Hybrid adapter with WebSockets for live typing indicators and read receipts, maintaining JSONP/CORS fallback for restricted environments.
 
 ---
 
 ## Phase 1: Modernization & AI Readiness (Immediate - 3 Months)
 
-### 1.1 WebSocket & Real-time Pipeline
-**Priority: High | Effort: 40 hours**
-- **Objective**: Eliminate the latency of JSONP polling.
-- **Implementation**: Introduce a hybrid adapter that uses WebSockets for live typing indicators and read receipts, while maintaining JSONP/CORS as a fallback for restricted environments.
-
-### 1.2 UI Support for AI-Driven Patterns
+### 1.1 UI Support for AI-Driven Patterns
 **Priority: High | Effort: 20 hours**
 - **Objective**: Standardize how the widget renders modern AI/LLM conversational patterns.
 - **Implementation**: Add native UI support for **"Streaming Responses"** (character-by-character updates) and **"Reasoning/Thought Blocks"** (collapsible sections for model chain-of-thought), ensuring the frontend remains strictly agnostic to the backend provider.
@@ -64,9 +60,9 @@ To maintain the project's agility, we recommend a lean, high-output team:
 - **QA/Automations**: 0.5 FTE (Maintaining Playwright coverage).
 
 ### Budget Estimate (6-Month Pivot)
-- **Development & Ops**: $60,000 - $90,000 (reduced by $20K due to completed theme engine)
+- **Development & Ops**: $40,000 - $70,000 (reduced by $40K due to completed theme engine and WebSocket pipeline)
 - **Infrastructure (CDN/Demos)**: $2,400 annually
-- **Total Investment**: **$62,400 - $92,400**
+- **Total Investment**: **$42,400 - $72,400**
 
 ---
 
@@ -130,4 +126,4 @@ To maintain the project's agility, we recommend a lean, high-output team:
 
 ChatUI is no longer just a widget; it is a **performance-first alternative to framework bloat**. By focusing on AI integration, real-time responsiveness, and enterprise readiness while keeping our "Vanilla" promise, we will capture the mid-market segment that requires sophistication without technical debt.
 
-The revised 6-month timeline and $62K-$92K budget represents a strategic balance between ambition and execution, positioning ChatUI for sustainable growth and market leadership.
+The revised 6-month timeline and $42K-$72K budget represents a strategic balance between ambition and execution, positioning ChatUI for sustainable growth and market leadership.

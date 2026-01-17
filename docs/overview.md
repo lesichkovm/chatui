@@ -31,6 +31,7 @@ A self-contained library of 15+ specialized components (managed via `WidgetFacto
 - **Zero Dependencies**: No React, Vue, or jQuery required.
 - **Ultra-Lightweight**: Core widget is ~12KB; full bundle with all 15+ widgets is ~70KB.
 - **Cross-Domain Freedom**: Native JSONP support bypasses CORS restrictions for seamless multi-domain deployments.
+- **Real-Time Communication**: Hybrid WebSocket/JSONP transport with automatic protocol detection, live typing indicators, and read receipts.
 - **Dual Display Modes**: Supports both a sleek **Popup** (bottom-right/left) and a **Full-page/Embedded** mode for dedicated support pages.
 
 ### Developer-Centric Design
@@ -43,7 +44,8 @@ A self-contained library of 15+ specialized components (managed via `WidgetFacto
 ### Core Modules
 - **`src/modules/chat-widget.class.js`**: Central controller managing state, lifecycle, and event coordination.
 - **`src/modules/ui.js`**: Lean rendering engine with an internal CSS reset.
-- **`src/modules/api.js`**: Communication layer handling the Handshake and Message protocols.
+- **`src/modules/api.js`**: Base JSONP communication layer handling the Handshake and Message protocols.
+- **`src/modules/hybrid-api.js`**: Hybrid WebSocket/JSONP adapter with automatic protocol detection and real-time features.
 - **`src/modules/widgets/`**: Modular registry of interactive UI components.
 
 ### Communication Protocol
@@ -55,8 +57,8 @@ A self-contained library of 15+ specialized components (managed via `WidgetFacto
 
 We are currently executing a **Product Modernization Phase** to bring core conversational features to the vanilla ecosystem:
 - [x] **Modular Widget System**: 15+ interactive components.
-- [ ] **Modern Theme System**: Move to CSS Variables for deep, runtime-switchable branding (Light/Dark/Corporate).
-- [ ] **Real-time Pipeline**: Transitioning from polling/JSONP towards **WebSocket** support for live typing indicators and read receipts.
+- [x] **Modern Theme System**: CSS Variables for deep, runtime-switchable branding (Light/Dark/Corporate).
+- [x] **Real-time Pipeline**: Hybrid WebSocket/JSONP support with live typing indicators, read receipts, and streaming responses.
 - [ ] **Rich Content**: Native support for Markdown parsing and image/card message types.
 
 ## Development & Testing
