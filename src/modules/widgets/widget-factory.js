@@ -1,6 +1,18 @@
 import { ButtonsWidget } from './buttons-widget.js';
 import { SelectWidget } from './select-widget.js';
 import { InputWidget } from './input-widget.js';
+import { CheckboxWidget } from './checkbox-widget.js';
+import { TextareaWidget } from './textarea-widget.js';
+import { SliderWidget } from './slider-widget.js';
+import { RatingWidget } from './rating-widget.js';
+import { ToggleWidget } from './toggle-widget.js';
+import { DateWidget } from './date-widget.js';
+import { TagsWidget } from './tags-widget.js';
+import { FileUploadWidget } from './file-upload-widget.js';
+import { ColorPickerWidget } from './color-picker-widget.js';
+import { ConfirmationWidget } from './confirmation-widget.js';
+import { RadioWidget } from './radio-widget.js';
+import { ProgressWidget } from './progress-widget.js';
 
 /**
  * Widget Factory
@@ -10,7 +22,19 @@ export class WidgetFactory {
   static widgetTypes = new Map([
     ['buttons', ButtonsWidget],
     ['select', SelectWidget],
-    ['input', InputWidget]
+    ['input', InputWidget],
+    ['checkbox', CheckboxWidget],
+    ['textarea', TextareaWidget],
+    ['slider', SliderWidget],
+    ['rating', RatingWidget],
+    ['toggle', ToggleWidget],
+    ['date', DateWidget],
+    ['tags', TagsWidget],
+    ['file', FileUploadWidget],
+    ['color', ColorPickerWidget],
+    ['confirmation', ConfirmationWidget],
+    ['radio', RadioWidget],
+    ['progress', ProgressWidget]
   ]);
 
   /**
