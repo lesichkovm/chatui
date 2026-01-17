@@ -145,6 +145,8 @@ test.describe('HybridChatAPI', () => {
       
       api.performHandshake(() => {
         handshakeSuccess = true;
+      }, (error: any) => {
+        console.error('Handshake failed:', error);
       });
       
       await new Promise(resolve => setTimeout(resolve, 15)); // Wait for connection
@@ -321,7 +323,7 @@ test.describe('HybridChatAPI', () => {
       expect(api.apiType).toBe('jsonp');
       
       // These should call the parent class methods without throwing
-      expect(() => api.performHandshake(() => {})).not.toThrow();
+      expect(() => api.performHandshake(() => {}, () => {})).not.toThrow();
       expect(() => api.connect(() => {})).not.toThrow();
       expect(() => api.sendMessage('test', () => {})).not.toThrow();
     });
@@ -343,6 +345,8 @@ test.describe('HybridChatAPI', () => {
       let handshakeSuccess = false;
       api.performHandshake(() => {
         handshakeSuccess = true;
+      }, (error: any) => {
+        // Handle error case if needed
       });
       
       expect(handshakeSuccess).toBe(true);
