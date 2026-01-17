@@ -43,6 +43,8 @@ export class HybridChatAPI extends ChatAPI {
     }
 
     this.initWebSocket().then(() => {
+      if (!this.wsConnection) return;
+      
       this.wsConnection.send(JSON.stringify({
         type: 'handshake',
         timestamp: Date.now()

@@ -303,6 +303,24 @@ export class ChatWidget {
   }
 
   /**
+   * Get the underlying WebSocket connection
+   * @returns {WebSocket|null}
+   */
+  get ws() {
+    return this.api.wsConnection;
+  }
+
+  /**
+   * Send a typing indicator to the server
+   * @param {boolean} isTyping - Whether the user is typing
+   */
+  sendTypingIndicator(isTyping) {
+    if (this.api.sendTypingIndicator) {
+      this.api.sendTypingIndicator(isTyping);
+    }
+  }
+
+  /**
    * Set the theme (default or branded)
    * @param {string} theme - Theme name ('default' or 'branded')
    */
