@@ -16,193 +16,98 @@
   status = 200
 
 [[redirects]]
-  from = "/demo/popup/api/api/handshake"
+  from = "/demo/popup/api/*"
   to = "/.netlify/functions/demo-popup"
   status = 200
 
 [[redirects]]
-  from = "/demo/popup/api/api/messages"
-  to = "/.netlify/functions/demo-popup"
-  status = 200
-
-[[redirects]]
-  from = "/demo/full_page/api/api/handshake"
+  from = "/demo/full_page/api/*"
   to = "/.netlify/functions/demo-fullpage"
   status = 200
 
 [[redirects]]
-  from = "/demo/full_page/api/api/messages"
-  to = "/.netlify/functions/demo-fullpage"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widget-demo/api/api/handshake"
+  from = "/demo/widget-demo/api/*"
   to = "/.netlify/functions/demo-widgets"
   status = 200
 
 [[redirects]]
-  from = "/demo/widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widgets"
-  status = 200
-
-[[redirects]]
-  from = "/demo/theme-demo/api/api/handshake"
-  to = "/.netlify/functions/demo-theme"
-  status = 200
-
-[[redirects]]
-  from = "/demo/theme-demo/api/api/messages"
+  from = "/demo/theme-demo/api/*"
   to = "/.netlify/functions/demo-theme"
   status = 200
 
 # Individual widget demos
 [[redirects]]
-  from = "/demo/widgets/buttons-widget-demo/api/api/handshake"
+  from = "/demo/widgets/buttons-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=buttons"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/buttons-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=buttons"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/rating-widget-demo/api/api/handshake"
+  from = "/demo/widgets/rating-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=rating"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/rating-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=rating"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/input-widget-demo/api/api/handshake"
+  from = "/demo/widgets/input-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=input"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/input-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=input"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/select-widget-demo/api/api/handshake"
+  from = "/demo/widgets/select-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=select"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/select-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=select"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/checkbox-widget-demo/api/api/handshake"
+  from = "/demo/widgets/checkbox-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=checkbox"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/checkbox-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=checkbox"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/radio-widget-demo/api/api/handshake"
+  from = "/demo/widgets/radio-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=radio"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/radio-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=radio"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/textarea-widget-demo/api/api/handshake"
+  from = "/demo/widgets/textarea-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=textarea"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/textarea-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=textarea"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/slider-widget-demo/api/api/handshake"
+  from = "/demo/widgets/slider-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=slider"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/slider-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=slider"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/toggle-widget-demo/api/api/handshake"
+  from = "/demo/widgets/toggle-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=toggle"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/toggle-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=toggle"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/date-widget-demo/api/api/handshake"
+  from = "/demo/widgets/date-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=date"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/date-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=date"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/color-picker-widget-demo/api/api/handshake"
+  from = "/demo/widgets/color-picker-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=color_picker"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/color-picker-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=color_picker"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/file-upload-widget-demo/api/api/handshake"
+  from = "/demo/widgets/file-upload-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=file_upload"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/file-upload-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=file_upload"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/tags-widget-demo/api/api/handshake"
+  from = "/demo/widgets/tags-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=tags"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/tags-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=tags"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/confirmation-widget-demo/api/api/handshake"
+  from = "/demo/widgets/confirmation-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=confirmation"
   status = 200
 
 [[redirects]]
-  from = "/demo/widgets/confirmation-widget-demo/api/api/messages"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=confirmation"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/progress-widget-demo/api/api/handshake"
-  to = "/.netlify/functions/demo-widget-individual?widget_type=progress"
-  status = 200
-
-[[redirects]]
-  from = "/demo/widgets/progress-widget-demo/api/api/messages"
+  from = "/demo/widgets/progress-widget-demo/api/*"
   to = "/.netlify/functions/demo-widget-individual?widget_type=progress"
   status = 200
 
