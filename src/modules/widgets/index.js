@@ -7,6 +7,7 @@ export { BaseWidget } from './base-widget.js';
 export { ButtonsWidget } from './buttons-widget.js';
 export { SelectWidget } from './select-widget.js';
 export { InputWidget } from './input-widget.js';
+export { PasswordWidget } from './password-widget.js';
 export { CheckboxWidget } from './checkbox-widget.js';
 export { TextareaWidget } from './textarea-widget.js';
 export { SliderWidget } from './slider-widget.js';

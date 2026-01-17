@@ -7,6 +7,7 @@ export const WIDGET_TYPES = {
   BUTTONS: 'buttons',
   SELECT: 'select',
   INPUT: 'input',
+  PASSWORD: 'password',
   CHECKBOX: 'checkbox',
   TEXTAREA: 'textarea',
   SLIDER: 'slider',

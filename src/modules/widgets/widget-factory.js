@@ -1,6 +1,7 @@
 import { ButtonsWidget } from './buttons-widget.js';
 import { SelectWidget } from './select-widget.js';
 import { InputWidget } from './input-widget.js';
+import { PasswordWidget } from './password-widget.js';
 import { CheckboxWidget } from './checkbox-widget.js';
 import { TextareaWidget } from './textarea-widget.js';
 import { SliderWidget } from './slider-widget.js';
@@ -30,6 +31,7 @@ export class WidgetFactory {
     [WIDGET_TYPES.BUTTONS, ButtonsWidget],
     [WIDGET_TYPES.SELECT, SelectWidget],
     [WIDGET_TYPES.INPUT, InputWidget],
+    [WIDGET_TYPES.PASSWORD, PasswordWidget],
     [WIDGET_TYPES.CHECKBOX, CheckboxWidget],
     [WIDGET_TYPES.TEXTAREA, TextareaWidget],
     [WIDGET_TYPES.SLIDER, SliderWidget],
