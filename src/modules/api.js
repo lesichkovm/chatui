@@ -86,12 +86,13 @@ export class HybridChatAPI extends ChatAPI {
   /**
    * Perform handshake using appropriate connection method
    * @param {Function} onSuccess - Callback function called on successful handshake
+   * @param {Function} onError - Callback function called on handshake error
    */
-  performHandshake(onSuccess) {
+  performHandshake(onSuccess, onError) {
     if (this.connectionType === 'websocket') {
-      this.performWebSocketHandshake(onSuccess);
+      this.performWebSocketHandshake(onSuccess, onError);
     } else if (this.apiType === 'cors') {
-      this.performCorsHandshake(onSuccess);
+      this.performCorsHandshake(onSuccess, onError);
     } else {
       super.performHandshake(onSuccess);
     }
@@ -101,8 +102,9 @@ export class HybridChatAPI extends ChatAPI {
    * Perform CORS handshake with fallback to JSONP
    * @private
    * @param {Function} onSuccess - Callback function called on successful handshake
+   * @param {Function} onError - Callback function called on handshake error
    */
-  performCorsHandshake(onSuccess) {
+  performCorsHandshake(onSuccess, onError) {
     this.corsApi.performHandshake(
       () => {
         // CORS succeeded, copy session key to parent
@@ -116,6 +118,7 @@ export class HybridChatAPI extends ChatAPI {
           super.performHandshake(onSuccess);
         } else {
           console.error('ChatWidget: Handshake failed', error);
+          if (onError) onError(error);
         }
       }
     );
@@ -152,8 +155,9 @@ export class HybridChatAPI extends ChatAPI {
    * Perform WebSocket-specific handshake
    * @private
    * @param {Function} onSuccess - Callback function called on successful handshake
+   * @param {Function} onError - Callback function called on handshake error
    */
-  performWebSocketHandshake(onSuccess) {
+  performWebSocketHandshake(onSuccess, onError) {
     if (this.isTestEnvironment()) {
       this.setSessionKey('test-session-key');
       if (onSuccess) onSuccess();
@@ -177,6 +181,7 @@ export class HybridChatAPI extends ChatAPI {
       };
     }).catch((error) => {
       console.error('ChatWidget: WebSocket handshake failed', error);
+      if (onError) onError(error);
     });
   }
 
