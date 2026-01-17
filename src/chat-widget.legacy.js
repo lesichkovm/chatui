@@ -34,7 +34,7 @@
       "chat-widget-" + Math.random().toString(36).substr(2, 9);
 
     // Get options from data attributes
-    const mode = scriptElement.getAttribute("data-mode") || "popup";
+    const displayMode = scriptElement.getAttribute("data-display") || "popup";
     const position =
       scriptElement.getAttribute("data-position") || "bottom-right";
     const primaryColor = scriptElement.getAttribute("data-color") || "#007bff";
@@ -141,7 +141,7 @@
         color: #6c757d;
         padding: 0;
         line-height: 1;
-        display: ${mode === "fullpage" ? "none" : "block"};
+        display: ${displayMode === "fullpage" ? "none" : "block"};
       }
       
       #${widgetId} .messages {
@@ -229,13 +229,13 @@
     // Create the widget
     const container = document.createElement("div");
     container.id = widgetId;
-    container.className = mode; // Add mode class
+    container.className = displayMode; // Add displayMode class
 
     // Create chat window
     const chatWindow = document.createElement("div");
     chatWindow.className = "window";
     chatWindow.id = `${widgetId}-window`;
-    if (mode === "popup") {
+    if (displayMode === "popup") {
       chatWindow.style.cssText = `
         ${position.includes("bottom") ? "bottom: 20px;" : "top: 20px;"}
         ${position.includes("right") ? "right: 20px;" : "left: 20px;"}
@@ -244,7 +244,7 @@
     chatWindow.innerHTML = `
       <div class="header" id="${widgetId}-header">
         <h3>${title}</h3>
-        ${mode === "popup" ? `<button type="button" class="close" id="${widgetId}-close">×</button>` : ""}
+        ${displayMode === "popup" ? `<button type="button" class="close" id="${widgetId}-close">×</button>` : ""}
       </div>
       <div class="messages" id="${widgetId}-messages"></div>
       <div class="input">
@@ -253,8 +253,8 @@
       </div>
     `;
 
-    if (mode === "popup") {
-      // Create chat button for popup mode
+    if (displayMode === "popup") {
+      // Create chat button for popup displayMode
       const chatButton = document.createElement("button");
       chatButton.className = "button";
       chatButton.id = `${widgetId}-button`;
@@ -270,7 +270,7 @@
       `;
       container.appendChild(chatButton);
 
-      // Setup popup mode event listeners
+      // Setup popup displayMode event listeners
       chatButton.addEventListener("click", () => {
         const isOpen = chatWindow.classList.contains("window-open");
         if (isOpen) {
@@ -315,7 +315,7 @@
     container.appendChild(chatWindow);
 
     // Append the widget to the target element or body
-    if (mode === "fullpage" && targetSelector) {
+    if (displayMode === "fullpage" && targetSelector) {
       const targetElement = document.querySelector(targetSelector);
       if (targetElement) {
         targetElement.appendChild(container);

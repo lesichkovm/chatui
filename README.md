@@ -63,7 +63,8 @@ chat.sendMessage('Hello from the API!');
 | Attribute | JS Option | Description | Default |
 |-----------|-----------|-------------|---------|
 | `data-server-url` | `serverUrl` | Base URL of the chat backend API | `http://localhost:3000` |
-| `data-mode` | `mode` | Display mode: `popup` or `fullpage` | `popup` |
+| `data-display` | `displayMode` | Display mode: `popup` or `fullpage` | `popup` |
+| `data-mode` | `themeMode` | Theme mode: `light` or `dark` | `light` |
 | `data-position` | `position` | Corner position: `bottom-right`, `bottom-left`, `top-right`, `top-left` | `bottom-right` |
 | `data-color` | `primaryColor` | Primary theme color (Hex code) | `#007bff` |
 | `data-title` | `title` | Title text displayed in the header | `Chat with us` |

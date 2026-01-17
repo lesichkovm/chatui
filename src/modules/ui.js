@@ -381,19 +381,19 @@ export function injectStyles(widgetId, themeConfig) {
 }
 
 export function createWidgetDOM(widgetId, config) {
-  const { mode, position, title, targetSelector } = config;
+  const { displayMode, position, title, targetSelector } = config;
 
   // Create the widget container
   const container = document.createElement("div");
   container.id = widgetId;
-  container.className = mode;
+  container.className = displayMode;
 
   // Create chat window
   const chatWindow = document.createElement("div");
   chatWindow.className = "window";
   chatWindow.id = `${widgetId}-window`;
 
-  if (mode === "popup") {
+  if (displayMode === "popup") {
     chatWindow.style.cssText = `
       ${position.includes("bottom") ? "bottom: 20px;" : "top: 20px;"}
       ${position.includes("right") ? "right: 20px;" : "left: 20px;"}
@@ -403,7 +403,7 @@ export function createWidgetDOM(widgetId, config) {
   chatWindow.innerHTML = `
     <div class="header" id="${widgetId}-header">
       <h3>${title}</h3>
-      ${mode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">×</button>` : ""
+      ${displayMode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">×</button>` : ""
     }
     </div>
     <div class="messages" id="${widgetId}-messages" role="log" aria-live="polite" aria-atomic="false"></div>
@@ -415,7 +415,7 @@ export function createWidgetDOM(widgetId, config) {
 
   let chatButton = null;
 
-  if (mode === "popup") {
+  if (displayMode === "popup") {
     // Create chat button for popup mode
     chatButton = document.createElement("button");
     chatButton.className = "button";
@@ -437,7 +437,7 @@ export function createWidgetDOM(widgetId, config) {
   container.appendChild(chatWindow);
 
   // Append the widget to the target element or body
-  if (mode === "fullpage" && targetSelector) {
+  if (displayMode === "fullpage" && targetSelector) {
     const targetElement = document.querySelector(targetSelector);
     if (targetElement) {
       targetElement.appendChild(container);

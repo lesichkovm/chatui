@@ -13,9 +13,11 @@ export class ChatWidget {
       if (scriptElement._chatWidgetInitialized) return;
       scriptElement._chatWidgetInitialized = true;
 
+      const displayMode = scriptElement.getAttribute("data-display") || null;
+
       config = {
         id: scriptElement.id,
-        mode: scriptElement.getAttribute("data-mode"),
+        displayMode: displayMode,
         position: scriptElement.getAttribute("data-position"),
         primaryColor: scriptElement.getAttribute("data-color"),
         title: scriptElement.getAttribute("data-title"),
@@ -35,7 +37,7 @@ export class ChatWidget {
     const themeConfig = this.themeManager.getThemeConfig();
 
     this.config = {
-      mode: config.mode || "popup",
+      displayMode: config.displayMode || config.mode || "popup",
       position: config.position || "bottom-right",
       primaryColor: config.primaryColor || config.color || themeConfig.colors.primary,
       title: config.title || "Chat with us",

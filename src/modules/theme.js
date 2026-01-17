@@ -103,8 +103,15 @@ export class ThemeManager {
       return savedMode;
     }
 
-    // 2. Check data attribute
+    // 2. Check data attributes
     if (this.scriptElement) {
+      // Priority 1: data-theme-mode
+      const themeMode = this.scriptElement.getAttribute('data-theme-mode');
+      if (themeMode === 'light' || themeMode === 'dark') {
+        return themeMode;
+      }
+
+      // Priority 2: data-mode (legacy/shared)
       const dataMode = this.scriptElement.getAttribute('data-mode');
       if (dataMode === 'light' || dataMode === 'dark') {
         return dataMode;
