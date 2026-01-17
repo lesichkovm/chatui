@@ -37,23 +37,106 @@ const handler = async (event, context) => {
         
         // Messages endpoint
         else if (message) {
-          const responses = [
-            "That's interesting! Tell me more about that.",
-            "I understand. How can I help you today?",
-            "Thanks for sharing! What would you like to discuss?",
-            "Great question! Let me think about that...",
-            "I'm here to help! What's on your mind?",
-            "That's a good point. What else would you like to know?",
-            "I appreciate you reaching out. How can I assist you?",
-            "Interesting! Can you elaborate on that?"
-          ];
+          // Handle special commands that trigger widgets
+          const lowerMessage = message.toLowerCase().trim();
           
-          responseData = {
-            text: responses[Math.floor(Math.random() * responses.length)],
-            sender: "bot",
-            timestamp: Date.now(),
-            session_key: session_key || "demo_session_" + Date.now()
-          };
+          if (lowerMessage === 'menu' || lowerMessage === 'options') {
+            responseData = {
+              text: "Choose an option below:",
+              sender: "bot",
+              timestamp: Date.now(),
+              session_key: session_key || "demo_session_" + Date.now(),
+              widget: {
+                type: "buttons",
+                data: {
+                  buttons: [
+                    { id: "btn1", text: "📝 Rate Service", value: "rate" },
+                    { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
+                    { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
+                    { id: "btn4", text: "📋 View Options", value: "more_options" }
+                  ]
+                }
+              }
+            };
+          } else if (lowerMessage === 'rate' || lowerMessage === 'rating') {
+            responseData = {
+              text: "How would you rate our service?",
+              sender: "bot",
+              timestamp: Date.now(),
+              session_key: session_key || "demo_session_" + Date.now(),
+              widget: {
+                type: "rating",
+                data: {
+                  max: 5,
+                  initial: 0,
+                  icon: "star"
+                }
+              }
+            };
+          } else if (lowerMessage === 'feedback' || lowerMessage === 'comment') {
+            responseData = {
+              text: "Please share your feedback:",
+              sender: "bot",
+              timestamp: Date.now(),
+              session_key: session_key || "demo_session_" + Date.now(),
+              widget: {
+                type: "textarea",
+                data: {
+                  placeholder: "Enter your feedback here...",
+                  rows: 4,
+                  required: true
+                }
+              }
+            };
+          } else if (lowerMessage === 'schedule' || lowerMessage === 'date') {
+            responseData = {
+              text: "When would you like to schedule?",
+              sender: "bot",
+              timestamp: Date.now(),
+              session_key: session_key || "demo_session_" + Date.now(),
+              widget: {
+                type: "date",
+                data: {
+                  value: new Date().toISOString().split('T')[0],
+                  required: true
+                }
+              }
+            };
+          } else if (lowerMessage === 'color' || lowerMessage === 'theme') {
+            responseData = {
+              text: "Choose your preferred color:",
+              sender: "bot",
+              timestamp: Date.now(),
+              session_key: session_key || "demo_session_" + Date.now(),
+              widget: {
+                type: "color_picker",
+                data: {
+                  value: "#667eea",
+                  preset_colors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"]
+                }
+              }
+            };
+          } else {
+            // Default responses for regular messages
+            const responses = [
+              "That's interesting! Tell me more about that.",
+              "I understand. How can I help you today?",
+              "Thanks for sharing! What would you like to discuss?",
+              "Great question! Let me think about that...",
+              "I'm here to help! What's on your mind?",
+              "That's a good point. What else would you like to know?",
+              "I appreciate you reaching out. How can I assist you?",
+              "Interesting! Can you elaborate on that?",
+              "Try typing 'menu' to see interactive widgets, 'rate' for rating, 'feedback' for comments, or 'color' for color picker."
+            ];
+            
+            responseData = {
+              text: responses[Math.floor(Math.random() * responses.length)],
+              sender: "bot",
+              timestamp: Date.now(),
+              session_key: session_key || "demo_session_" + Date.now()
+            };
+          }
         }
         
         // Handle connection initialization
@@ -109,19 +192,96 @@ const handler = async (event, context) => {
             message: "Welcome to ChatUI Widget Demo!"
           };
         } else if (message) {
-          const responses = [
-            "That's interesting! Tell me more.",
-            "I understand. How can I help?",
-            "Thanks for sharing! What else?",
-            "Great question! Let me assist you.",
-            "I'm here to help! What's on your mind?"
-          ];
+          // Handle special commands that trigger widgets
+          const lowerMessage = message.toLowerCase().trim();
           
-          responseData = {
-            text: responses[Math.floor(Math.random() * responses.length)],
-            sender: "bot",
-            timestamp: Date.now()
-          };
+          if (lowerMessage === 'menu' || lowerMessage === 'options') {
+            responseData = {
+              text: "Choose an option below:",
+              sender: "bot",
+              timestamp: Date.now(),
+              widget: {
+                type: "buttons",
+                data: {
+                  buttons: [
+                    { id: "btn1", text: "📝 Rate Service", value: "rate" },
+                    { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
+                    { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
+                    { id: "btn4", text: "📋 View Options", value: "more_options" }
+                  ]
+                }
+              }
+            };
+          } else if (lowerMessage === 'rate' || lowerMessage === 'rating') {
+            responseData = {
+              text: "How would you rate our service?",
+              sender: "bot",
+              timestamp: Date.now(),
+              widget: {
+                type: "rating",
+                data: {
+                  max: 5,
+                  initial: 0,
+                  icon: "star"
+                }
+              }
+            };
+          } else if (lowerMessage === 'feedback' || lowerMessage === 'comment') {
+            responseData = {
+              text: "Please share your feedback:",
+              sender: "bot",
+              timestamp: Date.now(),
+              widget: {
+                type: "textarea",
+                data: {
+                  placeholder: "Enter your feedback here...",
+                  rows: 4,
+                  required: true
+                }
+              }
+            };
+          } else if (lowerMessage === 'schedule' || lowerMessage === 'date') {
+            responseData = {
+              text: "When would you like to schedule?",
+              sender: "bot",
+              timestamp: Date.now(),
+              widget: {
+                type: "date",
+                data: {
+                  value: new Date().toISOString().split('T')[0],
+                  required: true
+                }
+              }
+            };
+          } else if (lowerMessage === 'color' || lowerMessage === 'theme') {
+            responseData = {
+              text: "Choose your preferred color:",
+              sender: "bot",
+              timestamp: Date.now(),
+              widget: {
+                type: "color_picker",
+                data: {
+                  value: "#667eea",
+                  preset_colors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"]
+                }
+              }
+            };
+          } else {
+            const responses = [
+              "That's interesting! Tell me more.",
+              "I understand. How can I help?",
+              "Thanks for sharing! What else?",
+              "Great question! Let me assist you.",
+              "I'm here to help! What's on your mind?",
+              "Try typing 'menu' to see interactive widgets."
+            ];
+            
+            responseData = {
+              text: responses[Math.floor(Math.random() * responses.length)],
+              sender: "bot",
+              timestamp: Date.now()
+            };
+          }
         } else if (type === 'connect') {
           responseData = {
             text: "Welcome to ChatUI Widget Demo! I'm here to help you explore the features.",
