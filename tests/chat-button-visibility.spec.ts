@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Bug Reproduction - Chat Button Visibility', () => {
+test.describe('Chat Button Visibility Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/tests/test.html');
   });
