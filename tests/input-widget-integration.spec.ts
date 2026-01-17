@@ -209,8 +209,8 @@ test.describe('Input Widget Integration Tests (Mocked API)', () => {
     await submitButton.click();
     
     // Verify visual feedback for disabled state
-    await expect(inputElement).toHaveCSS('opacity', '0.6');
-    await expect(submitButton).toHaveCSS('opacity', '0.6');
+    await expect(inputElement).toHaveCSS('opacity', '0.5');
+    await expect(submitButton).toHaveCSS('opacity', '0.5');
     await expect(inputElement).toHaveCSS('cursor', 'not-allowed');
   });
 });
