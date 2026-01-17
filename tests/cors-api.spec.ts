@@ -56,6 +56,12 @@ test.describe('CorsAPI', () => {
       key: () => null
     };
 
+    // Create API instance
+    api = new CorsAPI({ serverUrl: 'https://example.com' });
+    
+    // Override test environment detection to force actual API calls
+    api.isTestEnvironment = () => false;
+
     // Mock AbortController
     mockAbortController = {
       abort: () => {}
@@ -338,7 +344,10 @@ test.describe('CorsAPI', () => {
 
       await new Promise<void>((resolve) => {
         api.performHandshake(
-          () => resolve(),
+          () => {
+            // This should not be called
+            resolve();
+          },
           (error: any) => {
             errorCalled = true;
             errorDetails = error;
@@ -418,6 +427,9 @@ test.describe('CorsAPI', () => {
   test.describe('Timeout Handling', () => {
     test('should abort request on timeout', async () => {
       api = new CorsAPI({ serverUrl: 'https://example.com', timeout: 100 });
+      
+      // Override test environment detection to force actual API calls
+      api.isTestEnvironment = () => false;
 
       // Mock slow request that never resolves
       mockFetch = () => 
