@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Test</title>
+</head>
+<body>
+    <h1>Widget Test</h1>
+    <p>Type "test" to see widget functionality.</p>
+    
+    <script>
+        // Mock the API for testing
+        const originalFetch = window.fetch;
+        
+        // Test widget functionality
+        window.addEventListener('load', () => {
+            console.log('Testing widget functionality...');
+            
+            // Wait for widget to initialize
+            setTimeout(() => {
+                // Test if widget was created
+                const widget = document.querySelector('[id^="chat-widget-"]');
+                if (widget) {
+                    console.log('✓ Widget created successfully');
+                } else {
+                    console.log('✗ Widget not found');
+                }
+            }, 1000);
+        });
+    </script>
+    
+    <script 
+        id="chat-widget"
+        src="../dist/chat-widget.js"
+        data-server-url="http://localhost:3000"
+        data-position="bottom-right"
+        data-color="#007bff"
+        data-title="Test Widget">
+    </script>
+</body>
+</html>

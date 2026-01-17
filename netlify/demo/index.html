@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat UI Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .demo-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        .demo-card {
+            flex: 1;
+            max-width: 300px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .demo-card h2 {
+            color: #007bff;
+            margin-top: 0;
+        }
+        .demo-card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .demo-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .demo-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat UI Demo</h1>
+    <p style="text-align: center;">Choose a demo version to explore the chat interface:</p>
+    
+    <div class="demo-options">
+        <div class="demo-card">
+            <h2>Popup Version</h2>
+            <p>A chat widget that appears as a popup button in the corner of your website.</p>
+            <a href="popup.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Full Page Version</h2>
+            <p>A dedicated chat page where the interface is always visible.</p>
+            <a href="full_page.htm" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Interactive Widgets</h2>
+            <p>Experience the new widget functionality with clickable buttons and interactive options.</p>
+            <a href="widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+    </div>
+    
+    <h2 style="text-align: center; margin-top: 40px; color: #333;">Theme Demos</h2>
+    <p style="text-align: center; color: #666;">Explore the new theme system with light/dark modes and customizable colors:</p>
+    
+    <div class="demo-options">
+        <div class="demo-card">
+            <h2>Default Theme</h2>
+            <p>Clean, professional appearance with light and dark mode variants.</p>
+            <a href="theme-demo.html?theme=default" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Branded Theme</h2>
+            <p>Modern purple-based theme designed for brand integration.</p>
+            <a href="theme-demo.html?theme=branded" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Custom Colors</h2>
+            <p>Theme with custom colors applied via data attributes.</p>
+            <a href="theme-demo.html?theme=default&custom=true" class="demo-button">View Demo</a>
+        </div>
+    </div>
+    
+    <h2 style="text-align: center; margin-top: 40px; color: #333;">Individual Widget Demos</h2>
+    <p style="text-align: center; color: #666;">Explore each widget type in detail:</p>
+    
+    <div class="demo-options">
+        <div class="demo-card">
+            <h2>Buttons Widget</h2>
+            <p>Interactive button options with click handling and automatic disable.</p>
+            <a href="widgets/buttons-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Input Widget</h2>
+            <p>Text input form with customizable types and submission handling.</p>
+            <a href="widgets/input-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Select Widget</h2>
+            <p>Dropdown selection menu with multiple options and placeholder text.</p>
+            <a href="widgets/select-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+    </div>
+    
+    <div class="demo-options">
+        <div class="demo-card">
+            <h2>Checkbox Widget</h2>
+            <p>Multi-select checkboxes for choosing multiple options.</p>
+            <a href="widgets/checkbox-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Textarea Widget</h2>
+            <p>Multi-line text input for longer responses.</p>
+            <a href="widgets/textarea-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Slider Widget</h2>
+            <p>Numeric range slider for selecting values.</p>
+            <a href="widgets/slider-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+    </div>
+    
+    <div class="demo-options">
+        <div class="demo-card">
+            <h2>Rating Widget</h2>
+            <p>Star or emoji-based rating system.</p>
+            <a href="widgets/rating-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Toggle Widget</h2>
+            <p>On/off switch for binary choices.</p>
+            <a href="widgets/toggle-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Date Widget</h2>
+            <p>Date picker for selecting dates.</p>
+            <a href="widgets/date-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+    </div>
+    
+    <div class="demo-options">
+        <div class="demo-card">
+            <h2>Tags Widget</h2>
+            <p>Tag input with autocomplete for multiple keywords.</p>
+            <a href="widgets/tags-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>File Upload Widget</h2>
+            <p>File upload with drag-and-drop support.</p>
+            <a href="widgets/file-upload-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Color Picker Widget</h2>
+            <p>Color selection for visual preferences.</p>
+            <a href="widgets/color-picker-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+    </div>
+    
+    <div class="demo-options">
+        <div class="demo-card">
+            <h2>Confirmation Widget</h2>
+            <p>Confirm/cancel action dialog.</p>
+            <a href="widgets/confirmation-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Radio Widget</h2>
+            <p>Radio buttons for single selection from multiple options.</p>
+            <a href="widgets/radio-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>Progress Widget</h2>
+            <p>Read-only progress indicator.</p>
+            <a href="widgets/progress-widget-demo.html" class="demo-button">View Demo</a>
+        </div>
+    </div>
+</body>
+</html>

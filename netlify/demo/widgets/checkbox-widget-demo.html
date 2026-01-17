@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkbox Widget Demo - ChatUI</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .api-response {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Checkbox Widget Demo</h1>
+        
+        <div class="demo-section">
+            <h2>Overview</h2>
+            <p>The Checkbox Widget renders multiple checkboxes for multi-select options. Users can select one or more options and submit them together.</p>
+            
+            <h3>Key Features:</h3>
+            <ul class="feature-list">
+                <li>Multiple selection support</li>
+                <li>Pre-checked options support</li>
+                <li>Customizable submit button text</li>
+                <li>Validation for empty submissions</li>
+                <li>Disable after submission</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>Backend Response Format</h2>
+            <p>To trigger a checkbox widget, the backend should respond with:</p>
+            <div class="api-response">{
+  "text": "Select your interests:",
+  "widget": {
+    "type": "checkbox",
+    "buttonText": "Submit",
+    "options": [
+      { "id": "1", "text": "Technology", "value": "tech" },
+      { "id": "2", "text": "Sports", "value": "sports" },
+      { "id": "3", "text": "Music", "value": "music" }
+    ]
+  }
+}</div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Widget Data Structure</h2>
+            <div class="api-response">{
+  "type": "checkbox",
+  "buttonText": "Submit",
+  "allowEmpty": false,
+  "options": [
+    {
+      "id": "unique-id",
+      "text": "Display text",
+      "value": "value",
+      "checked": false
+    }
+  ]
+}</div>
+            
+            <h3>Fields:</h3>
+            <ul class="feature-list">
+                <li><strong>type:</strong> Must be "checkbox"</li>
+                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>allowEmpty:</strong> Allow empty submissions (default: false)</li>
+                <li><strong>options:</strong> Array of checkbox options</li>
+                <li><strong>options[].id:</strong> Unique identifier for the option</li>
+                <li><strong>options[].text:</strong> Display text for the option</li>
+                <li><strong>options[].value:</strong> Value to send when selected</li>
+                <li><strong>options[].checked:</strong> Pre-check the option (default: false)</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>Usage Examples</h2>
+            
+            <h3>Interest Selection</h3>
+            <div class="api-response">{
+  "type": "checkbox",
+  "buttonText": "Save Preferences",
+  "options": [
+    { "id": "tech", "text": "Technology", "value": "tech" },
+    { "id": "sports", "text": "Sports", "value": "sports" },
+    { "id": "music", "text": "Music", "value": "music" },
+    { "id": "travel", "text": "Travel", "value": "travel" }
+  ]
+}</div>
+            
+            <h3>Feature Selection with Pre-checked</h3>
+            <div class="api-response">{
+  "type": "checkbox",
+  "buttonText": "Continue",
+  "options": [
+    { "id": "email", "text": "Email Notifications", "value": "email", "checked": true },
+    { "id": "sms", "text": "SMS Notifications", "value": "sms" },
+    { "id": "push", "text": "Push Notifications", "value": "push", "checked": true }
+  ]
+}</div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Try It Yourself</h2>
+            <p>Type "show checkbox" in the chat to see the checkbox widget in action!</p>
+            <p>The demo simulates backend responses with checkbox widget data. Try selecting multiple options and submitting them.</p>
+        </div>
+
+        <a href="../index.html" class="back-link">← Back to Demo Index</a>
+    </div>
+
+    <!-- Load the chat widget -->
+    <script 
+        id="chat-widget"
+        src="../../dist/chat-widget.js"
+        data-server-url="http://localhost:3000"
+        data-position="bottom-right"
+        data-color="#007bff"
+        data-title="Checkbox Widget Demo">
+    </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Textarea Widget Demo - ChatUI</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .api-response {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Textarea Widget Demo</h1>
+        
+        <div class="demo-section">
+            <h2>Overview</h2>
+            <p>The Textarea Widget renders a multi-line text input for longer responses. Users can type multiple lines of text and submit them.</p>
+            
+            <h3>Key Features:</h3>
+            <ul class="feature-list">
+                <li>Multi-line text input</li>
+                <li>Customizable number of rows</li>
+                <li>Character limit support</li>
+                <li>Custom placeholder text</li>
+                <li>Ctrl+Enter keyboard shortcut for submission</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>Backend Response Format</h2>
+            <p>To trigger a textarea widget, the backend should respond with:</p>
+            <div class="api-response">{
+  "text": "Please describe your issue in detail:",
+  "widget": {
+    "type": "textarea",
+    "placeholder": "Describe your issue here...",
+    "rows": 6,
+    "maxLength": 500,
+    "buttonText": "Submit"
+  }
+}</div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Widget Data Structure</h2>
+            <div class="api-response">{
+  "type": "textarea",
+  "placeholder": "Enter your response...",
+  "rows": 4,
+  "maxLength": 1000,
+  "buttonText": "Submit"
+}</div>
+            
+            <h3>Fields:</h3>
+            <ul class="feature-list">
+                <li><strong>type:</strong> Must be "textarea"</li>
+                <li><strong>placeholder:</strong> Placeholder text for the textarea (default: "Enter your response...")</li>
+                <li><strong>rows:</strong> Number of visible rows (default: 4)</li>
+                <li><strong>maxLength:</strong> Maximum character count (optional)</li>
+                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>Usage Examples</h2>
+            
+            <h3>Feedback Form</h3>
+            <div class="api-response">{
+  "type": "textarea",
+  "placeholder": "Please share your feedback...",
+  "rows": 6,
+  "maxLength": 1000,
+  "buttonText": "Send Feedback"
+}</div>
+            
+            <h3>Bug Report</h3>
+            <div class="api-response">{
+  "type": "textarea",
+  "placeholder": "Describe the bug and steps to reproduce...",
+  "rows": 8,
+  "maxLength": 2000,
+  "buttonText": "Submit Report"
+}</div>
+            
+            <h3>Short Note</h3>
+            <div class="api-response">{
+  "type": "textarea",
+  "placeholder": "Add a note...",
+  "rows": 3,
+  "buttonText": "Save"
+}</div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Try It Yourself</h2>
+            <p>Type "show textarea" in the chat to see the textarea widget in action!</p>
+            <p>The demo simulates backend responses with textarea widget data. Try entering multi-line text and submitting it using Ctrl+Enter.</p>
+        </div>
+
+        <a href="../index.html" class="back-link">← Back to Demo Index</a>
+    </div>
+
+    <!-- Load the chat widget -->
+    <script 
+        id="chat-widget"
+        src="../../dist/chat-widget.js"
+        data-server-url="http://localhost:3000"
+        data-position="bottom-right"
+        data-color="#007bff"
+        data-title="Textarea Widget Demo">
+    </script>
+</body>
+</html>

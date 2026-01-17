@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatUI - Theme System Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 1.1rem;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .demo-card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .demo-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .demo-card h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+    }
+
+    .demo-card p {
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .theme-controls {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    .theme-controls h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .control-group label {
+      display: block;
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #667eea;
+      color: white;
+    }
+
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-top: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .code-block .comment {
+      color: #6a9955;
+    }
+
+    .code-block .tag {
+      color: #569cd6;
+    }
+
+    .code-block .attr {
+      color: #9cdcfe;
+    }
+
+    .code-block .value {
+      color: #ce9178;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .feature-list li {
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+      color: #555;
+    }
+
+    .feature-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #667eea;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .info-box {
+      background: #f0f4ff;
+      border-left: 4px solid #667eea;
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .info-box strong {
+      color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 ChatUI Theme System</h1>
+    <p class="subtitle">Data-Attributes-First Theming with Runtime Switching</p>
+
+    <div class="theme-controls">
+      <h2>🎛️ Live Theme Controls</h2>
+      <p>Control the themes of all widgets on this page in real-time:</p>
+      
+      <div class="control-group">
+        <label>Theme Selection:</label>
+        <div class="button-group">
+          <button onclick="setAllThemes('default')">Default Theme</button>
+          <button onclick="setAllThemes('branded')">Branded Theme</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Mode Selection:</label>
+        <div class="button-group">
+          <button onclick="setAllModes('light')">Light Mode</button>
+          <button onclick="setAllModes('dark')">Dark Mode</button>
+          <button onclick="toggleAllModes()">Toggle Mode</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-grid">
+      <!-- Demo 1: Default Light -->
+      <div class="demo-card">
+        <h2>Default Light</h2>
+        <p>Clean, minimal theme with light colors - perfect for professional applications.</p>
+        <ul class="feature-list">
+          <li>Blue primary color (#007bff)</li>
+          <li>White background</li>
+          <li>Light gray surfaces</li>
+        </ul>
+      </div>
+
+      <!-- Demo 2: Default Dark -->
+      <div class="demo-card">
+        <h2>Default Dark</h2>
+        <p>Modern dark theme with high contrast - ideal for low-light environments.</p>
+        <ul class="feature-list">
+          <li>Light blue primary (#4dabf7)</li>
+          <li>Dark background (#1a1a1a)</li>
+          <li>Dark gray surfaces</li>
+        </ul>
+      </div>
+
+      <!-- Demo 3: Branded Light -->
+      <div class="demo-card">
+        <h2>Branded Light</h2>
+        <p>Corporate-friendly theme with purple accent - great for branded experiences.</p>
+        <ul class="feature-list">
+          <li>Indigo primary (#6366f1)</li>
+          <li>White background</li>
+          <li>Purple-tinted surfaces</li>
+        </ul>
+      </div>
+
+      <!-- Demo 4: Branded Dark -->
+      <div class="demo-card">
+        <h2>Branded Dark</h2>
+        <p>Premium dark theme with purple tones - sophisticated and modern.</p>
+        <ul class="feature-list">
+          <li>Light indigo primary (#818cf8)</li>
+          <li>Slate background (#0f172a)</li>
+          <li>Dark slate surfaces</li>
+        </ul>
+      </div>
+
+      <!-- Demo 5: Custom Colors -->
+      <div class="demo-card">
+        <h2>Custom Colors</h2>
+        <p>Fully customizable via data attributes - no CSS knowledge required!</p>
+        <ul class="feature-list">
+          <li>Custom primary color</li>
+          <li>Custom backgrounds</li>
+          <li>Custom text colors</li>
+        </ul>
+      </div>
+
+      <!-- Demo 6: System Preference -->
+      <div class="demo-card">
+        <h2>System Preference</h2>
+        <p>Automatically respects user's system theme preference.</p>
+        <ul class="feature-list">
+          <li>Detects prefers-color-scheme</li>
+          <li>Watches for changes</li>
+          <li>localStorage persistence</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="theme-controls">
+      <h2>📝 Implementation Examples</h2>
+      
+      <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333;">1. Default Theme with Light Mode</h3>
+      <div class="code-block">
+<span class="tag">&lt;script</span>
+  <span class="attr">id</span>=<span class="value">"chat-widget"</span>
+  <span class="attr">src</span>=<span class="value">"../dist/chat-widget.js"</span>
+  <span class="attr">data-server-url</span>=<span class="value">"http://localhost:3000"</span>
+  <span class="attr">data-position</span>=<span class="value">"bottom-right"</span>
+  <span class="attr">data-theme</span>=<span class="value">"default"</span>
+  <span class="attr">data-mode</span>=<span class="value">"light"</span>
+  <span class="attr">data-title</span>=<span class="value">"Chat with us"</span><span class="tag">&gt;&lt;/script&gt;</span>
+      </div>
+
+      <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333;">2. Branded Theme with Dark Mode</h3>
+      <div class="code-block">
+<span class="tag">&lt;script</span>
+  <span class="attr">id</span>=<span class="value">"chat-widget-branded"</span>
+  <span class="attr">src</span>=<span class="value">"../dist/chat-widget.js"</span>
+  <span class="attr">data-server-url</span>=<span class="value">"http://localhost:3000"</span>
+  <span class="attr">data-position</span>=<span class="value">"bottom-left"</span>
+  <span class="attr">data-theme</span>=<span class="value">"branded"</span>
+  <span class="attr">data-mode</span>=<span class="value">"dark"</span>
+  <span class="attr">data-title</span>=<span class="value">"Support Chat"</span><span class="tag">&gt;&lt;/script&gt;</span>
+      </div>
+
+      <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333;">3. Custom Colors (Data-Attributes-First)</h3>
+      <div class="code-block">
+<span class="tag">&lt;script</span>
+  <span class="attr">id</span>=<span class="value">"chat-widget-custom"</span>
+  <span class="attr">src</span>=<span class="value">"../dist/chat-widget.js"</span>
+  <span class="attr">data-server-url</span>=<span class="value">"http://localhost:3000"</span>
+  <span class="attr">data-position</span>=<span class="value">"bottom-right"</span>
+  <span class="attr">data-theme</span>=<span class="value">"default"</span>
+  <span class="attr">data-mode</span>=<span class="value">"light"</span>
+  <span class="comment">&lt;!-- Custom Light Mode Colors --&gt;</span>
+  <span class="attr">data-color-light</span>=<span class="value">"#ff6b6b"</span>
+  <span class="attr">data-bg-color-light</span>=<span class="value">"#ffffff"</span>
+  <span class="attr">data-surface-color-light</span>=<span class="value">"#ffe5e5"</span>
+  <span class="attr">data-text-color-light</span>=<span class="value">"#2d2d2d"</span>
+  <span class="attr">data-border-color-light</span>=<span class="value">"#ffcccc"</span>
+  <span class="comment">&lt;!-- Custom Dark Mode Colors --&gt;</span>
+  <span class="attr">data-color-dark</span>=<span class="value">"#ff8787"</span>
+  <span class="attr">data-bg-color-dark</span>=<span class="value">"#1a1a1a"</span>
+  <span class="attr">data-surface-color-dark</span>=<span class="value">"#2d2020"</span>
+  <span class="attr">data-text-color-dark</span>=<span class="value">"#ffffff"</span>
+  <span class="attr">data-border-color-dark</span>=<span class="value">"#4a3030"</span>
+  <span class="attr">data-title</span>=<span class="value">"Custom Chat"</span><span class="tag">&gt;&lt;/script&gt;</span>
+      </div>
+
+      <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333;">4. Programmatic API</h3>
+      <div class="code-block">
+<span class="comment">// Initialize widget programmatically</span>
+<span class="tag">const</span> widget = ChatUI.init({
+  serverUrl: <span class="value">'http://localhost:3000'</span>,
+  position: <span class="value">'bottom-right'</span>,
+  title: <span class="value">'Chat with us'</span>
+});
+
+<span class="comment">// Switch theme</span>
+widget.setTheme(<span class="value">'branded'</span>);
+
+<span class="comment">// Switch mode</span>
+widget.setThemeMode(<span class="value">'dark'</span>);
+
+<span class="comment">// Toggle light/dark</span>
+widget.toggleThemeMode();
+
+<span class="comment">// Get current theme config</span>
+<span class="tag">const</span> config = widget.getThemeConfig();
+console.log(config); <span class="comment">// { theme: 'branded', mode: 'dark', colors: {...} }</span>
+      </div>
+
+      <div class="info-box">
+        <strong>💡 Pro Tip:</strong> Theme preferences are automatically saved to localStorage and will persist across page reloads. The widget also respects the user's system theme preference (prefers-color-scheme) if no explicit preference is set.
+      </div>
+    </div>
+  </div>
+
+  <!-- Widget Instances -->
+  <!-- Default Light -->
+  <script 
+    id="chat-widget-default-light"
+    src="../dist/chat-widget.js"
+    data-server-url="http://localhost:3000"
+    data-position="bottom-right"
+    data-theme="default"
+    data-mode="light"
+    data-title="Default Light">
+  </script>
+
+  <!-- Default Dark -->
+  <script 
+    id="chat-widget-default-dark"
+    src="../dist/chat-widget.js"
+    data-server-url="http://localhost:3000"
+    data-position="bottom-left"
+    data-theme="default"
+    data-mode="dark"
+    data-title="Default Dark">
+  </script>
+
+  <!-- Branded Light -->
+  <script 
+    id="chat-widget-branded-light"
+    src="../dist/chat-widget.js"
+    data-server-url="http://localhost:3000"
+    data-position="top-right"
+    data-theme="branded"
+    data-mode="light"
+    data-title="Branded Light">
+  </script>
+
+  <!-- Branded Dark -->
+  <script 
+    id="chat-widget-branded-dark"
+    src="../dist/chat-widget.js"
+    data-server-url="http://localhost:3000"
+    data-position="top-left"
+    data-theme="branded"
+    data-mode="dark"
+    data-title="Branded Dark">
+  </script>
+
+  <!-- Custom Colors Example -->
+  <script 
+    id="chat-widget-custom"
+    src="../dist/chat-widget.js"
+    data-server-url="http://localhost:3000"
+    data-position="bottom-right"
+    data-theme="default"
+    data-mode="light"
+    data-color-light="#ff6b6b"
+    data-bg-color-light="#ffffff"
+    data-surface-color-light="#ffe5e5"
+    data-text-color-light="#2d2d2d"
+    data-border-color-light="#ffcccc"
+    data-color-dark="#ff8787"
+    data-bg-color-dark="#1a1a1a"
+    data-surface-color-dark="#2d2020"
+    data-text-color-dark="#ffffff"
+    data-border-color-dark="#4a3030"
+    data-title="Custom Colors">
+  </script>
+
+  <!-- System Preference (no explicit mode) -->
+  <script 
+    id="chat-widget-system"
+    src="../dist/chat-widget.js"
+    data-server-url="http://localhost:3000"
+    data-position="bottom-left"
+    data-theme="default"
+    data-title="System Preference">
+  </script>
+
+  <script>
+    // Store widget instances
+    let widgets = [];
+
+    // Wait for widgets to initialize
+    setTimeout(() => {
+      // Get all widget instances from the global ChatUI instances array
+      if (window.ChatUI && window.ChatUI.instances) {
+        widgets = Object.values(window.ChatUI.instances);
+      }
+      
+      // Alternative: try to get from script elements
+      const widgetElements = document.querySelectorAll('[id^="chat-widget"]');
+      widgetElements.forEach(el => {
+        if (el._chatWidgetInstance) {
+          widgets.push(el._chatWidgetInstance);
+        }
+      });
+      
+      console.log('Found widget instances:', widgets.length);
+    }, 1000);
+
+    function setAllThemes(theme) {
+      widgets.forEach(widget => {
+        if (widget && widget.setTheme) {
+          widget.setTheme(theme);
+        }
+      });
+    }
+
+    function setAllModes(mode) {
+      widgets.forEach(widget => {
+        if (widget && widget.setThemeMode) {
+          widget.setThemeMode(mode);
+        }
+      });
+    }
+
+    function toggleAllModes() {
+      widgets.forEach(widget => {
+        if (widget && widget.toggleThemeMode) {
+          widget.toggleThemeMode();
+        }
+      });
+    }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch(e.key) {
+          case '1':
+            e.preventDefault();
+            setAllThemes('default');
+            break;
+          case '2':
+            e.preventDefault();
+            setAllThemes('branded');
+            break;
+          case 'l':
+            e.preventDefault();
+            setAllModes('light');
+            break;
+          case 'd':
+            e.preventDefault();
+            setAllModes('dark');
+            break;
+          case 't':
+            e.preventDefault();
+            toggleAllModes();
+            break;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
