@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-17T23:02:19.887Z
+ * Generated on: 2026-01-17T23:16:29.974Z
  */
 
 
@@ -455,7 +455,6 @@
     }
     /**
      * Fallback from CORS to JSONP API
-     * @private
      */
     fallbackToJSONP() {
       this.fallbackAttempts++;
@@ -3433,7 +3432,9 @@
           primaryColor: scriptElement.getAttribute("data-color"),
           title: scriptElement.getAttribute("data-title"),
           targetSelector: scriptElement.getAttribute("data-target"),
-          serverUrl: scriptElement.getAttribute("data-server-url")
+          serverUrl: scriptElement.getAttribute("data-server-url"),
+          forceJsonP: scriptElement.getAttribute("data-force-jsonp") === "true",
+          preferJsonP: scriptElement.getAttribute("data-prefer-jsonp") === "true"
         };
       } else {
         config = input || {};

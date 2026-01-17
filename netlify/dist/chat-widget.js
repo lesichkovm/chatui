@@ -441,7 +441,6 @@
     }
     /**
      * Fallback from CORS to JSONP API
-     * @private
      */
     fallbackToJSONP() {
       this.fallbackAttempts++;
@@ -3419,7 +3418,9 @@
           primaryColor: scriptElement.getAttribute("data-color"),
           title: scriptElement.getAttribute("data-title"),
           targetSelector: scriptElement.getAttribute("data-target"),
-          serverUrl: scriptElement.getAttribute("data-server-url")
+          serverUrl: scriptElement.getAttribute("data-server-url"),
+          forceJsonP: scriptElement.getAttribute("data-force-jsonp") === "true",
+          preferJsonP: scriptElement.getAttribute("data-prefer-jsonp") === "true"
         };
       } else {
         config = input || {};

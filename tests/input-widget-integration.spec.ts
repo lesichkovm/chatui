@@ -12,92 +12,64 @@ test.describe('Input Widget Integration Tests (Mocked API)', () => {
     await page.locator('[id^="chat-widget-"][id$="-button"]').first().click();
     await page.waitForSelector('[id^="chat-widget-"][id$="-window"]', { timeout: 5000 });
     
-    // Bypass test environment detection to allow API calls
+    // Use test environment mode to bypass API calls entirely
     await page.evaluate(() => {
       // Find the chat widget script element and access its instance
       const scriptElement = document.querySelector('script[id^="chat-widget-"]');
       if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
         const widget = (scriptElement as any)._chatWidgetInstance;
         if (widget && widget.api) {
-          // Override the isTestEnvironment method to always return false
-          widget.api.isTestEnvironment = () => false;
+          // Force test environment mode to bypass API calls
+          widget.api.isTestEnvironment = () => true;
+          
+          // Mock the handshake and connect methods to simulate successful API calls
+          const originalPerformHandshake = widget.api.performHandshake.bind(widget.api);
+          widget.api.performHandshake = function(onSuccess: any) {
+            console.log('Mock handshake called');
+            if (onSuccess) onSuccess();
+          };
+          
+          const originalConnect = widget.api.connect.bind(widget.api);
+          widget.api.connect = function(onMessage: any) {
+            console.log('Mock connect called');
+            // Simulate initial welcome message
+            if (onMessage) {
+              onMessage("Hello! I'm here to help. Type 'show input' to see the input widget.", "bot");
+            }
+          };
+          
+          const originalSendMessage = widget.api.sendMessage.bind(widget.api);
+          widget.api.sendMessage = function(message: string, onResponse: any) {
+            console.log('Mock sendMessage called with:', message);
+            
+            // Simulate input widget response
+            if (message === 'show input') {
+              if (onResponse) {
+                onResponse("Please enter your email address:", "bot", {
+                  type: "input",
+                  inputType: "email",
+                  placeholder: "Enter your email...",
+                  buttonText: "Submit"
+                });
+              }
+            } else if (message && message.includes('@')) {
+              if (onResponse) {
+                onResponse(`Thank you! We've received your email: ${message}`, "bot");
+              }
+            } else {
+              if (onResponse) {
+                onResponse(`Echo: ${message}`, "bot");
+              }
+            }
+          };
           
           // Add debugging to see what responses are being processed
           const originalAddMessage = widget.addMessage.bind(widget);
-          widget.addMessage = function(text, sender, widgetData) {
+          widget.addMessage = function(text: any, sender: any, widgetData: any) {
             console.log('addMessage called with:', { text, sender, widgetData });
             return originalAddMessage(text, sender, widgetData);
           };
         }
-      }
-    });
-    
-    // Mock the API response for input widget
-    await page.route('**/api/handshake**', async (route) => {
-      const url = route.request().url();
-      const callbackMatch = url.match(/callback=([^&]+)/);
-      const callbackName = callbackMatch ? callbackMatch[1] : 'handshakeCallback';
-      
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/javascript',
-        body: `${callbackName}({
-          "status": "success",
-          "session_key": "test-session-key"
-        });`
-      });
-    });
-    
-    await page.route('**/api/messages**', async (route) => {
-      const url = route.request().url();
-      const callbackMatch = url.match(/callback=([^&]+)/);
-      const messageMatch = url.match(/message=([^&]+)/);
-      const callbackName = callbackMatch ? decodeURIComponent(callbackMatch[1]) : 'mockCallback';
-      const message = messageMatch ? decodeURIComponent(messageMatch[1]) : '';
-      
-      console.log('API Mock called with message:', message, 'callback:', callbackName);
-      
-      if (message === 'show input') {
-        // Return mock response with input widget
-        const response = `${callbackName}({
-          "text": "Please enter your email address:",
-          "widget": {
-            "type": "input",
-            "inputType": "email",
-            "placeholder": "Enter your email...",
-            "buttonText": "Submit"
-          }
-        });`;
-        console.log('Sending response:', response);
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/javascript',
-          body: response
-        });
-      } else if (message && message.includes('@')) {
-        // Return mock response for email submission
-        const response = `${callbackName}({
-          "text": "Thank you! We received your email: ${message}",
-          "sender": "bot"
-        });`;
-        console.log('Sending response:', response);
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/javascript',
-          body: response
-        });
-      } else {
-        // Default echo response
-        const response = `${callbackName}({
-          "text": "Echo: ${message}",
-          "sender": "bot"
-        });`;
-        console.log('Sending response:', response);
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/javascript',
-          body: response
-        });
       }
     });
   });

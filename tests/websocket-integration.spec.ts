@@ -16,16 +16,45 @@ test.describe('WebSocket Integration Tests', () => {
     expect(wsConnection).toBe(true);
   });
 
-  test('should fallback to JSONP for https:// URLs', async ({ page }) => {
+  test('should use CORS for https:// URLs by default', async ({ page }) => {
     await page.goto('/tests/jsonp-test.html');
     
     // Wait for widget to initialize
     await page.waitForSelector('[id^="chat-widget-"][id$="-button"]', { timeout: 10000 });
     
+    // Check that CORS connection is used by default
+    const corsConnection = await page.evaluate(() => {
+      const script = document.querySelector('script[id^="chat-widget"]') as any;
+      return script?._chatWidgetInstance?.api?.connectionType === 'http' && 
+             script?._chatWidgetInstance?.api?.apiType === 'cors';
+    });
+    
+    expect(corsConnection).toBe(true);
+  });
+
+  test('should use JSONP when forced', async ({ page }) => {
+    await page.goto('/tests/jsonp-test.html');
+    
+    // Wait for widget to initialize
+    await page.waitForSelector('[id^="chat-widget-"][id$="-button"]', { timeout: 10000 });
+    
+    // Force JSONP mode
+    await page.evaluate(() => {
+      const script = document.querySelector('script[id^="chat-widget"]') as any;
+      const widget = script?._chatWidgetInstance;
+      if (widget) {
+        // Reinitialize with JSONP forced
+        widget.api = new (widget.api.constructor as any)({ 
+          serverUrl: 'http://localhost:3000',
+          forceJsonP: true 
+        });
+      }
+    });
+    
     // Check that JSONP connection is used
     const jsonpConnection = await page.evaluate(() => {
       const script = document.querySelector('script[id^="chat-widget"]') as any;
-      return script?._chatWidgetInstance?.api?.connectionType === 'jsonp';
+      return script?._chatWidgetInstance?.api?.apiType === 'jsonp';
     });
     
     expect(jsonpConnection).toBe(true);

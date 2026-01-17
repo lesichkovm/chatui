@@ -39,6 +39,8 @@ export class ChatWidget {
         title: scriptElement.getAttribute("data-title"),
         targetSelector: scriptElement.getAttribute("data-target"),
         serverUrl: scriptElement.getAttribute("data-server-url"),
+        forceJsonP: scriptElement.getAttribute("data-force-jsonp") === "true",
+        preferJsonP: scriptElement.getAttribute("data-prefer-jsonp") === "true",
       };
     } else {
       config = input || {};
