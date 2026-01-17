@@ -47,14 +47,12 @@ const handler = async (event, context) => {
               session_key: session_key || "demo_popup_" + Date.now(),
               widget: {
                 type: "buttons",
-                data: {
-                  buttons: [
-                    { id: "btn1", text: "🎨 Change Color", value: "color" },
-                    { id: "btn2", text: "📍 Move Position", value: "position" },
-                    { id: "btn3", text: "🔔 Toggle Sound", value: "sound" },
-                    { id: "btn4", text: "❓ Help", value: "help" }
-                  ]
-                }
+                options: [
+                  { id: "btn1", text: "🎨 Change Color", value: "color" },
+                  { id: "btn2", text: "📍 Move Position", value: "position" },
+                  { id: "btn3", text: "🔔 Toggle Sound", value: "sound" },
+                  { id: "btn4", text: "❓ Help", value: "help" }
+                ]
               }
             };
           } else if (lowerMessage === 'color') {
