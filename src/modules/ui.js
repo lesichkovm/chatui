@@ -308,6 +308,25 @@ export function injectStyles(widgetId, primaryColor, mode) {
     #${widgetId} .widget-input-submit:hover {
       background: var(--chat-primary-color-dark);
     }
+    
+    #${widgetId} .widget-input-element:disabled,
+    #${widgetId} .widget-input-element.widget-input-disabled,
+    #${widgetId} .widget-input-submit:disabled,
+    #${widgetId} .widget-input-submit.widget-input-disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #f8f9fa;
+      color: #6c757d;
+      border-color: #dee2e6;
+    }
+    
+    #${widgetId} .widget-input-element:disabled:hover,
+    #${widgetId} .widget-input-element.widget-input-disabled:hover,
+    #${widgetId} .widget-input-submit:disabled:hover,
+    #${widgetId} .widget-input-submit.widget-input-disabled:hover {
+      background: #f8f9fa;
+      border-color: #dee2e6;
+    }
   `;
   document.head.appendChild(styleElement);
 }

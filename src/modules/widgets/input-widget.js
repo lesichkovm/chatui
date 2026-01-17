@@ -30,6 +30,12 @@ export class InputWidget extends BaseWidget {
       const handleSubmit = () => {
         const value = input.value.trim();
         if (value) {
+          // Disable both input and submit button after submission
+          input.disabled = true;
+          input.classList.add('widget-input-disabled');
+          submitButton.disabled = true;
+          submitButton.classList.add('widget-input-disabled');
+          
           this.handleInteraction({
             optionId: 'input-submit',
             optionValue: value,
