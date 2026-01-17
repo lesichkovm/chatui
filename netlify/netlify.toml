@@ -6,8 +6,18 @@
   NODE_VERSION = "18"
 
 [[redirects]]
+  from = "/api/handshake"
+  to = "/.netlify/functions/chat-api"
+  status = 200
+
+[[redirects]]
+  from = "/api/messages"
+  to = "/.netlify/functions/chat-api"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/chat-api"
   status = 200
 
 [[redirects]]
