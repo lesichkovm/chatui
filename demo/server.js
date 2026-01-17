@@ -244,6 +244,23 @@ function handleMessages(req, res, query) {
             showPercentage: true
           }
         };
+      } else if (message && message.startsWith('[') && message.endsWith(']')) {
+        // Handle file upload responses (JSON array string)
+        try {
+          const fileData = JSON.parse(decodeURIComponent(message));
+          const fileNames = fileData.map(f => f.name).join(', ');
+          const totalSize = fileData.reduce((sum, f) => sum + f.size, 0);
+          
+          responseData = {
+            text: `Files uploaded successfully!\n\nFiles: ${fileNames}\nTotal size: ${Math.round(totalSize / 1024)}KB`,
+            sender: 'bot'
+          };
+        } catch (e) {
+          responseData = {
+            text: 'Files uploaded successfully!',
+            sender: 'bot'
+          };
+        }
       }
     } else if (lowerMessage === 'support') {
       responseData = {

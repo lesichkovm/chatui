@@ -142,10 +142,11 @@ export class FileUploadWidget extends BaseWidget {
           submitButton.disabled = true;
           submitButton.classList.add('widget-file-disabled');
           
+          const fileNames = selectedFiles.map(file => file.name).join(', ');
           this.handleInteraction({
             optionId: 'file-upload',
             optionValue: fileData,
-            optionText: `${selectedFiles.length} file(s)`,
+            optionText: fileNames || `${selectedFiles.length} file(s)`,
             widgetType: 'file'
           });
         }

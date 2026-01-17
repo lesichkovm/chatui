@@ -56,7 +56,7 @@
       const callbackName = "chatCallback_" + Date.now();
       const url = `${this.serverUrl}/api/messages?callback=${callbackName}&message=${encodeURIComponent(
         message
-      )}&session_key=${encodeURIComponent(sessionKey)}`;
+      )}&type=message&session_key=${encodeURIComponent(sessionKey)}`;
       this._injectScript(url, callbackName, (response) => {
         if (onResponse) {
           if (response.widget) {
@@ -281,12 +281,946 @@
     }
   };
 
+  // src/modules/widgets/checkbox-widget.js
+  var CheckboxWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid checkbox widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "checkbox" && this.widgetData.options) {
+        const checkboxContainer = document.createElement("div");
+        checkboxContainer.className = "widget-checkbox";
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-checkbox-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        this.widgetData.options.forEach((option) => {
+          const checkboxWrapper = document.createElement("div");
+          checkboxWrapper.className = "widget-checkbox-item";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "widget-checkbox-element";
+          checkbox.id = `checkbox-${this.widgetId}-${option.id}`;
+          checkbox.value = option.value;
+          checkbox.setAttribute("data-widget-id", this.widgetId);
+          checkbox.setAttribute("data-option-id", option.id);
+          if (option.checked) {
+            checkbox.checked = true;
+          }
+          const label = document.createElement("label");
+          label.className = "widget-checkbox-label";
+          label.htmlFor = `checkbox-${this.widgetId}-${option.id}`;
+          label.textContent = option.text;
+          checkboxWrapper.appendChild(checkbox);
+          checkboxWrapper.appendChild(label);
+          checkboxContainer.appendChild(checkboxWrapper);
+        });
+        const handleSubmit = () => {
+          const checkboxes = checkboxContainer.querySelectorAll(".widget-checkbox-element");
+          const selectedOptions = [];
+          checkboxes.forEach((checkbox) => {
+            if (checkbox.checked) {
+              const optionId = checkbox.getAttribute("data-option-id");
+              const optionData = this.widgetData.options.find((opt) => opt.id === optionId);
+              if (optionData) {
+                selectedOptions.push({
+                  optionId: optionData.id,
+                  optionValue: optionData.value,
+                  optionText: optionData.text
+                });
+              }
+            }
+          });
+          if (selectedOptions.length > 0 || this.widgetData.allowEmpty !== false) {
+            const allCheckboxes = checkboxContainer.querySelectorAll(".widget-checkbox-element");
+            allCheckboxes.forEach((cb) => {
+              cb.disabled = true;
+              cb.classList.add("widget-checkbox-disabled");
+            });
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-checkbox-disabled");
+            this.handleInteraction({
+              selectedOptions,
+              widgetType: "checkbox"
+            });
+          }
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        checkboxContainer.appendChild(submitButton);
+        widgetContainer.appendChild(checkboxContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "checkbox" && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
+    }
+  };
+
+  // src/modules/widgets/textarea-widget.js
+  var TextareaWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid textarea widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "textarea") {
+        const formContainer = document.createElement("div");
+        formContainer.className = "widget-textarea";
+        const textarea = document.createElement("textarea");
+        textarea.className = "widget-textarea-element";
+        textarea.placeholder = this.widgetData.placeholder || "Enter your response...";
+        textarea.rows = this.widgetData.rows || 4;
+        textarea.setAttribute("data-widget-id", this.widgetId);
+        if (this.widgetData.maxLength) {
+          textarea.maxLength = this.widgetData.maxLength;
+        }
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-textarea-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        const handleSubmit = () => {
+          const value = textarea.value.trim();
+          if (value) {
+            textarea.disabled = true;
+            textarea.classList.add("widget-textarea-disabled");
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-textarea-disabled");
+            this.handleInteraction({
+              optionId: "textarea-submit",
+              optionValue: value,
+              optionText: value,
+              widgetType: "textarea"
+            });
+            textarea.value = "";
+          }
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        textarea.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && e.ctrlKey) {
+            e.preventDefault();
+            handleSubmit();
+          }
+        });
+        formContainer.appendChild(textarea);
+        formContainer.appendChild(submitButton);
+        widgetContainer.appendChild(formContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "textarea";
+    }
+  };
+
+  // src/modules/widgets/slider-widget.js
+  var SliderWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid slider widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "slider") {
+        const sliderContainer = document.createElement("div");
+        sliderContainer.className = "widget-slider";
+        const label = document.createElement("label");
+        label.className = "widget-slider-label";
+        label.textContent = this.widgetData.label || "Select a value";
+        const sliderWrapper = document.createElement("div");
+        sliderWrapper.className = "widget-slider-wrapper";
+        const slider = document.createElement("input");
+        slider.type = "range";
+        slider.className = "widget-slider-element";
+        slider.min = this.widgetData.min || 0;
+        slider.max = this.widgetData.max || 100;
+        slider.step = this.widgetData.step || 1;
+        slider.value = this.widgetData.defaultValue || Math.floor((slider.min + slider.max) / 2);
+        slider.setAttribute("data-widget-id", this.widgetId);
+        const valueDisplay = document.createElement("div");
+        valueDisplay.className = "widget-slider-value";
+        valueDisplay.textContent = slider.value;
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-slider-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        slider.addEventListener("input", () => {
+          valueDisplay.textContent = slider.value;
+        });
+        const handleSubmit = () => {
+          const value = parseFloat(slider.value);
+          slider.disabled = true;
+          slider.classList.add("widget-slider-disabled");
+          submitButton.disabled = true;
+          submitButton.classList.add("widget-slider-disabled");
+          this.handleInteraction({
+            optionId: "slider-submit",
+            optionValue: value,
+            optionText: value.toString(),
+            widgetType: "slider"
+          });
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        sliderWrapper.appendChild(slider);
+        sliderWrapper.appendChild(valueDisplay);
+        sliderContainer.appendChild(label);
+        sliderContainer.appendChild(sliderWrapper);
+        sliderContainer.appendChild(submitButton);
+        widgetContainer.appendChild(sliderContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "slider" && typeof this.widgetData.min === "number" && typeof this.widgetData.max === "number" && this.widgetData.max > this.widgetData.min;
+    }
+  };
+
+  // src/modules/widgets/rating-widget.js
+  var RatingWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid rating widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "rating") {
+        const ratingContainer = document.createElement("div");
+        ratingContainer.className = "widget-rating";
+        const label = document.createElement("div");
+        label.className = "widget-rating-label";
+        label.textContent = this.widgetData.label || "Rate this";
+        const starsContainer = document.createElement("div");
+        starsContainer.className = "widget-rating-stars";
+        const maxRating = this.widgetData.maxRating || 5;
+        const iconType = this.widgetData.iconType || "stars";
+        for (let i = 1; i <= maxRating; i++) {
+          const star = document.createElement("button");
+          star.className = "widget-rating-star";
+          star.setAttribute("data-rating", i);
+          star.setAttribute("data-widget-id", this.widgetId);
+          if (iconType === "emojis") {
+            star.textContent = "\u2B50";
+          } else {
+            star.innerHTML = "\u2605";
+          }
+          star.addEventListener("mouseenter", () => {
+            this.highlightStars(starsContainer, i);
+          });
+          star.addEventListener("mouseleave", () => {
+            this.resetStars(starsContainer);
+          });
+          star.addEventListener("click", () => {
+            this.selectRating(starsContainer, i);
+            const allStars = starsContainer.querySelectorAll(".widget-rating-star");
+            allStars.forEach((s) => {
+              s.disabled = true;
+              s.classList.add("widget-rating-disabled");
+            });
+            this.handleInteraction({
+              optionId: "rating-submit",
+              optionValue: i,
+              optionText: `${i} star${i > 1 ? "s" : ""}`,
+              widgetType: "rating"
+            });
+          });
+          starsContainer.appendChild(star);
+        }
+        ratingContainer.appendChild(label);
+        ratingContainer.appendChild(starsContainer);
+        widgetContainer.appendChild(ratingContainer);
+      }
+      return widgetContainer;
+    }
+    highlightStars(container, rating) {
+      const stars = container.querySelectorAll(".widget-rating-star");
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add("widget-rating-star-hover");
+        } else {
+          star.classList.remove("widget-rating-star-hover");
+        }
+      });
+    }
+    resetStars(container) {
+      const stars = container.querySelectorAll(".widget-rating-star");
+      stars.forEach((star) => {
+        star.classList.remove("widget-rating-star-hover");
+      });
+    }
+    selectRating(container, rating) {
+      const stars = container.querySelectorAll(".widget-rating-star");
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add("widget-rating-star-selected");
+        } else {
+          star.classList.remove("widget-rating-star-selected");
+        }
+      });
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "rating" && typeof this.widgetData.maxRating === "number" && this.widgetData.maxRating > 0;
+    }
+  };
+
+  // src/modules/widgets/toggle-widget.js
+  var ToggleWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid toggle widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "toggle") {
+        const toggleContainer = document.createElement("div");
+        toggleContainer.className = "widget-toggle";
+        const label = document.createElement("label");
+        label.className = "widget-toggle-label";
+        label.textContent = this.widgetData.label || "Enable";
+        const toggleWrapper = document.createElement("div");
+        toggleWrapper.className = "widget-toggle-wrapper";
+        const toggle = document.createElement("input");
+        toggle.type = "checkbox";
+        toggle.className = "widget-toggle-input";
+        toggle.setAttribute("data-widget-id", this.widgetId);
+        if (this.widgetData.defaultValue === true) {
+          toggle.checked = true;
+        }
+        const toggleSlider = document.createElement("span");
+        toggleSlider.className = "widget-toggle-slider";
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-toggle-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        const handleSubmit = () => {
+          const value = toggle.checked;
+          toggle.disabled = true;
+          toggle.classList.add("widget-toggle-disabled");
+          submitButton.disabled = true;
+          submitButton.classList.add("widget-toggle-disabled");
+          this.handleInteraction({
+            optionId: "toggle-submit",
+            optionValue: value,
+            optionText: value ? "enabled" : "disabled",
+            widgetType: "toggle"
+          });
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        toggleWrapper.appendChild(toggle);
+        toggleWrapper.appendChild(toggleSlider);
+        toggleContainer.appendChild(label);
+        toggleContainer.appendChild(toggleWrapper);
+        toggleContainer.appendChild(submitButton);
+        widgetContainer.appendChild(toggleContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "toggle";
+    }
+  };
+
+  // src/modules/widgets/date-widget.js
+  var DateWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid date widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "date") {
+        const dateContainer = document.createElement("div");
+        dateContainer.className = "widget-date";
+        const label = document.createElement("label");
+        label.className = "widget-date-label";
+        label.textContent = this.widgetData.label || "Select a date";
+        const dateInput = document.createElement("input");
+        dateInput.type = "date";
+        dateInput.className = "widget-date-element";
+        dateInput.setAttribute("data-widget-id", this.widgetId);
+        if (this.widgetData.minDate) {
+          dateInput.min = this.widgetData.minDate;
+        }
+        if (this.widgetData.maxDate) {
+          dateInput.max = this.widgetData.maxDate;
+        }
+        if (this.widgetData.placeholder) {
+          dateInput.placeholder = this.widgetData.placeholder;
+        }
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-date-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        const handleSubmit = () => {
+          const value = dateInput.value;
+          if (value) {
+            dateInput.disabled = true;
+            dateInput.classList.add("widget-date-disabled");
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-date-disabled");
+            this.handleInteraction({
+              optionId: "date-submit",
+              optionValue: value,
+              optionText: value,
+              widgetType: "date"
+            });
+          }
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        dateInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit();
+          }
+        });
+        dateContainer.appendChild(label);
+        dateContainer.appendChild(dateInput);
+        dateContainer.appendChild(submitButton);
+        widgetContainer.appendChild(dateContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "date";
+    }
+  };
+
+  // src/modules/widgets/tags-widget.js
+  var TagsWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid tags widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "tags") {
+        const tagsContainer = document.createElement("div");
+        tagsContainer.className = "widget-tags";
+        const label = document.createElement("label");
+        label.className = "widget-tags-label";
+        label.textContent = this.widgetData.label || "Add tags";
+        const inputWrapper = document.createElement("div");
+        inputWrapper.className = "widget-tags-input-wrapper";
+        const tagsDisplay = document.createElement("div");
+        tagsDisplay.className = "widget-tags-display";
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "widget-tags-input";
+        input.placeholder = this.widgetData.placeholder || "Type and press Enter to add tag";
+        input.setAttribute("data-widget-id", this.widgetId);
+        const suggestionsList = document.createElement("ul");
+        suggestionsList.className = "widget-tags-suggestions";
+        suggestionsList.style.display = "none";
+        const maxTags = this.widgetData.maxTags || 10;
+        let tags = [];
+        const renderTags = () => {
+          tagsDisplay.innerHTML = "";
+          tags.forEach((tag, index) => {
+            const tagElement = document.createElement("span");
+            tagElement.className = "widget-tag";
+            tagElement.textContent = tag;
+            const removeButton = document.createElement("button");
+            removeButton.className = "widget-tag-remove";
+            removeButton.textContent = "\xD7";
+            removeButton.addEventListener("click", () => {
+              tags.splice(index, 1);
+              renderTags();
+            });
+            tagElement.appendChild(removeButton);
+            tagsDisplay.appendChild(tagElement);
+          });
+        };
+        const showSuggestions = (query) => {
+          if (!this.widgetData.suggestions || !query) {
+            suggestionsList.style.display = "none";
+            return;
+          }
+          const filtered = this.widgetData.suggestions.filter(
+            (s) => s.toLowerCase().includes(query.toLowerCase()) && !tags.includes(s)
+          );
+          if (filtered.length > 0) {
+            suggestionsList.innerHTML = "";
+            filtered.forEach((suggestion) => {
+              const li = document.createElement("li");
+              li.className = "widget-tags-suggestion";
+              li.textContent = suggestion;
+              li.addEventListener("click", () => {
+                if (tags.length < maxTags) {
+                  tags.push(suggestion);
+                  renderTags();
+                  input.value = "";
+                  suggestionsList.style.display = "none";
+                }
+              });
+              suggestionsList.appendChild(li);
+            });
+            suggestionsList.style.display = "block";
+          } else {
+            suggestionsList.style.display = "none";
+          }
+        };
+        input.addEventListener("input", () => {
+          showSuggestions(input.value);
+        });
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            const value = input.value.trim();
+            if (value && tags.length < maxTags && !tags.includes(value)) {
+              tags.push(value);
+              renderTags();
+              input.value = "";
+              suggestionsList.style.display = "none";
+            }
+          } else if (e.key === "Backspace" && !input.value && tags.length > 0) {
+            tags.pop();
+            renderTags();
+          }
+        });
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-tags-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        const handleSubmit = () => {
+          if (tags.length > 0) {
+            input.disabled = true;
+            input.classList.add("widget-tags-disabled");
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-tags-disabled");
+            this.handleInteraction({
+              optionId: "tags-submit",
+              optionValue: tags,
+              optionText: tags.join(", "),
+              widgetType: "tags"
+            });
+          }
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        inputWrapper.appendChild(tagsDisplay);
+        inputWrapper.appendChild(input);
+        inputWrapper.appendChild(suggestionsList);
+        tagsContainer.appendChild(label);
+        tagsContainer.appendChild(inputWrapper);
+        tagsContainer.appendChild(submitButton);
+        widgetContainer.appendChild(tagsContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "tags";
+    }
+  };
+
+  // src/modules/widgets/file-upload-widget.js
+  var FileUploadWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid file upload widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "file") {
+        const uploadContainer = document.createElement("div");
+        uploadContainer.className = "widget-file-upload";
+        const label = document.createElement("label");
+        label.className = "widget-file-label";
+        label.textContent = this.widgetData.label || "Upload a file";
+        const dropZone = document.createElement("div");
+        dropZone.className = "widget-file-dropzone";
+        const dropZoneContent = document.createElement("div");
+        dropZoneContent.className = "widget-file-dropzone-content";
+        dropZoneContent.innerHTML = `
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <p>Drag and drop files here or click to select</p>
+      `;
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.className = "widget-file-input";
+        fileInput.setAttribute("data-widget-id", this.widgetId);
+        fileInput.style.display = "none";
+        if (this.widgetData.accept) {
+          fileInput.accept = this.widgetData.accept;
+        }
+        if (this.widgetData.maxFiles) {
+          fileInput.multiple = this.widgetData.maxFiles > 1;
+        }
+        const fileList = document.createElement("div");
+        fileList.className = "widget-file-list";
+        let selectedFiles = [];
+        const maxFiles = this.widgetData.maxFiles || 1;
+        const maxSize = this.widgetData.maxSize || 10 * 1024 * 1024;
+        const renderFiles = () => {
+          fileList.innerHTML = "";
+          selectedFiles.forEach((file, index) => {
+            const fileItem = document.createElement("div");
+            fileItem.className = "widget-file-item";
+            const fileName = document.createElement("span");
+            fileName.className = "widget-file-name";
+            fileName.textContent = file.name;
+            const fileSize = document.createElement("span");
+            fileSize.className = "widget-file-size";
+            fileSize.textContent = this.formatFileSize(file.size);
+            const removeButton = document.createElement("button");
+            removeButton.className = "widget-file-remove";
+            removeButton.textContent = "\xD7";
+            removeButton.addEventListener("click", () => {
+              selectedFiles.splice(index, 1);
+              renderFiles();
+            });
+            fileItem.appendChild(fileName);
+            fileItem.appendChild(fileSize);
+            fileItem.appendChild(removeButton);
+            fileList.appendChild(fileItem);
+          });
+        };
+        dropZone.addEventListener("click", () => {
+          fileInput.click();
+        });
+        dropZone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropZone.classList.add("widget-file-dropzone-active");
+        });
+        dropZone.addEventListener("dragleave", () => {
+          dropZone.classList.remove("widget-file-dropzone-active");
+        });
+        dropZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropZone.classList.remove("widget-file-dropzone-active");
+          const files = Array.from(e.dataTransfer.files);
+          this.addFiles(files);
+        });
+        fileInput.addEventListener("change", () => {
+          const files = Array.from(fileInput.files);
+          this.addFiles(files);
+          fileInput.value = "";
+        });
+        this.addFiles = (files) => {
+          files.forEach((file) => {
+            if (selectedFiles.length >= maxFiles) return;
+            if (file.size > maxSize) {
+              alert(`File ${file.name} exceeds maximum size of ${this.formatFileSize(maxSize)}`);
+              return;
+            }
+            if (!selectedFiles.some((f) => f.name === file.name)) {
+              selectedFiles.push(file);
+            }
+          });
+          renderFiles();
+        };
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-file-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Upload";
+        const handleSubmit = () => {
+          if (selectedFiles.length > 0) {
+            const fileData = selectedFiles.map((file) => ({
+              name: file.name,
+              size: file.size,
+              type: file.type
+            }));
+            dropZone.classList.add("widget-file-disabled");
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-file-disabled");
+            const fileNames = selectedFiles.map((file) => file.name).join(", ");
+            this.handleInteraction({
+              optionId: "file-upload",
+              optionValue: fileData,
+              optionText: fileNames || `${selectedFiles.length} file(s)`,
+              widgetType: "file"
+            });
+          }
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        dropZone.appendChild(dropZoneContent);
+        uploadContainer.appendChild(label);
+        uploadContainer.appendChild(dropZone);
+        uploadContainer.appendChild(fileList);
+        uploadContainer.appendChild(submitButton);
+        uploadContainer.appendChild(fileInput);
+        widgetContainer.appendChild(uploadContainer);
+      }
+      return widgetContainer;
+    }
+    formatFileSize(bytes) {
+      if (bytes === 0) return "0 Bytes";
+      const k = 1024;
+      const sizes = ["Bytes", "KB", "MB", "GB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "file";
+    }
+  };
+
+  // src/modules/widgets/color-picker-widget.js
+  var ColorPickerWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid color picker widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "color") {
+        const colorContainer = document.createElement("div");
+        colorContainer.className = "widget-color-picker";
+        const label = document.createElement("label");
+        label.className = "widget-color-label";
+        label.textContent = this.widgetData.label || "Select a color";
+        const colorWrapper = document.createElement("div");
+        colorWrapper.className = "widget-color-wrapper";
+        const colorInput = document.createElement("input");
+        colorInput.type = "color";
+        colorInput.className = "widget-color-input";
+        colorInput.setAttribute("data-widget-id", this.widgetId);
+        if (this.widgetData.defaultColor) {
+          colorInput.value = this.widgetData.defaultColor;
+        }
+        const colorDisplay = document.createElement("div");
+        colorDisplay.className = "widget-color-display";
+        colorDisplay.style.backgroundColor = colorInput.value;
+        colorDisplay.textContent = colorInput.value.toUpperCase();
+        const presetContainer = document.createElement("div");
+        presetContainer.className = "widget-color-presets";
+        if (this.widgetData.presetColors && this.widgetData.presetColors.length > 0) {
+          this.widgetData.presetColors.forEach((color) => {
+            const preset = document.createElement("button");
+            preset.className = "widget-color-preset";
+            preset.style.backgroundColor = color;
+            preset.setAttribute("data-color", color);
+            preset.addEventListener("click", () => {
+              colorInput.value = color;
+              colorDisplay.style.backgroundColor = color;
+              colorDisplay.textContent = color.toUpperCase();
+            });
+            presetContainer.appendChild(preset);
+          });
+        }
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-color-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        colorInput.addEventListener("input", () => {
+          colorDisplay.style.backgroundColor = colorInput.value;
+          colorDisplay.textContent = colorInput.value.toUpperCase();
+        });
+        const handleSubmit = () => {
+          const value = colorInput.value;
+          colorInput.disabled = true;
+          colorInput.classList.add("widget-color-disabled");
+          submitButton.disabled = true;
+          submitButton.classList.add("widget-color-disabled");
+          this.handleInteraction({
+            optionId: "color-submit",
+            optionValue: value,
+            optionText: value.toUpperCase(),
+            widgetType: "color"
+          });
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        colorWrapper.appendChild(colorInput);
+        colorWrapper.appendChild(colorDisplay);
+        colorContainer.appendChild(label);
+        colorContainer.appendChild(colorWrapper);
+        if (this.widgetData.presetColors && this.widgetData.presetColors.length > 0) {
+          colorContainer.appendChild(presetContainer);
+        }
+        colorContainer.appendChild(submitButton);
+        widgetContainer.appendChild(colorContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "color";
+    }
+  };
+
+  // src/modules/widgets/confirmation-widget.js
+  var ConfirmationWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid confirmation widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "confirmation") {
+        const confirmationContainer = document.createElement("div");
+        confirmationContainer.className = "widget-confirmation";
+        const message = document.createElement("div");
+        message.className = "widget-confirmation-message";
+        message.textContent = this.widgetData.message || "Are you sure?";
+        const buttonsContainer = document.createElement("div");
+        buttonsContainer.className = "widget-confirmation-buttons";
+        const cancelButton = document.createElement("button");
+        cancelButton.className = "widget-confirmation-cancel";
+        cancelButton.textContent = this.widgetData.cancelText || "Cancel";
+        const confirmButton = document.createElement("button");
+        confirmButton.className = "widget-confirmation-confirm";
+        confirmButton.textContent = this.widgetData.confirmText || "Confirm";
+        const handleCancel = () => {
+          cancelButton.disabled = true;
+          cancelButton.classList.add("widget-confirmation-disabled");
+          confirmButton.disabled = true;
+          confirmButton.classList.add("widget-confirmation-disabled");
+          this.handleInteraction({
+            optionId: "confirmation-cancel",
+            optionValue: false,
+            optionText: "cancelled",
+            widgetType: "confirmation"
+          });
+        };
+        const handleConfirm = () => {
+          cancelButton.disabled = true;
+          cancelButton.classList.add("widget-confirmation-disabled");
+          confirmButton.disabled = true;
+          confirmButton.classList.add("widget-confirmation-disabled");
+          this.handleInteraction({
+            optionId: "confirmation-confirm",
+            optionValue: true,
+            optionText: "confirmed",
+            widgetType: "confirmation"
+          });
+        };
+        cancelButton.addEventListener("click", handleCancel);
+        confirmButton.addEventListener("click", handleConfirm);
+        buttonsContainer.appendChild(cancelButton);
+        buttonsContainer.appendChild(confirmButton);
+        confirmationContainer.appendChild(message);
+        confirmationContainer.appendChild(buttonsContainer);
+        widgetContainer.appendChild(confirmationContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "confirmation" && this.widgetData.message;
+    }
+  };
+
+  // src/modules/widgets/radio-widget.js
+  var RadioWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid radio widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "radio" && this.widgetData.options) {
+        const radioContainer = document.createElement("div");
+        radioContainer.className = "widget-radio";
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-radio-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        this.widgetData.options.forEach((option) => {
+          const radioWrapper = document.createElement("div");
+          radioWrapper.className = "widget-radio-item";
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = `radio-${this.widgetId}`;
+          radio.className = "widget-radio-element";
+          radio.id = `radio-${this.widgetId}-${option.id}`;
+          radio.value = option.value;
+          radio.setAttribute("data-widget-id", this.widgetId);
+          radio.setAttribute("data-option-id", option.id);
+          if (option.checked) {
+            radio.checked = true;
+          }
+          const label = document.createElement("label");
+          label.className = "widget-radio-label";
+          label.htmlFor = `radio-${this.widgetId}-${option.id}`;
+          label.textContent = option.text;
+          radioWrapper.appendChild(radio);
+          radioWrapper.appendChild(label);
+          radioContainer.appendChild(radioWrapper);
+        });
+        const handleSubmit = () => {
+          const selectedRadio = radioContainer.querySelector(".widget-radio-element:checked");
+          if (selectedRadio) {
+            const optionId = selectedRadio.getAttribute("data-option-id");
+            const optionData = this.widgetData.options.find((opt) => opt.id === optionId);
+            if (optionData) {
+              const allRadios = radioContainer.querySelectorAll(".widget-radio-element");
+              allRadios.forEach((r) => {
+                r.disabled = true;
+                r.classList.add("widget-radio-disabled");
+              });
+              submitButton.disabled = true;
+              submitButton.classList.add("widget-radio-disabled");
+              this.handleInteraction({
+                optionId: optionData.id,
+                optionValue: optionData.value,
+                optionText: optionData.text,
+                widgetType: "radio"
+              });
+            }
+          }
+        };
+        submitButton.addEventListener("click", handleSubmit);
+        radioContainer.appendChild(submitButton);
+        widgetContainer.appendChild(radioContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "radio" && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
+    }
+  };
+
+  // src/modules/widgets/progress-widget.js
+  var ProgressWidget = class extends BaseWidget {
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid progress widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "progress") {
+        const progressContainer = document.createElement("div");
+        progressContainer.className = "widget-progress";
+        const label = document.createElement("div");
+        label.className = "widget-progress-label";
+        label.textContent = this.widgetData.label || "Progress";
+        const progressBarWrapper = document.createElement("div");
+        progressBarWrapper.className = "widget-progress-bar-wrapper";
+        const progressBar = document.createElement("div");
+        progressBar.className = "widget-progress-bar";
+        const value = this.widgetData.value || 0;
+        const max = this.widgetData.max || 100;
+        const percentage = Math.min(Math.max(value / max * 100, 0), 100);
+        progressBar.style.width = `${percentage}%`;
+        const progressText = document.createElement("div");
+        progressText.className = "widget-progress-text";
+        progressText.textContent = `${value} / ${max}`;
+        if (this.widgetData.showPercentage !== false) {
+          progressText.textContent += ` (${Math.round(percentage)}%)`;
+        }
+        progressBarWrapper.appendChild(progressBar);
+        progressContainer.appendChild(label);
+        progressContainer.appendChild(progressBarWrapper);
+        progressContainer.appendChild(progressText);
+        widgetContainer.appendChild(progressContainer);
+      }
+      return widgetContainer;
+    }
+    validate() {
+      return super.validate() && this.widgetData.type === "progress" && typeof this.widgetData.value === "number" && typeof this.widgetData.max === "number" && this.widgetData.max > 0;
+    }
+  };
+
   // src/modules/widgets/widget-factory.js
   var WidgetFactory2 = class {
     static widgetTypes = /* @__PURE__ */ new Map([
       ["buttons", ButtonsWidget],
       ["select", SelectWidget],
-      ["input", InputWidget]
+      ["input", InputWidget],
+      ["checkbox", CheckboxWidget],
+      ["textarea", TextareaWidget],
+      ["slider", SliderWidget],
+      ["rating", RatingWidget],
+      ["toggle", ToggleWidget],
+      ["date", DateWidget],
+      ["tags", TagsWidget],
+      ["file", FileUploadWidget],
+      ["color", ColorPickerWidget],
+      ["confirmation", ConfirmationWidget],
+      ["radio", RadioWidget],
+      ["progress", ProgressWidget]
     ]);
     /**
      * Register a new widget type

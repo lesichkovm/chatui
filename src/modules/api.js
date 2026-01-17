@@ -71,7 +71,7 @@ export class ChatAPI {
     const callbackName = "chatCallback_" + Date.now();
     const url = `${this.serverUrl}/api/messages?callback=${callbackName}&message=${encodeURIComponent(
       message
-    )}&session_key=${encodeURIComponent(sessionKey)}`;
+    )}&type=message&session_key=${encodeURIComponent(sessionKey)}`;
 
     this._injectScript(url, callbackName, (response) => {
       if (onResponse) {
