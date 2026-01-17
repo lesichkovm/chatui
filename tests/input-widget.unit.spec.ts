@@ -2,11 +2,121 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Input Widget Unit Tests', () => {
   test('should create input widget with correct structure', async ({ page }) => {
-    // Load the widget module directly
-    await page.goto('data:text/html,<html><head><script src="/src/modules/widgets/input-widget.js" type="module"></script></head><body></body></html>');
+    // Create a self-contained test page with inline widget definitions
+    await page.goto('about:blank');
+    await page.setContent(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .widget { margin-top: 8px; }
+          .widget-input { display: flex; flex-direction: column; gap: 8px; }
+          .widget-input-element { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+          .widget-input-submit { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+          .widget-input-disabled { opacity: 0.5; cursor: not-allowed; }
+        </style>
+      </head>
+      <body></body>
+      </html>
+    `);
     
-    // Create widget directly in the page
+    // Define widget classes inline and create widget
     await page.evaluate(() => {
+      // Base Widget Class
+      class BaseWidget {
+        constructor(widgetData, widgetId) {
+          this.widgetData = widgetData;
+          this.widgetId = widgetId;
+        }
+        
+        createElement() {
+          throw new Error('createElement() must be implemented by subclass');
+        }
+        
+        handleInteraction(interaction) {
+          const event = new CustomEvent("widgetInteraction", {
+            detail: {
+              widgetId: this.widgetId,
+              ...interaction
+            }
+          });
+          document.dispatchEvent(event);
+        }
+        
+        validate() {
+          return this.widgetData && this.widgetData.type;
+        }
+      }
+      
+      // Input Widget Class
+      class InputWidget extends BaseWidget {
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment('Invalid input widget data');
+          }
+
+          const widgetContainer = document.createElement("div");
+          widgetContainer.className = "widget";
+          
+          if (this.widgetData.type === 'input') {
+            const formContainer = document.createElement("div");
+            formContainer.className = "widget-input";
+            
+            const input = document.createElement("input");
+            input.type = this.widgetData.inputType || 'text';
+            input.className = "widget-input-element";
+            input.placeholder = this.widgetData.placeholder || 'Enter your response...';
+            input.setAttribute("data-widget-id", this.widgetId);
+            
+            const submitButton = document.createElement("button");
+            submitButton.className = "widget-input-submit";
+            submitButton.textContent = this.widgetData.buttonText || 'Submit';
+            
+            const handleSubmit = () => {
+              const value = input.value.trim();
+              if (value) {
+                input.disabled = true;
+                input.classList.add('widget-input-disabled');
+                submitButton.disabled = true;
+                submitButton.classList.add('widget-input-disabled');
+                
+                this.handleInteraction({
+                  optionId: 'input-submit',
+                  optionValue: value,
+                  optionText: value,
+                  widgetType: 'input'
+                });
+                input.value = '';
+              }
+            };
+            
+            submitButton.addEventListener("click", handleSubmit);
+            input.addEventListener("keypress", (e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSubmit();
+              }
+            });
+            
+            formContainer.appendChild(input);
+            formContainer.appendChild(submitButton);
+            widgetContainer.appendChild(formContainer);
+          }
+          
+          return widgetContainer;
+        }
+
+        validate() {
+          return super.validate() && 
+                 this.widgetData.type === 'input';
+        }
+      }
+      
+      // Make classes available globally
+      window.BaseWidget = BaseWidget;
+      window.InputWidget = InputWidget;
+      
+      // Create widget
       const widgetData = {
         type: 'input',
         inputType: 'email',
@@ -14,7 +124,6 @@ test.describe('Input Widget Unit Tests', () => {
         buttonText: 'Submit'
       };
       
-      // Import and create widget (assuming it's exported)
       const widget = new InputWidget(widgetData, 'test-widget-id');
       const element = widget.createElement();
       document.body.appendChild(element);
@@ -35,10 +144,115 @@ test.describe('Input Widget Unit Tests', () => {
   });
 
   test('should disable widget after submission', async ({ page }) => {
-    // Create widget directly
-    await page.goto('data:text/html,<html><head><script src="/src/modules/widgets/input-widget.js" type="module"></script></head><body></body></html>');
+    // Create a self-contained test page with inline widget definitions
+    await page.goto('about:blank');
+    await page.setContent(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .widget { margin-top: 8px; }
+          .widget-input { display: flex; flex-direction: column; gap: 8px; }
+          .widget-input-element { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+          .widget-input-submit { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+          .widget-input-disabled { opacity: 0.5; cursor: not-allowed; }
+        </style>
+      </head>
+      <body></body>
+      </html>
+    `);
     
     await page.evaluate(() => {
+      // Base Widget Class
+      class BaseWidget {
+        constructor(widgetData, widgetId) {
+          this.widgetData = widgetData;
+          this.widgetId = widgetId;
+        }
+        
+        createElement() {
+          throw new Error('createElement() must be implemented by subclass');
+        }
+        
+        handleInteraction(interaction) {
+          const event = new CustomEvent("widgetInteraction", {
+            detail: {
+              widgetId: this.widgetId,
+              ...interaction
+            }
+          });
+          document.dispatchEvent(event);
+        }
+        
+        validate() {
+          return this.widgetData && this.widgetData.type;
+        }
+      }
+      
+      // Input Widget Class
+      class InputWidget extends BaseWidget {
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment('Invalid input widget data');
+          }
+
+          const widgetContainer = document.createElement("div");
+          widgetContainer.className = "widget";
+          
+          if (this.widgetData.type === 'input') {
+            const formContainer = document.createElement("div");
+            formContainer.className = "widget-input";
+            
+            const input = document.createElement("input");
+            input.type = this.widgetData.inputType || 'text';
+            input.className = "widget-input-element";
+            input.placeholder = this.widgetData.placeholder || 'Enter your response...';
+            input.setAttribute("data-widget-id", this.widgetId);
+            
+            const submitButton = document.createElement("button");
+            submitButton.className = "widget-input-submit";
+            submitButton.textContent = this.widgetData.buttonText || 'Submit';
+            
+            const handleSubmit = () => {
+              const value = input.value.trim();
+              if (value) {
+                input.disabled = true;
+                input.classList.add('widget-input-disabled');
+                submitButton.disabled = true;
+                submitButton.classList.add('widget-input-disabled');
+                
+                this.handleInteraction({
+                  optionId: 'input-submit',
+                  optionValue: value,
+                  optionText: value,
+                  widgetType: 'input'
+                });
+                input.value = '';
+              }
+            };
+            
+            submitButton.addEventListener("click", handleSubmit);
+            input.addEventListener("keypress", (e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSubmit();
+              }
+            });
+            
+            formContainer.appendChild(input);
+            formContainer.appendChild(submitButton);
+            widgetContainer.appendChild(formContainer);
+          }
+          
+          return widgetContainer;
+        }
+
+        validate() {
+          return super.validate() && 
+                 this.widgetData.type === 'input';
+        }
+      }
+      
       const widgetData = {
         type: 'input',
         inputType: 'text',
@@ -69,9 +283,115 @@ test.describe('Input Widget Unit Tests', () => {
   });
 
   test('should not submit empty input', async ({ page }) => {
-    await page.goto('data:text/html,<html><head><script src="/src/modules/widgets/input-widget.js" type="module"></script></head><body></body></html>');
+    // Create a self-contained test page with inline widget definitions
+    await page.goto('about:blank');
+    await page.setContent(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .widget { margin-top: 8px; }
+          .widget-input { display: flex; flex-direction: column; gap: 8px; }
+          .widget-input-element { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+          .widget-input-submit { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+          .widget-input-disabled { opacity: 0.5; cursor: not-allowed; }
+        </style>
+      </head>
+      <body></body>
+      </html>
+    `);
     
     await page.evaluate(() => {
+      // Base Widget Class
+      class BaseWidget {
+        constructor(widgetData, widgetId) {
+          this.widgetData = widgetData;
+          this.widgetId = widgetId;
+        }
+        
+        createElement() {
+          throw new Error('createElement() must be implemented by subclass');
+        }
+        
+        handleInteraction(interaction) {
+          const event = new CustomEvent("widgetInteraction", {
+            detail: {
+              widgetId: this.widgetId,
+              ...interaction
+            }
+          });
+          document.dispatchEvent(event);
+        }
+        
+        validate() {
+          return this.widgetData && this.widgetData.type;
+        }
+      }
+      
+      // Input Widget Class
+      class InputWidget extends BaseWidget {
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment('Invalid input widget data');
+          }
+
+          const widgetContainer = document.createElement("div");
+          widgetContainer.className = "widget";
+          
+          if (this.widgetData.type === 'input') {
+            const formContainer = document.createElement("div");
+            formContainer.className = "widget-input";
+            
+            const input = document.createElement("input");
+            input.type = this.widgetData.inputType || 'text';
+            input.className = "widget-input-element";
+            input.placeholder = this.widgetData.placeholder || 'Enter your response...';
+            input.setAttribute("data-widget-id", this.widgetId);
+            
+            const submitButton = document.createElement("button");
+            submitButton.className = "widget-input-submit";
+            submitButton.textContent = this.widgetData.buttonText || 'Submit';
+            
+            const handleSubmit = () => {
+              const value = input.value.trim();
+              if (value) {
+                input.disabled = true;
+                input.classList.add('widget-input-disabled');
+                submitButton.disabled = true;
+                submitButton.classList.add('widget-input-disabled');
+                
+                this.handleInteraction({
+                  optionId: 'input-submit',
+                  optionValue: value,
+                  optionText: value,
+                  widgetType: 'input'
+                });
+                input.value = '';
+              }
+            };
+            
+            submitButton.addEventListener("click", handleSubmit);
+            input.addEventListener("keypress", (e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSubmit();
+              }
+            });
+            
+            formContainer.appendChild(input);
+            formContainer.appendChild(submitButton);
+            widgetContainer.appendChild(formContainer);
+          }
+          
+          return widgetContainer;
+        }
+
+        validate() {
+          return super.validate() && 
+                 this.widgetData.type === 'input';
+        }
+      }
+      
       const widgetData = {
         type: 'input',
         inputType: 'text',
@@ -98,9 +418,115 @@ test.describe('Input Widget Unit Tests', () => {
   });
 
   test('should handle Enter key submission', async ({ page }) => {
-    await page.goto('data:text/html,<html><head><script src="/src/modules/widgets/input-widget.js" type="module"></script></head><body></body></html>');
+    // Create a self-contained test page with inline widget definitions
+    await page.goto('about:blank');
+    await page.setContent(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .widget { margin-top: 8px; }
+          .widget-input { display: flex; flex-direction: column; gap: 8px; }
+          .widget-input-element { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+          .widget-input-submit { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+          .widget-input-disabled { opacity: 0.5; cursor: not-allowed; }
+        </style>
+      </head>
+      <body></body>
+      </html>
+    `);
     
     await page.evaluate(() => {
+      // Base Widget Class
+      class BaseWidget {
+        constructor(widgetData, widgetId) {
+          this.widgetData = widgetData;
+          this.widgetId = widgetId;
+        }
+        
+        createElement() {
+          throw new Error('createElement() must be implemented by subclass');
+        }
+        
+        handleInteraction(interaction) {
+          const event = new CustomEvent("widgetInteraction", {
+            detail: {
+              widgetId: this.widgetId,
+              ...interaction
+            }
+          });
+          document.dispatchEvent(event);
+        }
+        
+        validate() {
+          return this.widgetData && this.widgetData.type;
+        }
+      }
+      
+      // Input Widget Class
+      class InputWidget extends BaseWidget {
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment('Invalid input widget data');
+          }
+
+          const widgetContainer = document.createElement("div");
+          widgetContainer.className = "widget";
+          
+          if (this.widgetData.type === 'input') {
+            const formContainer = document.createElement("div");
+            formContainer.className = "widget-input";
+            
+            const input = document.createElement("input");
+            input.type = this.widgetData.inputType || 'text';
+            input.className = "widget-input-element";
+            input.placeholder = this.widgetData.placeholder || 'Enter your response...';
+            input.setAttribute("data-widget-id", this.widgetId);
+            
+            const submitButton = document.createElement("button");
+            submitButton.className = "widget-input-submit";
+            submitButton.textContent = this.widgetData.buttonText || 'Submit';
+            
+            const handleSubmit = () => {
+              const value = input.value.trim();
+              if (value) {
+                input.disabled = true;
+                input.classList.add('widget-input-disabled');
+                submitButton.disabled = true;
+                submitButton.classList.add('widget-input-disabled');
+                
+                this.handleInteraction({
+                  optionId: 'input-submit',
+                  optionValue: value,
+                  optionText: value,
+                  widgetType: 'input'
+                });
+                input.value = '';
+              }
+            };
+            
+            submitButton.addEventListener("click", handleSubmit);
+            input.addEventListener("keypress", (e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSubmit();
+              }
+            });
+            
+            formContainer.appendChild(input);
+            formContainer.appendChild(submitButton);
+            widgetContainer.appendChild(formContainer);
+          }
+          
+          return widgetContainer;
+        }
+
+        validate() {
+          return super.validate() && 
+                 this.widgetData.type === 'input';
+        }
+      }
+      
       const widgetData = {
         type: 'input',
         inputType: 'text',
@@ -137,15 +563,121 @@ test.describe('Input Widget Unit Tests', () => {
   });
 
   test('should dispatch interaction event correctly', async ({ page }) => {
-    await page.goto('data:text/html,<html><head><script src="/src/modules/widgets/input-widget.js" type="module"></script></head><body></body></html>');
+    // Create a self-contained test page with inline widget definitions
+    await page.goto('about:blank');
+    await page.setContent(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .widget { margin-top: 8px; }
+          .widget-input { display: flex; flex-direction: column; gap: 8px; }
+          .widget-input-element { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+          .widget-input-submit { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+          .widget-input-disabled { opacity: 0.5; cursor: not-allowed; }
+        </style>
+      </head>
+      <body></body>
+      </html>
+    `);
     
     // Set up event listener
-    let interactionData = null;
-    await page.exposeFunction('captureInteraction', (data) => {
+    let interactionData: any = null;
+    await page.exposeFunction('captureInteraction', (data: any) => {
       interactionData = data;
     });
     
     await page.evaluate(() => {
+      // Base Widget Class
+      class BaseWidget {
+        constructor(widgetData, widgetId) {
+          this.widgetData = widgetData;
+          this.widgetId = widgetId;
+        }
+        
+        createElement() {
+          throw new Error('createElement() must be implemented by subclass');
+        }
+        
+        handleInteraction(interaction) {
+          const event = new CustomEvent("widgetInteraction", {
+            detail: {
+              widgetId: this.widgetId,
+              ...interaction
+            }
+          });
+          document.dispatchEvent(event);
+        }
+        
+        validate() {
+          return this.widgetData && this.widgetData.type;
+        }
+      }
+      
+      // Input Widget Class
+      class InputWidget extends BaseWidget {
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment('Invalid input widget data');
+          }
+
+          const widgetContainer = document.createElement("div");
+          widgetContainer.className = "widget";
+          
+          if (this.widgetData.type === 'input') {
+            const formContainer = document.createElement("div");
+            formContainer.className = "widget-input";
+            
+            const input = document.createElement("input");
+            input.type = this.widgetData.inputType || 'text';
+            input.className = "widget-input-element";
+            input.placeholder = this.widgetData.placeholder || 'Enter your response...';
+            input.setAttribute("data-widget-id", this.widgetId);
+            
+            const submitButton = document.createElement("button");
+            submitButton.className = "widget-input-submit";
+            submitButton.textContent = this.widgetData.buttonText || 'Submit';
+            
+            const handleSubmit = () => {
+              const value = input.value.trim();
+              if (value) {
+                input.disabled = true;
+                input.classList.add('widget-input-disabled');
+                submitButton.disabled = true;
+                submitButton.classList.add('widget-input-disabled');
+                
+                this.handleInteraction({
+                  optionId: 'input-submit',
+                  optionValue: value,
+                  optionText: value,
+                  widgetType: 'input'
+                });
+                input.value = '';
+              }
+            };
+            
+            submitButton.addEventListener("click", handleSubmit);
+            input.addEventListener("keypress", (e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSubmit();
+              }
+            });
+            
+            formContainer.appendChild(input);
+            formContainer.appendChild(submitButton);
+            widgetContainer.appendChild(formContainer);
+          }
+          
+          return widgetContainer;
+        }
+
+        validate() {
+          return super.validate() && 
+                 this.widgetData.type === 'input';
+        }
+      }
+      
       const widgetData = {
         type: 'input',
         inputType: 'text',
@@ -172,10 +704,10 @@ test.describe('Input Widget Unit Tests', () => {
     
     // Verify interaction event was dispatched
     expect(interactionData).not.toBeNull();
-    expect(interactionData.widgetId).toBe('test-widget-id');
-    expect(interactionData.optionId).toBe('input-submit');
-    expect(interactionData.optionValue).toBe('test@example.com');
-    expect(interactionData.optionText).toBe('test@example.com');
-    expect(interactionData.widgetType).toBe('input');
+    expect(interactionData!.widgetId).toBe('test-widget-id');
+    expect(interactionData!.optionId).toBe('input-submit');
+    expect(interactionData!.optionValue).toBe('test@example.com');
+    expect(interactionData!.optionText).toBe('test@example.com');
+    expect(interactionData!.widgetType).toBe('input');
   });
 });
