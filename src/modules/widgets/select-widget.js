@@ -44,6 +44,10 @@ export class SelectWidget extends BaseWidget {
         const optionData = this.widgetData.options.find(opt => opt.id === selectedOption.getAttribute('data-option-id'));
         
         if (optionData) {
+          // Disable the select element after selection
+          select.disabled = true;
+          select.classList.add('widget-select-disabled');
+          
           this.handleInteraction({
             optionId: optionData.id,
             optionValue: optionData.value,

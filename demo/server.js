@@ -49,10 +49,10 @@ function handleMessages(req, res, query) {
   let responseData;
 
   if (type === 'connect') {
-    // Welcome message - check if this is the widget demo for special welcome
-    if (referer.includes('widget-demo.html')) {
+    // Welcome message - check if this is any widget demo for special welcome
+    if (referer.includes('widget-demo.html') || referer.includes('buttons-widget-demo.html') || referer.includes('input-widget-demo.html') || referer.includes('select-widget-demo.html')) {
       responseData = {
-        text: 'Hello! I\'m your virtual assistant. Type "menu" to see interactive options, or just ask me anything!',
+        text: 'Hello! I\'m your virtual assistant. Try "show buttons", "show select", or "show input" to see interactive widgets!',
         sender: 'bot'
       };
     } else {
@@ -67,9 +67,9 @@ function handleMessages(req, res, query) {
     // Check for widget trigger keywords regardless of page
     const lowerMessage = message.toLowerCase();
     
-    if (lowerMessage === 'menu' || lowerMessage === 'options' || lowerMessage === 'help') {
+    if (lowerMessage === 'show buttons' || lowerMessage === 'show select' || lowerMessage === 'show input' || lowerMessage === 'help') {
       // Widget responses - triggered by specific keywords
-      if (lowerMessage === 'menu') {
+      if (lowerMessage === 'show buttons') {
         responseData = {
           text: 'Welcome! How can I help you today?',
           widget: {
@@ -82,29 +82,28 @@ function handleMessages(req, res, query) {
             ]
           }
         };
-      } else if (lowerMessage === 'options') {
+      } else if (lowerMessage === 'show select') {
         responseData = {
-          text: 'Choose your preferred department:',
+          text: 'Please choose your preferred department:',
           widget: {
-            type: 'buttons',
+            type: 'select',
+            placeholder: 'Select a department...',
             options: [
-              { id: 'dept1', text: 'General Inquiry', value: 'general' },
-              { id: 'dept2', text: 'Product Information', value: 'product' },
-              { id: 'dept3', text: 'Account Issues', value: 'account' }
+              { id: 'dept1', text: 'Customer Support', value: 'support' },
+              { id: 'dept2', text: 'Sales', value: 'sales' },
+              { id: 'dept3', text: 'Technical Support', value: 'tech' },
+              { id: 'dept4', text: 'Billing', value: 'billing' }
             ]
           }
         };
-      } else if (lowerMessage === 'help') {
+      } else if (lowerMessage === 'show input') {
         responseData = {
-          text: 'I can help you with:',
+          text: 'Please enter your email address:',
           widget: {
-            type: 'buttons',
-            options: [
-              { id: 'help1', text: 'Customer Service', value: 'support' },
-              { id: 'help2', text: 'Sales Information', value: 'sales' },
-              { id: 'help3', text: 'Technical Support', value: 'technical' },
-              { id: 'help4', text: 'Billing Questions', value: 'billing' }
-            ]
+            type: 'input',
+            inputType: 'email',
+            placeholder: 'Enter your email...',
+            buttonText: 'Submit'
           }
         };
       }
@@ -158,9 +157,9 @@ function handleMessages(req, res, query) {
       };
     } else {
       // Default echo response
-      if (referer.includes('widget-demo.html')) {
+      if (referer.includes('widget-demo.html') || referer.includes('buttons-widget-demo.html') || referer.includes('input-widget-demo.html') || referer.includes('select-widget-demo.html')) {
         responseData = {
-          text: `You said: "${message}". Try typing "menu", "options", or "help" to see interactive buttons!`,
+          text: `You said: "${message}". Try "show buttons", "show select", "show input", or "help" to see interactive widgets!`,
           sender: 'bot'
         };
       } else {

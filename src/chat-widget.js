@@ -208,6 +208,8 @@
           const selectedOption = select.options[select.selectedIndex];
           const optionData = this.widgetData.options.find((opt) => opt.id === selectedOption.getAttribute("data-option-id"));
           if (optionData) {
+            select.disabled = true;
+            select.classList.add("widget-select-disabled");
             this.handleInteraction({
               optionId: optionData.id,
               optionValue: optionData.value,
@@ -580,6 +582,20 @@
     
     #${widgetId} .widget-select-element:focus {
       border-color: var(--chat-primary-color);
+    }
+    
+    #${widgetId} .widget-select-element:disabled,
+    #${widgetId} .widget-select-disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #f8f9fa;
+      color: #6c757d;
+    }
+    
+    #${widgetId} .widget-select-element:disabled:hover,
+    #${widgetId} .widget-select-disabled:hover {
+      background: #f8f9fa;
+      border-color: #dee2e6;
     }
     
     #${widgetId} .widget-input {

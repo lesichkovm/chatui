@@ -260,6 +260,20 @@ export function injectStyles(widgetId, primaryColor, mode) {
       border-color: var(--chat-primary-color);
     }
     
+    #${widgetId} .widget-select-element:disabled,
+    #${widgetId} .widget-select-disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #f8f9fa;
+      color: #6c757d;
+    }
+    
+    #${widgetId} .widget-select-element:disabled:hover,
+    #${widgetId} .widget-select-disabled:hover {
+      background: #f8f9fa;
+      border-color: #dee2e6;
+    }
+    
     #${widgetId} .widget-input {
       margin-top: 8px;
       display: flex;
