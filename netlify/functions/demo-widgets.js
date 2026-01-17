@@ -1,3 +1,5 @@
+import { WIDGET_TYPES } from './widget-types.js';
+
 const handler = async (event, context) => {
   const { httpMethod, queryStringParameters } = event;
   
@@ -46,7 +48,7 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
-                type: "buttons",
+                type: WIDGET_TYPES.BUTTONS,
                 options: [
                   { id: "btn1", text: "⭐ Rating Widget", value: "rating" },
                   { id: "btn2", text: "📝 Form Widgets", value: "forms" },
@@ -62,7 +64,7 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
-                type: "rating",
+                type: WIDGET_TYPES.RATING,
                 maxRating: 5,
                 iconType: "star"
               }
@@ -186,7 +188,7 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
-                type: "color_picker",
+                type: WIDGET_TYPES.COLOR_PICKER,
                 defaultColor: "#667eea",
                 presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4", "#ffd93d", "#6bcf7f"]
               }
@@ -210,7 +212,7 @@ const handler = async (event, context) => {
               timestamp: Date.now(),
               session_key: session_key || "demo_widgets_" + Date.now(),
               widget: {
-                type: "file_upload",
+                type: WIDGET_TYPES.FILE_UPLOAD,
                 accept: ".jpg,.png,.pdf,.doc,.txt",
                 multiple: false,
                 maxSize: "5MB"

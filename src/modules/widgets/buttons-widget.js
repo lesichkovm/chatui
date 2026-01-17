@@ -1,4 +1,5 @@
 import { BaseWidget } from './base-widget.js';
+import { WIDGET_TYPES } from './widget-types.js';
 
 /**
  * Buttons Widget
@@ -18,7 +19,7 @@ export class ButtonsWidget extends BaseWidget {
     const widgetContainer = document.createElement("div");
     widgetContainer.className = "widget";
     
-    if (this.widgetData.type === 'buttons' && this.widgetData.options) {
+    if (this.widgetData.type === WIDGET_TYPES.BUTTONS && this.widgetData.options) {
       const buttonsContainer = document.createElement("div");
       buttonsContainer.className = "widget-buttons";
       
@@ -61,7 +62,7 @@ export class ButtonsWidget extends BaseWidget {
    */
   validate() {
     return super.validate() && 
-           this.widgetData.type === 'buttons' && 
+           this.widgetData.type === WIDGET_TYPES.BUTTONS && 
            Array.isArray(this.widgetData.options) &&
            this.widgetData.options.length > 0;
   }

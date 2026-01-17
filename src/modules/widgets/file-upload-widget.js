@@ -1,4 +1,5 @@
 import { BaseWidget } from './base-widget.js';
+import { LEGACY_WIDGET_TYPES } from './widget-types.js';
 
 /**
  * File Upload Widget
@@ -18,7 +19,7 @@ export class FileUploadWidget extends BaseWidget {
     const widgetContainer = document.createElement("div");
     widgetContainer.className = "widget";
     
-    if (this.widgetData.type === 'file') {
+    if (this.widgetData.type === LEGACY_WIDGET_TYPES.FILE) {
       const uploadContainer = document.createElement("div");
       uploadContainer.className = "widget-file-upload";
       
@@ -181,6 +182,6 @@ export class FileUploadWidget extends BaseWidget {
 
   validate() {
     return super.validate() && 
-           this.widgetData.type === 'file';
+           this.widgetData.type === LEGACY_WIDGET_TYPES.FILE;
   }
 }

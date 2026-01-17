@@ -1,4 +1,5 @@
 import { BaseWidget } from './base-widget.js';
+import { LEGACY_WIDGET_TYPES } from './widget-types.js';
 
 /**
  * Color Picker Widget
@@ -18,7 +19,7 @@ export class ColorPickerWidget extends BaseWidget {
     const widgetContainer = document.createElement("div");
     widgetContainer.className = "widget";
     
-    if (this.widgetData.type === 'color') {
+    if (this.widgetData.type === LEGACY_WIDGET_TYPES.COLOR) {
       const colorContainer = document.createElement("div");
       colorContainer.className = "widget-color-picker";
       
@@ -106,6 +107,6 @@ export class ColorPickerWidget extends BaseWidget {
 
   validate() {
     return super.validate() && 
-           this.widgetData.type === 'color';
+           this.widgetData.type === LEGACY_WIDGET_TYPES.COLOR;
   }
 }

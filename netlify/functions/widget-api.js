@@ -1,3 +1,5 @@
+import { WIDGET_TYPES } from './widget-types.js';
+
 const handler = async (event, context) => {
   const { httpMethod, queryStringParameters } = event;
   
@@ -29,9 +31,9 @@ const handler = async (event, context) => {
         // Widget data for different types
         if (widget_type) {
           switch (widget_type) {
-            case 'buttons':
+            case WIDGET_TYPES.BUTTONS:
               responseData = {
-                type: 'buttons',
+                type: WIDGET_TYPES.BUTTONS,
                 options: [
                   { id: 'btn1', text: 'Option 1', value: 'option1' },
                   { id: 'btn2', text: 'Option 2', value: 'option2' },
@@ -40,26 +42,26 @@ const handler = async (event, context) => {
               };
               break;
               
-            case 'rating':
+            case WIDGET_TYPES.RATING:
               responseData = {
-                type: 'rating',
+                type: WIDGET_TYPES.RATING,
                 maxRating: 5,
                 iconType: 'star'
               };
               break;
               
-            case 'input':
+            case WIDGET_TYPES.INPUT:
               responseData = {
-                type: 'input',
+                type: WIDGET_TYPES.INPUT,
                 placeholder: 'Enter your message...',
                 inputType: 'text',
                 required: true
               };
               break;
               
-            case 'select':
+            case WIDGET_TYPES.SELECT:
               responseData = {
-                type: 'select',
+                type: WIDGET_TYPES.SELECT,
                 options: [
                   { value: 'option1', text: 'First Option' },
                   { value: 'option2', text: 'Second Option' },
@@ -71,7 +73,7 @@ const handler = async (event, context) => {
               
             case 'checkbox':
               responseData = {
-                type: 'checkbox',
+                type: WIDGET_TYPES.CHECKBOX,
                 options: [
                   { id: 'chk1', text: 'Feature A', value: 'feature_a' },
                   { id: 'chk2', text: 'Feature B', value: 'feature_b' },
@@ -83,7 +85,7 @@ const handler = async (event, context) => {
               
             case 'textarea':
               responseData = {
-                type: 'textarea',
+                type: WIDGET_TYPES.TEXTAREA,
                 placeholder: 'Enter your detailed feedback...',
                 rows: 4,
                 required: true
@@ -92,7 +94,7 @@ const handler = async (event, context) => {
               
             case 'slider':
               responseData = {
-                type: 'slider',
+                type: WIDGET_TYPES.SLIDER,
                 min: 0,
                 max: 100,
                 defaultValue: 50,
@@ -102,7 +104,7 @@ const handler = async (event, context) => {
               
             case 'toggle':
               responseData = {
-                type: 'toggle',
+                type: WIDGET_TYPES.TOGGLE,
                 defaultValue: false,
                 label: 'Enable notifications'
               };
@@ -110,7 +112,7 @@ const handler = async (event, context) => {
               
             case 'date':
               responseData = {
-                type: 'date',
+                type: WIDGET_TYPES.DATE,
                 value: new Date().toISOString().split('T')[0],
                 required: false
               };
@@ -118,7 +120,7 @@ const handler = async (event, context) => {
               
             case 'tags':
               responseData = {
-                type: 'tags',
+                type: WIDGET_TYPES.TAGS,
                 placeholder: 'Add tags...',
                 suggestions: ['javascript', 'chat', 'widget', 'demo', 'netlify']
               };
@@ -126,16 +128,16 @@ const handler = async (event, context) => {
               
             case 'file_upload':
               responseData = {
-                type: 'file_upload',
+                type: WIDGET_TYPES.FILE_UPLOAD,
                 accept: '.jpg,.png,.pdf,.doc',
                 multiple: false,
                 maxSize: '5MB'
               };
               break;
               
-            case 'color_picker':
+            case WIDGET_TYPES.COLOR_PICKER:
               responseData = {
-                type: 'color_picker',
+                type: WIDGET_TYPES.COLOR_PICKER,
                 defaultColor: '#667eea',
                 presetColors: ['#667eea', '#764ba2', '#f093fb', '#4facfe']
               };
@@ -143,7 +145,7 @@ const handler = async (event, context) => {
               
             case 'confirmation':
               responseData = {
-                type: 'confirmation',
+                type: WIDGET_TYPES.CONFIRMATION,
                 title: 'Confirm Action',
                 message: 'Are you sure you want to proceed?',
                 confirmText: 'Yes',
@@ -153,7 +155,7 @@ const handler = async (event, context) => {
               
             case 'radio':
               responseData = {
-                type: 'radio',
+                type: WIDGET_TYPES.RADIO,
                 options: [
                   { id: 'rad1', text: 'Choice A', value: 'choice_a' },
                   { id: 'rad2', text: 'Choice B', value: 'choice_b' },
@@ -165,7 +167,7 @@ const handler = async (event, context) => {
               
             case 'progress':
               responseData = {
-                type: 'progress',
+                type: WIDGET_TYPES.PROGRESS,
                 value: 75,
                 max: 100,
                 showPercentage: true

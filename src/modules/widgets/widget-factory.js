@@ -13,6 +13,7 @@ import { ColorPickerWidget } from './color-picker-widget.js';
 import { ConfirmationWidget } from './confirmation-widget.js';
 import { RadioWidget } from './radio-widget.js';
 import { ProgressWidget } from './progress-widget.js';
+import { WIDGET_TYPES, SERVER_TYPE_MAPPINGS, LEGACY_WIDGET_TYPES } from './widget-types.js';
 
 /**
  * Widget Factory
@@ -26,21 +27,21 @@ export class WidgetFactory {
    * @type {Map<string, BaseWidget>}
    */
   static widgetTypes = new Map([
-    ['buttons', ButtonsWidget],
-    ['select', SelectWidget],
-    ['input', InputWidget],
-    ['checkbox', CheckboxWidget],
-    ['textarea', TextareaWidget],
-    ['slider', SliderWidget],
-    ['rating', RatingWidget],
-    ['toggle', ToggleWidget],
-    ['date', DateWidget],
-    ['tags', TagsWidget],
-    ['file', FileUploadWidget],
-    ['color', ColorPickerWidget],
-    ['confirmation', ConfirmationWidget],
-    ['radio', RadioWidget],
-    ['progress', ProgressWidget]
+    [WIDGET_TYPES.BUTTONS, ButtonsWidget],
+    [WIDGET_TYPES.SELECT, SelectWidget],
+    [WIDGET_TYPES.INPUT, InputWidget],
+    [WIDGET_TYPES.CHECKBOX, CheckboxWidget],
+    [WIDGET_TYPES.TEXTAREA, TextareaWidget],
+    [WIDGET_TYPES.SLIDER, SliderWidget],
+    [WIDGET_TYPES.RATING, RatingWidget],
+    [WIDGET_TYPES.TOGGLE, ToggleWidget],
+    [WIDGET_TYPES.DATE, DateWidget],
+    [WIDGET_TYPES.TAGS, TagsWidget],
+    [LEGACY_WIDGET_TYPES.FILE, FileUploadWidget],
+    [LEGACY_WIDGET_TYPES.COLOR, ColorPickerWidget],
+    [WIDGET_TYPES.CONFIRMATION, ConfirmationWidget],
+    [WIDGET_TYPES.RADIO, RadioWidget],
+    [WIDGET_TYPES.PROGRESS, ProgressWidget]
   ]);
 
   /**
@@ -67,15 +68,19 @@ export class WidgetFactory {
       return null;
     }
 
-    const WidgetClass = this.widgetTypes.get(widgetData.type);
+    // Handle server-to-widget type mapping
+    const widgetType = SERVER_TYPE_MAPPINGS[widgetData.type] || widgetData.type;
+    const WidgetClass = this.widgetTypes.get(widgetType);
     
     if (!WidgetClass) {
-      console.warn(`Unsupported widget type: ${widgetData.type}`);
+      console.warn(`Unsupported widget type: ${widgetData.type} (mapped to: ${widgetType})`);
       return null;
     }
 
     try {
-      return new WidgetClass(widgetData, widgetId);
+      // Create widget with mapped type for internal consistency
+      const mappedWidgetData = { ...widgetData, type: widgetType };
+      return new WidgetClass(mappedWidgetData, widgetId);
     } catch (error) {
       console.error(`Error creating widget of type ${widgetData.type}:`, error);
       return null;
