@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatUI Widget - Professional Chat Interface</title>
+    <meta name="description" content="A professional, ultra-lightweight (~12KB), API-agnostic chat UI widget built with pure Vanilla JavaScript. Zero framework lock-in, zero external dependencies.">
+    <meta name="keywords" content="chat widget, javascript, vanilla js, chat ui, api-agnostic, websocket, jsonp">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .tagline {
+            font-size: 1.4em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .demo-description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .demo-card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .demo-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .demo-card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .demo-button {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .demo-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .installation {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .github-link {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .github-link:hover {
+            background: #555;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ChatUI Widget</h1>
+            <p class="tagline">Professional chat interface that's lightweight, framework-free, and ready to deploy</p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number">~12KB</span>
+                    <span class="stat-label">Ultra Lightweight</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">0</span>
+                    <span class="stat-label">Dependencies</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">15+</span>
+                    <span class="stat-label">Interactive Widgets</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Ultra-Lightweight</h3>
+                <p class="feature-description">Only ~12KB core footprint with minimal impact on host performance. Load instantly and run smoothly on any device.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3 class="feature-title">Zero Dependencies</h3>
+                <p class="feature-description">Pure vanilla JavaScript means no framework lock-in. Works with any tech stack and no external dependencies to manage.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3 class="feature-title">Cross-Domain Ready</h3>
+                <p class="feature-description">Native JSONP support bypasses CORS headaches. Deploy anywhere and connect to any backend seamlessly.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3 class="feature-title">Real-Time Support</h3>
+                <p class="feature-description">WebSocket support for live typing indicators, read receipts, and streaming responses for engaging user experiences.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3 class="feature-title">Interactive Widgets</h3>
+                <p class="feature-description">15+ specialized UI components including rating systems, file uploads, date pickers, and more for rich interactions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3 class="feature-title">Secure & Accessible</h3>
+                <p class="feature-description">ARIA-compliant focus management, robust XSS prevention, and scoped CSS that won't break your site's styles.</p>
+            </div>
+        </section>
+
+        <section class="demo-section">
+            <h2 class="demo-title">Live Demos</h2>
+            <p class="demo-description">Experience ChatUI Widget in action with our interactive demos powered by Netlify Functions</p>
+            
+            <div class="demo-grid">
+                <div class="demo-card">
+                    <h3>Popup Chat</h3>
+                    <p>Classic chat widget that appears as a floating button in the corner of your website.</p>
+                    <a href="/demo/popup.html" class="demo-button">Try Demo</a>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>Full Page Chat</h3>
+                    <p>Dedicated chat interface that takes up the full page for immersive conversations.</p>
+                    <a href="/demo/full_page.htm" class="demo-button">Try Demo</a>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>Widget Showcase</h3>
+                    <p>Explore all 15+ interactive widgets including forms, ratings, file uploads, and more.</p>
+                    <a href="/demo/widget-demo.html" class="demo-button">Try Demo</a>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>Theme System</h3>
+                    <p>See the theming capabilities with light/dark modes and custom color schemes.</p>
+                    <a href="/demo/theme-demo.html" class="demo-button">Try Demo</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="installation">
+            <h2 class="demo-title">Quick Start</h2>
+            <p class="demo-description">Get ChatUI Widget running on your site in under 30 seconds</p>
+            
+            <div class="code-block">
+                <code>&lt;script 
+  id="chat-widget"
+  src="/dist/chat-widget.js"
+  data-server-url="/.netlify/functions/chat-api"
+  data-position="bottom-right"
+  data-color="#667eea"
+  data-title="Chat with us"&gt;
+&lt;/script&gt;</code>
+            </div>
+            
+            <p style="text-align: center; color: #666; margin-top: 20px;">
+                That's it! The widget automatically initializes and connects to our Netlify Functions backend for demo purposes.
+            </p>
+        </section>
+
+        <footer class="footer">
+            <h2 style="margin-bottom: 20px; color: #333;">Ready to integrate?</h2>
+            <p style="color: #666; margin-bottom: 30px;">Join developers using ChatUI Widget in production</p>
+            <a href="https://github.com/lesichkovm/chatui" class="github-link" target="_blank">
+                View on GitHub
+            </a>
+        </footer>
+    </div>
+</body>
+</html>
