@@ -1930,12 +1930,15 @@
       }
       this.scriptElement = scriptElement;
       this.widgetId = config.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
+      const explicitColor = config.primaryColor || config.color;
       this.themeManager = new ThemeManager(this.widgetId, scriptElement);
       const themeConfig = this.themeManager.getThemeConfig();
       this.config = {
         displayMode: config.displayMode || config.mode || "popup",
         position: config.position || "bottom-right",
-        primaryColor: config.primaryColor || config.color || themeConfig.colors.primary,
+        primaryColor: explicitColor || themeConfig.colors.primary,
+        explicitColor,
+        // Store this to know if we should force it as inline style
         title: config.title || "Chat with us",
         targetSelector: config.targetSelector || config.target || null,
         serverUrl: config.serverUrl || "http://localhost:3000",
@@ -2021,9 +2024,9 @@
           }
         }
       }
-      if (this.config.primaryColor && !this.container.style.getPropertyValue("--chat-primary")) {
-        this.container.style.setProperty("--chat-primary", this.config.primaryColor);
-        this.container.style.setProperty("--chat-primary-dark", adjustColor(this.config.primaryColor, -20));
+      if (this.config.explicitColor && !this.container.style.getPropertyValue("--chat-primary")) {
+        this.container.style.setProperty("--chat-primary", this.config.explicitColor);
+        this.container.style.setProperty("--chat-primary-dark", adjustColor(this.config.explicitColor, -20));
       }
     }
     setState(newState) {
