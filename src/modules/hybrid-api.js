@@ -1,8 +1,9 @@
 import { ChatAPI } from './api.js';
+import { CorsAPI } from './cors-api.js';
 
 /**
- * HybridChatAPI extends ChatAPI with WebSocket support
- * Automatically detects and uses WebSocket when available, falls back to JSONP
+ * HybridChatAPI extends ChatAPI with WebSocket and CORS support
+ * Automatically detects and uses WebSocket when available, falls back to CORS then JSONP
  */
 export class HybridChatAPI extends ChatAPI {
   /**
@@ -10,22 +11,61 @@ export class HybridChatAPI extends ChatAPI {
    * @param {Object} config - Configuration object
    * @param {string} config.serverUrl - Base URL for the chat server
    * @param {boolean} [config.debug=false] - Enable debug logging
+   * @param {boolean} [config.preferJsonP=false] - Prefer JSONP over CORS (legacy)
+   * @param {boolean} [config.forceJsonP=false] - Force JSONP only (no CORS)
+   * @param {number} [config.timeout=5000] - CORS request timeout
+   * @param {number} [config.fallbackRetries=2] - Number of fallback attempts
    */
   constructor(config) {
+    // Always call super first
     super(config);
+    
+    this.config = config;
+    this.serverUrl = config.serverUrl;
+    this.debug = config.debug || false;
+    this.timeout = config.timeout || 5000;
+    this.fallbackRetries = config.fallbackRetries || 2;
+    this.forceJsonP = config.forceJsonP || false;
+    this.preferJsonP = config.preferJsonP || false;
+    
     this.wsConnection = null;
     this.connectionType = this.detectConnectionType(config.serverUrl);
     this.messageQueue = [];
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
     this.reconnectDelay = 1000;
+    this.fallbackAttempts = 0;
+    
+    // Initialize appropriate API instance
+    this.initializeApi();
+  }
+
+  /**
+   * Initialize the appropriate API instance based on configuration
+   * @private
+   */
+  initializeApi() {
+    if (this.connectionType === 'websocket') {
+      // For WebSocket, we use the parent ChatAPI
+      this.apiType = 'websocket';
+    } else {
+      // For HTTP/HTTPS, choose between CORS and JSONP
+      if (this.forceJsonP || this.preferJsonP) {
+        // Use JSONP (legacy behavior)
+        this.apiType = 'jsonp';
+      } else {
+        // Use CORS API by default
+        this.corsApi = new CorsAPI(this.config);
+        this.apiType = 'cors';
+      }
+    }
   }
 
   /**
    * Detect connection type based on server URL protocol
    * @private
    * @param {string} serverUrl - Server URL to analyze
-   * @returns {string} Connection type ('websocket' or 'jsonp')
+   * @returns {string} Connection type ('websocket' or 'http')
    */
   detectConnectionType(serverUrl) {
     try {
@@ -34,13 +74,13 @@ export class HybridChatAPI extends ChatAPI {
       if (url.protocol === 'wss:' || url.protocol === 'ws:') {
         return 'websocket';
       } else if (url.protocol === 'https:' || url.protocol === 'http:') {
-        return 'jsonp';
+        return 'http';
       }
     } catch (error) {
-      console.warn('ChatWidget: Invalid server URL, defaulting to JSONP');
+      console.warn('ChatWidget: Invalid server URL, defaulting to HTTP');
     }
     
-    return 'jsonp';
+    return 'http';
   }
 
   /**
@@ -50,9 +90,63 @@ export class HybridChatAPI extends ChatAPI {
   performHandshake(onSuccess) {
     if (this.connectionType === 'websocket') {
       this.performWebSocketHandshake(onSuccess);
+    } else if (this.apiType === 'cors') {
+      this.performCorsHandshake(onSuccess);
     } else {
       super.performHandshake(onSuccess);
     }
+  }
+
+  /**
+   * Perform CORS handshake with fallback to JSONP
+   * @private
+   * @param {Function} onSuccess - Callback function called on successful handshake
+   */
+  performCorsHandshake(onSuccess) {
+    this.corsApi.performHandshake(
+      () => {
+        // CORS succeeded, copy session key to parent
+        this.setSessionKey(this.corsApi.getSessionKey());
+        if (onSuccess) onSuccess();
+      },
+      (error) => {
+        // CORS failed, try fallback to JSONP
+        if (this.shouldFallbackToJSONP(error)) {
+          this.fallbackToJSONP();
+          super.performHandshake(onSuccess);
+        } else {
+          console.error('ChatWidget: Handshake failed', error);
+        }
+      }
+    );
+  }
+
+  /**
+   * Check if we should fallback to JSONP based on error
+   * @param {Error} error - The error that occurred
+   * @returns {boolean} True if should fallback to JSONP
+   */
+  shouldFallbackToJSONP(error) {
+    if (this.fallbackAttempts >= this.fallbackRetries) {
+      return false;
+    }
+
+    const errorMessage = error.message;
+    
+    // Check for CORS-specific errors
+    return errorMessage.includes('CORS_ERROR') || 
+           errorMessage.includes('Failed to fetch') ||
+           errorMessage.includes('Network request failed');
+  }
+
+  /**
+   * Fallback from CORS to JSONP API
+   * @private
+   */
+  fallbackToJSONP() {
+    this.fallbackAttempts++;
+    this.apiType = 'jsonp';
+    console.warn('ChatWidget: Falling back to JSONP due to CORS issues');
   }
 
   /**
@@ -97,9 +191,35 @@ export class HybridChatAPI extends ChatAPI {
   connect(onMessage) {
     if (this.connectionType === 'websocket') {
       this.connectWebSocket(onMessage);
+    } else if (this.apiType === 'cors') {
+      this.connectCors(onMessage);
     } else {
       super.connect(onMessage);
     }
+  }
+
+  /**
+   * Connect via CORS with fallback to JSONP
+   * @private
+   * @param {Function} onMessage - Callback function for incoming messages
+   */
+  connectCors(onMessage) {
+    this.corsApi.connect(
+      (text, sender, widget) => {
+        if (onMessage) {
+          onMessage(text, sender, widget);
+        }
+      },
+      (error) => {
+        // CORS failed, try fallback to JSONP
+        if (this.shouldFallbackToJSONP(error)) {
+          this.fallbackToJSONP();
+          super.connect(onMessage);
+        } else {
+          console.error('ChatWidget: Connect failed', error);
+        }
+      }
+    );
   }
 
   /**
@@ -174,9 +294,37 @@ export class HybridChatAPI extends ChatAPI {
   sendMessage(message, onResponse) {
     if (this.connectionType === 'websocket') {
       this.sendWebSocketMessage(message, onResponse);
+    } else if (this.apiType === 'cors') {
+      this.sendMessageCors(message, onResponse);
     } else {
       super.sendMessage(message, onResponse);
     }
+  }
+
+  /**
+   * Send message via CORS with fallback to JSONP
+   * @private
+   * @param {string} message - The message to send
+   * @param {Function} onResponse - Callback function for server response
+   */
+  sendMessageCors(message, onResponse) {
+    this.corsApi.sendMessage(
+      message,
+      (text, sender, widget) => {
+        if (onResponse) {
+          onResponse(text, sender, widget);
+        }
+      },
+      (error) => {
+        // CORS failed, try fallback to JSONP
+        if (this.shouldFallbackToJSONP(error)) {
+          this.fallbackToJSONP();
+          super.sendMessage(message, onResponse);
+        } else {
+          console.error('ChatWidget: SendMessage failed', error);
+        }
+      }
+    );
   }
 
   /**
@@ -249,7 +397,6 @@ export class HybridChatAPI extends ChatAPI {
 
   /**
    * Initialize WebSocket connection
-   * @private
    * @returns {Promise} Promise that resolves when connection is established
    */
   initWebSocket() {

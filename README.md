@@ -2,7 +2,7 @@
 
 ![Tests](https://github.com/lesichkovm/chatui/workflows/Tests/badge.svg)
 
-A professional, **ultra-lightweight (~12KB)**, API-agnostic chat UI widget built with **pure Vanilla JavaScript**. Zero framework lock-in (no React/Vue/jQuery), zero external dependencies, and built-in JSONP support for seamless cross-domain integration.
+A professional, **ultra-lightweight (~12KB)**, API-agnostic chat UI widget built with **pure Vanilla JavaScript**. Zero framework lock-in (no React/Vue/jQuery), zero external dependencies, with **CORS-first communication** and automatic JSONP fallback for seamless cross-domain integration.
 
 ## Strategic Position
 
@@ -19,9 +19,9 @@ ChatUI provides the interactive power of a modern conversational UI without the 
 - **Ultra-Lightweight**: ~12KB core footprint, minimal impact on host performance.
 - **Interactive Widget System**: Support for 15+ specialized UI components (Rating, Date Picker, File Upload, etc.).
 - **Zero Dependencies**: Pure vanilla JS, works with any stack.
-- **Cross-Domain Ready**: Native JSONP support bypasses CORS headaches.
+- **CORS-First Communication**: Modern fetch-based API with automatic JSONP fallback for legacy compatibility.
 - **Real-Time WebSocket Support**: Live typing indicators, read receipts, and streaming responses.
-- **Protocol-Based Transport**: Automatically uses WebSocket (ws/wss) or JSONP (http/https) based on server URL.
+- **Protocol-Based Transport**: Automatically uses WebSocket (ws/wss) or CORS/JSONP (http/https) based on server URL.
 - **Dual Modes**: Supports both `popup` and `fullpage` embedded modes.
 - **Modular Architecture**: Built with modern ES6 classes and a dedicated `WidgetFactory`.
 - **Accessible & Secure**: ARIA-compliant focus management and robust XSS prevention.
@@ -31,17 +31,29 @@ ChatUI provides the interactive power of a modern conversational UI without the 
 ### 1. HTML Integration (Auto-initialize)
 Add the script tag to your HTML. The widget will automatically initialize based on the data attributes.
 
-**JSONP Mode (HTTP/HTTPS):**
+**CORS Mode (HTTP/HTTPS) - Default:**
 ```html
 <script 
   id="chat-widget"
   src="path/to/chat-widget.js"
-  data-server-url="http://your-server.com"
+  data-server-url="https://your-server.com"
   data-position="bottom-right"
   data-color="#007bff"
   data-title="Chat with us">
 </script>
 ```
+
+**JSONP Mode (Legacy Fallback):**
+```html
+<script 
+  id="chat-widget"
+  src="path/to/chat-widget.js"
+  data-server-url="http://your-server.com"
+  data-prefer-jsonp="true"
+  data-position="bottom-right"
+  data-color="#007bff"
+  data-title="Chat with us">
+</script>
 
 **WebSocket Mode (WS/WSS):**
 ```html
@@ -79,13 +91,16 @@ chat.sendMessage('Hello from the API!');
 
 | Attribute | JS Option | Description | Default |
 |-----------|-----------|-------------|---------|
-| `data-server-url` | `serverUrl` | Base URL of the chat backend API | `http://localhost:3000` |
+| `data-server-url` | `serverUrl` | Base URL for the chat backend API | `http://localhost:3000` |
 | `data-display` | `displayMode` | Display mode: `popup` or `fullpage` | `popup` |
 | `data-mode` | `themeMode` | Theme mode: `light` or `dark` | `light` |
 | `data-position` | `position` | Corner position: `bottom-right`, `bottom-left`, `top-right`, `top-left` | `bottom-right` |
 | `data-color` | `primaryColor` | Primary theme color (Hex code) | `#007bff` |
 | `data-title` | `title` | Title text displayed in the header | `Chat with us` |
 | `data-target` | `targetSelector` | Selector for container element (fullpage mode only) | `null` |
+| `data-prefer-jsonp` | `preferJsonP` | Force JSONP instead of CORS (legacy) | `false` |
+| `data-force-jsonp` | `forceJsonP` | Force JSONP only, no CORS fallback | `false` |
+| `data-timeout` | `timeout` | CORS request timeout in milliseconds | `5000` |
 
 ## CSS Customization
 
@@ -106,10 +121,28 @@ The widget uses strictly ID-rooted CSS selectors to prevent affecting your site'
 
 ## API Integration
 
-The widget supports two transport protocols based on the server URL scheme:
+The widget supports multiple transport protocols with automatic fallback:
 
-### JSONP Mode (HTTP/HTTPS)
-The widget expects a backend that supports the following endpoints (compatible with JSONP):
+### CORS Mode (Default) - HTTP/HTTPS
+The widget uses modern fetch API with proper CORS headers. This is the default and recommended approach for modern web applications.
+
+#### Handshake
+`POST /api/handshake`  
+Request body: `{ type: 'handshake', timestamp: 1234567890 }`  
+Response: `{ status: "success", session_key: "..." }`
+
+#### Send/Receive Messages
+`POST /api/messages`  
+Request body: `{ type: 'message', message: "...", session_key: "...", timestamp: 1234567890 }`  
+Response: `{ text: "Response message", sender: "bot" }`
+
+#### Connect
+`POST /api/messages`  
+Request body: `{ type: 'connect', session_key: "...", timestamp: 1234567890 }`  
+Response: `{ text: "Welcome message", sender: "bot" }`
+
+### JSONP Mode (Legacy Fallback)
+If CORS fails or is explicitly configured, the widget automatically falls back to JSONP for compatibility with older servers.
 
 #### Handshake
 `GET /api/handshake?callback=cb`  
@@ -188,6 +221,8 @@ To see the widget in action with a live backend:
 
 ## Security Features
 
-- **JSONP Security**: Callback validation to prevent XSS.
+- **CORS-First Security**: Uses modern CORS headers by default, falling back to JSONP only when necessary.
+- **JSONP Security**: Callback validation to prevent XSS when JSONP fallback is used.
 - **Scoped Reset**: Internal CSS reset prevents host styles from breaking the UI.
 - **Message Sanitization**: Proper handling of user-generated content.
+- **Timeout Protection**: Configurable request timeouts prevent hanging connections.

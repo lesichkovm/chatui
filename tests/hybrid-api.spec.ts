@@ -105,24 +105,24 @@ test.describe('HybridChatAPI', () => {
       expect(api.connectionType).toBe('websocket');
     });
 
-    test('should detect JSONP protocol for https://', async () => {
+    test('should detect HTTP protocol for https://', async () => {
       api = new HybridChatAPI({ serverUrl: 'https://example.com' });
-      expect(api.connectionType).toBe('jsonp');
+      expect(api.connectionType).toBe('http');
     });
 
-    test('should detect JSONP protocol for http://', async () => {
+    test('should detect HTTP protocol for http://', async () => {
       api = new HybridChatAPI({ serverUrl: 'http://example.com' });
-      expect(api.connectionType).toBe('jsonp');
+      expect(api.connectionType).toBe('http');
     });
 
-    test('should default to JSONP for invalid URLs', async () => {
+    test('should default to HTTP for invalid URLs', async () => {
       api = new HybridChatAPI({ serverUrl: 'invalid-url' });
-      expect(api.connectionType).toBe('jsonp');
+      expect(api.connectionType).toBe('http');
     });
 
-    test('should default to JSONP for empty URL', async () => {
+    test('should default to HTTP for empty URL', async () => {
       api = new HybridChatAPI({ serverUrl: '' });
-      expect(api.connectionType).toBe('jsonp');
+      expect(api.connectionType).toBe('http');
     });
   });
 

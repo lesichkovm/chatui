@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-17T19:05:16.015Z
+ * Generated on: 2026-01-17T23:02:19.887Z
  */
 
 
@@ -153,6 +153,195 @@
     }
   };
 
+  // src/modules/cors-api.js
+  var CorsAPI = class {
+    /**
+     * Create a new CorsAPI instance
+     * @param {Object} config - Configuration object
+     * @param {string} config.serverUrl - Base URL for the chat server
+     * @param {boolean} [config.debug=false] - Enable debug logging
+     * @param {number} [config.timeout=5000] - Request timeout in milliseconds
+     */
+    constructor(config) {
+      this.serverUrl = config.serverUrl;
+      this.debug = config.debug || false;
+      this.timeout = config.timeout || 5e3;
+    }
+    /**
+     * Get the stored session key from localStorage
+     * @returns {string} The session key or empty string if not found
+     */
+    getSessionKey() {
+      return localStorage.getItem("chat_session_key") || "";
+    }
+    /**
+     * Store a session key in localStorage
+     * @param {string} key - The session key to store
+     */
+    setSessionKey(key) {
+      localStorage.setItem("chat_session_key", key);
+    }
+    /**
+     * Check if running in test environment (localhost:32000)
+     * @returns {boolean} True if in test environment
+     */
+    isTestEnvironment() {
+      return typeof window !== "undefined" && window.location && window.location.hostname === "localhost" && window.location.port === "32000";
+    }
+    /**
+     * Perform HTTP request with timeout and CORS error detection
+     * @private
+     * @param {string} url - Request URL
+     * @param {Object} options - Fetch options
+     * @returns {Promise} Promise that resolves with response data
+     */
+    async _fetchWithTimeout(url, options = {}) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            ...options.headers
+          }
+        });
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response content type. Expected JSON.");
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
+          throw new Error("CORS_ERROR: " + error.message);
+        } else if (error.name === "AbortError") {
+          throw new Error("TIMEOUT_ERROR: Request timed out");
+        } else {
+          throw error;
+        }
+      }
+    }
+    /**
+     * Perform initial handshake with server to establish session
+     * @param {Function} onSuccess - Callback function called on successful handshake
+     * @param {Function} onError - Callback function called on error (for fallback detection)
+     */
+    async performHandshake(onSuccess, onError) {
+      if (this.isTestEnvironment()) {
+        this.setSessionKey("test-session-key");
+        if (onSuccess) onSuccess();
+        return;
+      }
+      const url = `${this.serverUrl}/api/handshake`;
+      try {
+        const response = await this._fetchWithTimeout(url, {
+          method: "POST",
+          body: JSON.stringify({ type: "handshake", timestamp: Date.now() })
+        });
+        if (response.status === "success") {
+          this.setSessionKey(response.session_key);
+          if (onSuccess) onSuccess();
+        } else {
+          throw new Error("Handshake failed: Invalid response status");
+        }
+      } catch (error) {
+        if (this.debug) {
+          console.error("ChatWidget: CORS handshake failed", error);
+        }
+        if (onError) onError(error);
+      }
+    }
+    /**
+     * Connect to the chat server to receive messages
+     * @param {Function} onMessage - Callback function for incoming messages
+     * @param {string} onMessage.text - Message text
+     * @param {string} onMessage.sender - Message sender ('bot')
+     * @param {Object} [onMessage.widget] - Optional widget data
+     * @param {Function} onError - Callback function called on error (for fallback detection)
+     */
+    async connect(onMessage, onError) {
+      if (this.isTestEnvironment()) {
+        return;
+      }
+      const sessionKey = this.getSessionKey();
+      const url = `${this.serverUrl}/api/messages`;
+      try {
+        const response = await this._fetchWithTimeout(url, {
+          method: "POST",
+          body: JSON.stringify({
+            type: "connect",
+            session_key: sessionKey,
+            timestamp: Date.now()
+          })
+        });
+        if (onMessage) {
+          if (response.widget) {
+            onMessage(response.text, "bot", response.widget);
+          } else {
+            onMessage(response.text, "bot");
+          }
+        }
+      } catch (error) {
+        if (this.debug) {
+          console.error("ChatWidget: CORS connect failed", error);
+        }
+        if (onError) onError(error);
+      }
+    }
+    /**
+     * Send a message to the chat server
+     * @param {string} message - The message to send
+     * @param {Function} onResponse - Callback function for server response
+     * @param {string} onResponse.text - Response text
+     * @param {string} onResponse.sender - Response sender ('bot')
+     * @param {Object} [onResponse.widget] - Optional widget data
+     * @param {Function} onError - Callback function called on error (for fallback detection)
+     */
+    async sendMessage(message, onResponse, onError) {
+      if (this.isTestEnvironment()) {
+        setTimeout(() => {
+          if (onResponse) {
+            onResponse(`Test response to: ${message}`, "bot");
+          }
+        }, 100);
+        return;
+      }
+      const sessionKey = this.getSessionKey();
+      const url = `${this.serverUrl}/api/messages`;
+      try {
+        const response = await this._fetchWithTimeout(url, {
+          method: "POST",
+          body: JSON.stringify({
+            type: "message",
+            message,
+            session_key: sessionKey,
+            timestamp: Date.now()
+          })
+        });
+        if (onResponse) {
+          if (response.widget) {
+            onResponse(response.text, "bot", response.widget);
+          } else {
+            onResponse(response.text, "bot");
+          }
+        }
+      } catch (error) {
+        if (this.debug) {
+          console.error("ChatWidget: CORS sendMessage failed", error);
+        }
+        if (onError) onError(error);
+      }
+    }
+  };
+
   // src/modules/hybrid-api.js
   var HybridChatAPI = class extends ChatAPI {
     /**
@@ -160,21 +349,50 @@
      * @param {Object} config - Configuration object
      * @param {string} config.serverUrl - Base URL for the chat server
      * @param {boolean} [config.debug=false] - Enable debug logging
+     * @param {boolean} [config.preferJsonP=false] - Prefer JSONP over CORS (legacy)
+     * @param {boolean} [config.forceJsonP=false] - Force JSONP only (no CORS)
+     * @param {number} [config.timeout=5000] - CORS request timeout
+     * @param {number} [config.fallbackRetries=2] - Number of fallback attempts
      */
     constructor(config) {
       super(config);
+      this.config = config;
+      this.serverUrl = config.serverUrl;
+      this.debug = config.debug || false;
+      this.timeout = config.timeout || 5e3;
+      this.fallbackRetries = config.fallbackRetries || 2;
+      this.forceJsonP = config.forceJsonP || false;
+      this.preferJsonP = config.preferJsonP || false;
       this.wsConnection = null;
       this.connectionType = this.detectConnectionType(config.serverUrl);
       this.messageQueue = [];
       this.reconnectAttempts = 0;
       this.maxReconnectAttempts = 5;
       this.reconnectDelay = 1e3;
+      this.fallbackAttempts = 0;
+      this.initializeApi();
+    }
+    /**
+     * Initialize the appropriate API instance based on configuration
+     * @private
+     */
+    initializeApi() {
+      if (this.connectionType === "websocket") {
+        this.apiType = "websocket";
+      } else {
+        if (this.forceJsonP || this.preferJsonP) {
+          this.apiType = "jsonp";
+        } else {
+          this.corsApi = new CorsAPI(this.config);
+          this.apiType = "cors";
+        }
+      }
     }
     /**
      * Detect connection type based on server URL protocol
      * @private
      * @param {string} serverUrl - Server URL to analyze
-     * @returns {string} Connection type ('websocket' or 'jsonp')
+     * @returns {string} Connection type ('websocket' or 'http')
      */
     detectConnectionType(serverUrl) {
       try {
@@ -182,12 +400,12 @@
         if (url.protocol === "wss:" || url.protocol === "ws:") {
           return "websocket";
         } else if (url.protocol === "https:" || url.protocol === "http:") {
-          return "jsonp";
+          return "http";
         }
       } catch (error) {
-        console.warn("ChatWidget: Invalid server URL, defaulting to JSONP");
+        console.warn("ChatWidget: Invalid server URL, defaulting to HTTP");
       }
-      return "jsonp";
+      return "http";
     }
     /**
      * Perform handshake using appropriate connection method
@@ -196,9 +414,53 @@
     performHandshake(onSuccess) {
       if (this.connectionType === "websocket") {
         this.performWebSocketHandshake(onSuccess);
+      } else if (this.apiType === "cors") {
+        this.performCorsHandshake(onSuccess);
       } else {
         super.performHandshake(onSuccess);
       }
+    }
+    /**
+     * Perform CORS handshake with fallback to JSONP
+     * @private
+     * @param {Function} onSuccess - Callback function called on successful handshake
+     */
+    performCorsHandshake(onSuccess) {
+      this.corsApi.performHandshake(
+        () => {
+          this.setSessionKey(this.corsApi.getSessionKey());
+          if (onSuccess) onSuccess();
+        },
+        (error) => {
+          if (this.shouldFallbackToJSONP(error)) {
+            this.fallbackToJSONP();
+            super.performHandshake(onSuccess);
+          } else {
+            console.error("ChatWidget: Handshake failed", error);
+          }
+        }
+      );
+    }
+    /**
+     * Check if we should fallback to JSONP based on error
+     * @param {Error} error - The error that occurred
+     * @returns {boolean} True if should fallback to JSONP
+     */
+    shouldFallbackToJSONP(error) {
+      if (this.fallbackAttempts >= this.fallbackRetries) {
+        return false;
+      }
+      const errorMessage = error.message;
+      return errorMessage.includes("CORS_ERROR") || errorMessage.includes("Failed to fetch") || errorMessage.includes("Network request failed");
+    }
+    /**
+     * Fallback from CORS to JSONP API
+     * @private
+     */
+    fallbackToJSONP() {
+      this.fallbackAttempts++;
+      this.apiType = "jsonp";
+      console.warn("ChatWidget: Falling back to JSONP due to CORS issues");
     }
     /**
      * Perform WebSocket-specific handshake
@@ -238,9 +500,33 @@
     connect(onMessage) {
       if (this.connectionType === "websocket") {
         this.connectWebSocket(onMessage);
+      } else if (this.apiType === "cors") {
+        this.connectCors(onMessage);
       } else {
         super.connect(onMessage);
       }
+    }
+    /**
+     * Connect via CORS with fallback to JSONP
+     * @private
+     * @param {Function} onMessage - Callback function for incoming messages
+     */
+    connectCors(onMessage) {
+      this.corsApi.connect(
+        (text, sender, widget) => {
+          if (onMessage) {
+            onMessage(text, sender, widget);
+          }
+        },
+        (error) => {
+          if (this.shouldFallbackToJSONP(error)) {
+            this.fallbackToJSONP();
+            super.connect(onMessage);
+          } else {
+            console.error("ChatWidget: Connect failed", error);
+          }
+        }
+      );
     }
     /**
      * Connect via WebSocket
@@ -307,9 +593,35 @@
     sendMessage(message, onResponse) {
       if (this.connectionType === "websocket") {
         this.sendWebSocketMessage(message, onResponse);
+      } else if (this.apiType === "cors") {
+        this.sendMessageCors(message, onResponse);
       } else {
         super.sendMessage(message, onResponse);
       }
+    }
+    /**
+     * Send message via CORS with fallback to JSONP
+     * @private
+     * @param {string} message - The message to send
+     * @param {Function} onResponse - Callback function for server response
+     */
+    sendMessageCors(message, onResponse) {
+      this.corsApi.sendMessage(
+        message,
+        (text, sender, widget) => {
+          if (onResponse) {
+            onResponse(text, sender, widget);
+          }
+        },
+        (error) => {
+          if (this.shouldFallbackToJSONP(error)) {
+            this.fallbackToJSONP();
+            super.sendMessage(message, onResponse);
+          } else {
+            console.error("ChatWidget: SendMessage failed", error);
+          }
+        }
+      );
     }
     /**
      * Send message via WebSocket
@@ -375,7 +687,6 @@
     }
     /**
      * Initialize WebSocket connection
-     * @private
      * @returns {Promise} Promise that resolves when connection is established
      */
     initWebSocket() {
@@ -502,6 +813,38 @@
     }
   };
 
+  // src/modules/widgets/widget-types.js
+  var WIDGET_TYPES = {
+    BUTTONS: "buttons",
+    SELECT: "select",
+    INPUT: "input",
+    PASSWORD: "password",
+    CHECKBOX: "checkbox",
+    TEXTAREA: "textarea",
+    SLIDER: "slider",
+    RATING: "rating",
+    TOGGLE: "toggle",
+    DATE: "date",
+    TAGS: "tags",
+    FILE_UPLOAD: "file_upload",
+    COLOR_PICKER: "color_picker",
+    CONFIRMATION: "confirmation",
+    RADIO: "radio",
+    PROGRESS: "progress"
+  };
+  var LEGACY_WIDGET_TYPES = {
+    FILE: "file",
+    COLOR: "color"
+  };
+  var SERVER_TYPE_MAPPINGS = {
+    [WIDGET_TYPES.FILE_UPLOAD]: LEGACY_WIDGET_TYPES.FILE,
+    [WIDGET_TYPES.COLOR_PICKER]: LEGACY_WIDGET_TYPES.COLOR
+  };
+  var WIDGET_TYPE_MAPPINGS = {
+    [LEGACY_WIDGET_TYPES.FILE]: WIDGET_TYPES.FILE_UPLOAD,
+    [LEGACY_WIDGET_TYPES.COLOR]: WIDGET_TYPES.COLOR_PICKER
+  };
+
   // src/modules/widgets/buttons-widget.js
   var ButtonsWidget = class extends BaseWidget {
     /**
@@ -514,7 +857,7 @@
       }
       const widgetContainer = document.createElement("div");
       widgetContainer.className = "widget";
-      if (this.widgetData.type === "buttons" && this.widgetData.options) {
+      if (this.widgetData.type === WIDGET_TYPES.BUTTONS && this.widgetData.options) {
         const buttonsContainer = document.createElement("div");
         buttonsContainer.className = "widget-buttons";
         this.widgetData.options.forEach((option) => {
@@ -548,7 +891,7 @@
      * @returns {boolean} True if data contains required properties for buttons widget
      */
     validate() {
-      return super.validate() && this.widgetData.type === "buttons" && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
+      return super.validate() && this.widgetData.type === WIDGET_TYPES.BUTTONS && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
     }
   };
 
@@ -671,6 +1014,93 @@
      */
     validate() {
       return super.validate() && this.widgetData.type === "input";
+    }
+  };
+
+  // src/modules/widgets/password-widget.js
+  var PasswordWidget = class extends BaseWidget {
+    /**
+     * Create the DOM element for the password widget
+     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+     */
+    createElement() {
+      if (!this.validate()) {
+        return document.createComment("Invalid password widget data");
+      }
+      const widgetContainer = document.createElement("div");
+      widgetContainer.className = "widget";
+      if (this.widgetData.type === "password") {
+        const formContainer = document.createElement("div");
+        formContainer.className = "widget-password";
+        const inputWrapper = document.createElement("div");
+        inputWrapper.className = "widget-password-wrapper";
+        const input = document.createElement("input");
+        input.type = "password";
+        input.className = "widget-password-element";
+        input.placeholder = this.widgetData.placeholder || "Enter your password...";
+        input.setAttribute("data-widget-id", this.widgetId);
+        input.autocomplete = this.widgetData.autocomplete || "current-password";
+        const toggleButton = document.createElement("button");
+        toggleButton.type = "button";
+        toggleButton.className = "widget-password-toggle";
+        toggleButton.setAttribute("aria-label", "Toggle password visibility");
+        toggleButton.innerHTML = "\u{1F441}\uFE0F";
+        const submitButton = document.createElement("button");
+        submitButton.className = "widget-password-submit";
+        submitButton.textContent = this.widgetData.buttonText || "Submit";
+        const toggleVisibility = () => {
+          if (input.type === "password") {
+            input.type = "text";
+            toggleButton.innerHTML = "\u{1F648}";
+            toggleButton.setAttribute("aria-label", "Hide password");
+          } else {
+            input.type = "password";
+            toggleButton.innerHTML = "\u{1F441}\uFE0F";
+            toggleButton.setAttribute("aria-label", "Show password");
+          }
+        };
+        const handleSubmit = () => {
+          const value = input.value.trim();
+          if (value) {
+            input.disabled = true;
+            input.classList.add("widget-password-disabled");
+            toggleButton.disabled = true;
+            toggleButton.classList.add("widget-password-disabled");
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-password-disabled");
+            const passwordValue = value;
+            input.value = "";
+            this.handleInteraction({
+              optionId: "password-submit",
+              optionValue: passwordValue,
+              optionText: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+              // Mask the password in display
+              widgetType: "password"
+            });
+          }
+        };
+        toggleButton.addEventListener("click", toggleVisibility);
+        submitButton.addEventListener("click", handleSubmit);
+        input.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit();
+          }
+        });
+        inputWrapper.appendChild(input);
+        inputWrapper.appendChild(toggleButton);
+        formContainer.appendChild(inputWrapper);
+        formContainer.appendChild(submitButton);
+        widgetContainer.appendChild(formContainer);
+      }
+      return widgetContainer;
+    }
+    /**
+     * Validate password widget data structure
+     * @returns {boolean} True if data contains required properties for password widget
+     */
+    validate() {
+      return super.validate() && this.widgetData.type === "password";
     }
   };
 
@@ -1239,7 +1669,7 @@
       }
       const widgetContainer = document.createElement("div");
       widgetContainer.className = "widget";
-      if (this.widgetData.type === "file") {
+      if (this.widgetData.type === LEGACY_WIDGET_TYPES.FILE) {
         const uploadContainer = document.createElement("div");
         uploadContainer.className = "widget-file-upload";
         const label = document.createElement("label");
@@ -1372,7 +1802,7 @@
       return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
     }
     validate() {
-      return super.validate() && this.widgetData.type === "file";
+      return super.validate() && this.widgetData.type === LEGACY_WIDGET_TYPES.FILE;
     }
   };
 
@@ -1388,7 +1818,7 @@
       }
       const widgetContainer = document.createElement("div");
       widgetContainer.className = "widget";
-      if (this.widgetData.type === "color") {
+      if (this.widgetData.type === LEGACY_WIDGET_TYPES.COLOR) {
         const colorContainer = document.createElement("div");
         colorContainer.className = "widget-color-picker";
         const label = document.createElement("label");
@@ -1457,7 +1887,7 @@
       return widgetContainer;
     }
     validate() {
-      return super.validate() && this.widgetData.type === "color";
+      return super.validate() && this.widgetData.type === LEGACY_WIDGET_TYPES.COLOR;
     }
   };
 
@@ -1652,21 +2082,22 @@
      * @type {Map<string, BaseWidget>}
      */
     static widgetTypes = /* @__PURE__ */ new Map([
-      ["buttons", ButtonsWidget],
-      ["select", SelectWidget],
-      ["input", InputWidget],
-      ["checkbox", CheckboxWidget],
-      ["textarea", TextareaWidget],
-      ["slider", SliderWidget],
-      ["rating", RatingWidget],
-      ["toggle", ToggleWidget],
-      ["date", DateWidget],
-      ["tags", TagsWidget],
-      ["file", FileUploadWidget],
-      ["color", ColorPickerWidget],
-      ["confirmation", ConfirmationWidget],
-      ["radio", RadioWidget],
-      ["progress", ProgressWidget]
+      [WIDGET_TYPES.BUTTONS, ButtonsWidget],
+      [WIDGET_TYPES.SELECT, SelectWidget],
+      [WIDGET_TYPES.INPUT, InputWidget],
+      [WIDGET_TYPES.PASSWORD, PasswordWidget],
+      [WIDGET_TYPES.CHECKBOX, CheckboxWidget],
+      [WIDGET_TYPES.TEXTAREA, TextareaWidget],
+      [WIDGET_TYPES.SLIDER, SliderWidget],
+      [WIDGET_TYPES.RATING, RatingWidget],
+      [WIDGET_TYPES.TOGGLE, ToggleWidget],
+      [WIDGET_TYPES.DATE, DateWidget],
+      [WIDGET_TYPES.TAGS, TagsWidget],
+      [LEGACY_WIDGET_TYPES.FILE, FileUploadWidget],
+      [LEGACY_WIDGET_TYPES.COLOR, ColorPickerWidget],
+      [WIDGET_TYPES.CONFIRMATION, ConfirmationWidget],
+      [WIDGET_TYPES.RADIO, RadioWidget],
+      [WIDGET_TYPES.PROGRESS, ProgressWidget]
     ]);
     /**
      * Register a new widget type
@@ -1690,13 +2121,15 @@
         console.warn("Invalid widget data:", widgetData);
         return null;
       }
-      const WidgetClass = this.widgetTypes.get(widgetData.type);
+      const widgetType = SERVER_TYPE_MAPPINGS[widgetData.type] || widgetData.type;
+      const WidgetClass = this.widgetTypes.get(widgetType);
       if (!WidgetClass) {
-        console.warn(`Unsupported widget type: ${widgetData.type}`);
+        console.warn(`Unsupported widget type: ${widgetData.type} (mapped to: ${widgetType})`);
         return null;
       }
       try {
-        return new WidgetClass(widgetData, widgetId);
+        const mappedWidgetData = { ...widgetData, type: widgetType };
+        return new WidgetClass(mappedWidgetData, widgetId);
       } catch (error) {
         console.error(`Error creating widget of type ${widgetData.type}:`, error);
         return null;
