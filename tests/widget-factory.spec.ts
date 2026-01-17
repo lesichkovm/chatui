@@ -41,7 +41,7 @@ test.describe('Widget Factory Tests', () => {
                   div.appendChild(container);
                   return div;
                 },
-                validate: () => widgetData.type === 'buttons' && Array.isArray(widgetData.options)
+                validate: () => widgetData.type === 'buttons' && Array.isArray(widgetData.options) && widgetData.options.length > 0
               };
             case 'select':
               return {
@@ -63,7 +63,7 @@ test.describe('Widget Factory Tests', () => {
                   div.appendChild(select);
                   return div;
                 },
-                validate: () => widgetData.type === 'select' && Array.isArray(widgetData.options)
+                validate: () => widgetData.type === 'select' && Array.isArray(widgetData.options) && widgetData.options.length > 0
               };
             default:
               return null;
@@ -82,12 +82,12 @@ test.describe('Widget Factory Tests', () => {
       ]
     };
 
-    const widget = await page.evaluate((data) => {
-      return window.testWidgetFactory.createWidget(data, 'test-widget');
+    const isValid = await page.evaluate((data) => {
+      const widget = window.testWidgetFactory.createWidget(data, 'test-widget');
+      return widget !== null && widget.validate();
     }, widgetData);
 
-    expect(widget).not.toBeNull();
-    expect(await page.evaluate((w) => w.validate(), widget)).toBe(true);
+    expect(isValid).toBe(true);
   });
 
   test('should create select widget successfully', async ({ page }) => {
@@ -99,12 +99,12 @@ test.describe('Widget Factory Tests', () => {
       ]
     };
 
-    const widget = await page.evaluate((data) => {
-      return window.testWidgetFactory.createWidget(data, 'test-widget');
+    const isValid = await page.evaluate((data) => {
+      const widget = window.testWidgetFactory.createWidget(data, 'test-widget');
+      return widget !== null && widget.validate();
     }, widgetData);
 
-    expect(widget).not.toBeNull();
-    expect(await page.evaluate((w) => w.validate(), widget)).toBe(true);
+    expect(isValid).toBe(true);
   });
 
   test('should return null for unsupported widget type', async ({ page }) => {
@@ -113,21 +113,21 @@ test.describe('Widget Factory Tests', () => {
       options: []
     };
 
-    const widget = await page.evaluate((data) => {
-      return window.testWidgetFactory.createWidget(data, 'test-widget');
+    const isNull = await page.evaluate((data) => {
+      const widget = window.testWidgetFactory.createWidget(data, 'test-widget');
+      return widget === null;
     }, widgetData);
 
-    expect(widget).toBeNull();
+    expect(isNull).toBe(true);
   });
 
   test('should return null for invalid widget data', async ({ page }) => {
-    const widgetData = null;
+    const isNull = await page.evaluate(() => {
+      const widget = window.testWidgetFactory.createWidget(null, 'test-widget');
+      return widget === null;
+    });
 
-    const widget = await page.evaluate((data) => {
-      return window.testWidgetFactory.createWidget(data, 'test-widget');
-    }, widgetData);
-
-    expect(widget).toBeNull();
+    expect(isNull).toBe(true);
   });
 
   test('should render buttons widget DOM correctly', async ({ page }) => {
@@ -192,8 +192,8 @@ test.describe('Widget Factory Tests', () => {
     await expect(options).toHaveCount(2);
     await expect(options.nth(0)).toHaveText('Select Option 1');
     await expect(options.nth(1)).toHaveText('Select Option 2');
-    await expect(options.nth(0)).toHaveValue('value1');
-    await expect(options.nth(1)).toHaveValue('value2');
+    await expect(options.nth(0)).toHaveAttribute('value', 'value1');
+    await expect(options.nth(1)).toHaveAttribute('value', 'value2');
   });
 
   test('should validate buttons widget correctly', async ({ page }) => {
