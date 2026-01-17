@@ -75,18 +75,18 @@ export class ThemeManager {
    * Get theme name from data attribute, localStorage, or default
    */
   getTheme() {
-    // 1. Check data attribute
+    // 1. Check localStorage
+    const savedTheme = localStorage.getItem(this.storageKey);
+    if (savedTheme && THEMES[savedTheme]) {
+      return savedTheme;
+    }
+
+    // 2. Check data attribute
     if (this.scriptElement) {
       const dataTheme = this.scriptElement.getAttribute('data-theme');
       if (dataTheme && THEMES[dataTheme]) {
         return dataTheme;
       }
-    }
-
-    // 2. Check localStorage
-    const savedTheme = localStorage.getItem(this.storageKey);
-    if (savedTheme && THEMES[savedTheme]) {
-      return savedTheme;
     }
 
     // 3. Default
@@ -97,18 +97,18 @@ export class ThemeManager {
    * Get mode (light/dark) from data attribute, localStorage, system preference, or default
    */
   getMode() {
-    // 1. Check data attribute
+    // 1. Check localStorage
+    const savedMode = localStorage.getItem(this.modeStorageKey);
+    if (savedMode === 'light' || savedMode === 'dark') {
+      return savedMode;
+    }
+
+    // 2. Check data attribute
     if (this.scriptElement) {
       const dataMode = this.scriptElement.getAttribute('data-mode');
       if (dataMode === 'light' || dataMode === 'dark') {
         return dataMode;
       }
-    }
-
-    // 2. Check localStorage
-    const savedMode = localStorage.getItem(this.modeStorageKey);
-    if (savedMode === 'light' || savedMode === 'dark') {
-      return savedMode;
     }
 
     // 3. Check system preference

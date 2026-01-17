@@ -23,11 +23,11 @@ test.describe('Theme System', () => {
       </html>
     `);
 
-        await page.waitForSelector('script#chat-widget', { state: 'attached' });
+        await page.waitForSelector('div#chat-widget', { state: 'attached' });
 
-        // Check data attributes
-        const theme = await page.getAttribute('script#chat-widget', 'data-theme');
-        const mode = await page.getAttribute('script#chat-widget', 'data-mode');
+        // Check data attributes on container
+        const theme = await page.getAttribute('div#chat-widget', 'data-theme');
+        const mode = await page.getAttribute('div#chat-widget', 'data-mode');
 
         expect(theme).toBe('default');
         expect(mode).toBe('light');
@@ -59,9 +59,9 @@ test.describe('Theme System', () => {
       </html>
     `);
 
-        await page.waitForSelector('script#chat-widget', { state: 'attached' });
+        await page.waitForSelector('div#chat-widget', { state: 'attached' });
 
-        const mode = await page.getAttribute('script#chat-widget', 'data-mode');
+        const mode = await page.getAttribute('div#chat-widget', 'data-mode');
         expect(mode).toBe('dark');
 
         const primaryColor = await page.evaluate(() => {
@@ -90,9 +90,9 @@ test.describe('Theme System', () => {
       </html>
     `);
 
-        await page.waitForSelector('script#chat-widget', { state: 'attached' });
+        await page.waitForSelector('div#chat-widget', { state: 'attached' });
 
-        const theme = await page.getAttribute('script#chat-widget', 'data-theme');
+        const theme = await page.getAttribute('div#chat-widget', 'data-theme');
         expect(theme).toBe('branded');
 
         const primaryColor = await page.evaluate(() => {
@@ -140,9 +140,9 @@ test.describe('Theme System', () => {
             };
         });
 
-        expect(colors.primary).toBe('rgb(255, 107, 107)'); // #ff6b6b
-        expect(colors.bg).toBe('rgb(255, 255, 255)'); // #ffffff
-        expect(colors.surface).toBe('rgb(255, 229, 229)'); // #ffe5e5
+        expect(['rgb(255, 107, 107)', '#ff6b6b']).toContain(colors.primary);
+        expect(['rgb(255, 255, 255)', '#ffffff']).toContain(colors.bg);
+        expect(['rgb(255, 229, 229)', '#ffe5e5']).toContain(colors.surface);
     });
 
     test('should switch theme programmatically', async ({ page }) => {
@@ -174,7 +174,7 @@ test.describe('Theme System', () => {
 
         await page.waitForTimeout(100);
 
-        const theme = await page.getAttribute('script#chat-widget', 'data-theme');
+        const theme = await page.getAttribute('div#chat-widget', 'data-theme');
         expect(theme).toBe('branded');
 
         const primaryColor = await page.evaluate(() => {
@@ -214,7 +214,7 @@ test.describe('Theme System', () => {
 
         await page.waitForTimeout(100);
 
-        const mode = await page.getAttribute('script#chat-widget', 'data-mode');
+        const mode = await page.getAttribute('div#chat-widget', 'data-mode');
         expect(mode).toBe('dark');
 
         const primaryColor = await page.evaluate(() => {
@@ -254,7 +254,7 @@ test.describe('Theme System', () => {
 
         expect(newMode).toBe('dark');
 
-        const mode = await page.getAttribute('script#chat-widget', 'data-mode');
+        const mode = await page.getAttribute('div#chat-widget', 'data-mode');
         expect(mode).toBe('dark');
 
         // Toggle back
@@ -334,7 +334,7 @@ test.describe('Theme System', () => {
             return getComputedStyle(widget).getPropertyValue('--chat-primary').trim();
         });
 
-        expect(primaryColor).toBe('rgb(255, 107, 107)'); // #ff6b6b
+        expect(['rgb(255, 107, 107)', '#ff6b6b']).toContain(primaryColor); // #ff6b6b
 
         // Switch to dark mode
         await page.evaluate(() => {
@@ -351,7 +351,7 @@ test.describe('Theme System', () => {
             return getComputedStyle(widget).getPropertyValue('--chat-primary').trim();
         });
 
-        expect(primaryColor).toBe('rgb(255, 135, 135)'); // #ff8787
+        expect(['rgb(255, 135, 135)', '#ff8787']).toContain(primaryColor); // #ff8787
     });
 
     test('should get theme configuration', async ({ page }) => {
@@ -404,10 +404,10 @@ test.describe('Theme System', () => {
       </html>
     `);
 
-        await page.waitForSelector('script#chat-widget', { state: 'attached' });
+        await page.waitForSelector('div#chat-widget', { state: 'attached' });
 
         // Open the chat
-        await page.click('#chat-widget-button');
+        await page.click('[id^="chat-widget-"][id$="-button"]');
         await page.waitForSelector('.window-open');
 
         // Check that dark mode colors are applied to UI elements
