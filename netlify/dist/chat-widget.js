@@ -2035,15 +2035,17 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 24px;
-      padding: 4px 8px;
+      padding: 0px 10px 4px 10px;
       color: var(--chat-text);
       transition: all 0.2s ease;
       line-height: 1;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       min-width: 40px;
       min-height: 40px;
+      vertical-align: middle;
+      box-sizing: border-box;
     }
     
     #${widgetId} .widget-rating-star:hover,
