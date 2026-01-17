@@ -34,14 +34,23 @@ test.describe('Chat Widget - Basic Functionality', () => {
   test('should toggle chat window visibility on button click', async ({ page }) => {
     const widgetButton = page.locator('[id^="chat-widget-"][id$="-button"]').first();
     const chatWindow = page.locator('[id^="chat-widget-"][id$="-window"]');
+    const closeButton = chatWindow.locator('[id^="chat-widget-"][id$="-close"]');
     
     await expect(chatWindow).not.toBeVisible();
     
+    // Open chat
     await widgetButton.click();
     await expect(chatWindow).toBeVisible();
+    await expect(widgetButton).not.toBeVisible();
     
-    await widgetButton.click();
+    // Close chat via close button (since main button is hidden)
+    await closeButton.click();
     await expect(chatWindow).not.toBeVisible();
+    await expect(widgetButton).toBeVisible();
+
+    // Re-open chat
+    await widgetButton.click();
+    await expect(chatWindow).toBeVisible();
   });
 
   test('should display chat window header with title', async ({ page }) => {

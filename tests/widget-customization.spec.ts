@@ -74,7 +74,8 @@ test.describe('Chat Widget - Customization', () => {
     const headerText = await header1.textContent();
     expect(headerText).toContain('Chat with us');
     
-    await widgetButton1.click();
+    const closeButton1 = page.locator('#chat-widget-1-close');
+    await closeButton1.click();
     
     const widgetButton2 = page.locator('#chat-widget-2-button').first();
     await widgetButton2.click();

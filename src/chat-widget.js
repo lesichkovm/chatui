@@ -406,14 +406,14 @@
       if (this.state.isOpen) {
         this.chatWindow.classList.add("window-open");
         if (this.chatButton) {
-          this.chatButton.style.display = "none";
           this._updateButtonPosition(true);
+          this.chatButton.style.display = "none";
         }
       } else {
         this.chatWindow.classList.remove("window-open");
         if (this.chatButton) {
-          this.chatButton.style.display = "flex";
           this._updateButtonPosition(false);
+          this.chatButton.style.display = "flex";
         }
       }
     }

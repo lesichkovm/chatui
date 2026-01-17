@@ -62,12 +62,14 @@ test.describe('Chat Widget - Multiple Widgets', () => {
     await expect(chatWindow1).toBeVisible();
     await expect(chatWindow2).toBeVisible();
     
-    await widgetButton1.click();
+    const closeButton1 = page.locator('#chat-widget-1-close');
+    await closeButton1.click();
     
     await expect(chatWindow1).not.toBeVisible();
     await expect(chatWindow2).toBeVisible();
     
-    await widgetButton2.click();
+    const closeButton2 = page.locator('#chat-widget-2-close');
+    await closeButton2.click();
     
     await expect(chatWindow1).not.toBeVisible();
     await expect(chatWindow2).not.toBeVisible();

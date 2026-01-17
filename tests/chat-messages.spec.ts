@@ -147,7 +147,8 @@ test.describe('Chat Widget - Message Functionality', () => {
     await messageInput.fill(testMessage);
     await sendButton.click();
     
-    await widgetButton.click();
+    const closeButton = page.locator('#chat-widget-1-close');
+    await closeButton.click();
     
     const chatWindow = page.locator('#chat-widget-1-window');
     await expect(chatWindow).not.toBeVisible();
