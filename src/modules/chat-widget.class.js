@@ -109,52 +109,58 @@ export class ChatWidget {
    * Apply custom colors from data attributes via inline styles
    */
   applyCustomColors() {
-    if (!this.scriptElement) return;
+    if (this.scriptElement) {
+      const mode = this.config.themeMode;
+      const suffix = mode === 'light' ? '-light' : '-dark';
 
-    const mode = this.config.themeMode;
-    const suffix = mode === 'light' ? '-light' : '-dark';
+      const colorMap = {
+        [`data-color${suffix}`]: '--chat-primary',
+        [`data-bg-color${suffix}`]: '--chat-bg',
+        [`data-surface-color${suffix}`]: '--chat-surface',
+        [`data-text-color${suffix}`]: '--chat-text',
+        [`data-border-color${suffix}`]: '--chat-border',
+      };
 
-    const colorMap = {
-      [`data-color${suffix}`]: '--chat-primary',
-      [`data-bg-color${suffix}`]: '--chat-bg',
-      [`data-surface-color${suffix}`]: '--chat-surface',
-      [`data-text-color${suffix}`]: '--chat-text',
-      [`data-border-color${suffix}`]: '--chat-border',
-    };
+      // Also check for generic attributes without mode suffix (fallback)
+      const genericColorMap = {
+        'data-color': '--chat-primary',
+        'data-bg-color': '--chat-bg',
+        'data-surface-color': '--chat-surface',
+        'data-text-color': '--chat-text',
+        'data-border-color': '--chat-border',
+      };
 
-    // Also check for generic attributes without mode suffix (fallback)
-    const genericColorMap = {
-      'data-color': '--chat-primary',
-      'data-bg-color': '--chat-bg',
-      'data-surface-color': '--chat-surface',
-      'data-text-color': '--chat-text',
-      'data-border-color': '--chat-border',
-    };
+      // First check mode-specific attributes
+      for (const [attr, cssVar] of Object.entries(colorMap)) {
+        const value = this.scriptElement.getAttribute(attr);
+        if (value) {
+          this.container.style.setProperty(cssVar, value);
 
-    // First check mode-specific attributes
-    for (const [attr, cssVar] of Object.entries(colorMap)) {
-      const value = this.scriptElement.getAttribute(attr);
-      if (value) {
-        this.container.style.setProperty(cssVar, value);
+          // Also set --chat-primary-dark if primary color is customized
+          if (cssVar === '--chat-primary') {
+            this.container.style.setProperty('--chat-primary-dark', adjustColor(value, -20));
+          }
+        }
+      }
 
-        // Also set --chat-primary-dark if primary color is customized
-        if (cssVar === '--chat-primary') {
-          this.container.style.setProperty('--chat-primary-dark', adjustColor(value, -20));
+      // Then check generic attributes as fallback
+      for (const [attr, cssVar] of Object.entries(genericColorMap)) {
+        const value = this.scriptElement.getAttribute(attr);
+        if (value && !this.container.style.getPropertyValue(cssVar)) {
+          this.container.style.setProperty(cssVar, value);
+
+          // Also set --chat-primary-dark if primary color is customized
+          if (cssVar === '--chat-primary') {
+            this.container.style.setProperty('--chat-primary-dark', adjustColor(value, -20));
+          }
         }
       }
     }
 
-    // Then check generic attributes as fallback
-    for (const [attr, cssVar] of Object.entries(genericColorMap)) {
-      const value = this.scriptElement.getAttribute(attr);
-      if (value && !this.container.style.getPropertyValue(cssVar)) {
-        this.container.style.setProperty(cssVar, value);
-
-        // Also set --chat-primary-dark if primary color is customized
-        if (cssVar === '--chat-primary') {
-          this.container.style.setProperty('--chat-primary-dark', adjustColor(value, -20));
-        }
-      }
+    // Apply primaryColor from config if it was provided programmatically (not from theme default)
+    if (this.config.primaryColor && !this.container.style.getPropertyValue('--chat-primary')) {
+      this.container.style.setProperty('--chat-primary', this.config.primaryColor);
+      this.container.style.setProperty('--chat-primary-dark', adjustColor(this.config.primaryColor, -20));
     }
   }
 
