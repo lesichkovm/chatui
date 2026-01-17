@@ -120,6 +120,13 @@ const handler = async (event, context) => {
                 }
               }
             };
+          } else if (lowerMessage === 'light' || lowerMessage === 'dark' || lowerMessage === 'auto') {
+            responseData = {
+              text: `Theme switched to ${lowerMessage} mode! 🎨`,
+              sender: "bot",
+              timestamp: Date.now(),
+              session_key: session_key || "demo_fullpage_" + Date.now()
+            };
           } else {
             const responses = [
               "This is the full page chat demo! The interface is embedded directly in the page.",
