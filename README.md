@@ -20,6 +20,8 @@ ChatUI provides the interactive power of a modern conversational UI without the 
 - **Interactive Widget System**: Support for 15+ specialized UI components (Rating, Date Picker, File Upload, etc.).
 - **Zero Dependencies**: Pure vanilla JS, works with any stack.
 - **Cross-Domain Ready**: Native JSONP support bypasses CORS headaches.
+- **Real-Time WebSocket Support**: Live typing indicators, read receipts, and streaming responses.
+- **Protocol-Based Transport**: Automatically uses WebSocket (ws/wss) or JSONP (http/https) based on server URL.
 - **Dual Modes**: Supports both `popup` and `fullpage` embedded modes.
 - **Modular Architecture**: Built with modern ES6 classes and a dedicated `WidgetFactory`.
 - **Accessible & Secure**: ARIA-compliant focus management and robust XSS prevention.
@@ -29,11 +31,24 @@ ChatUI provides the interactive power of a modern conversational UI without the 
 ### 1. HTML Integration (Auto-initialize)
 Add the script tag to your HTML. The widget will automatically initialize based on the data attributes.
 
+**JSONP Mode (HTTP/HTTPS):**
 ```html
 <script 
   id="chat-widget"
   src="path/to/chat-widget.js"
   data-server-url="http://your-server.com"
+  data-position="bottom-right"
+  data-color="#007bff"
+  data-title="Chat with us">
+</script>
+```
+
+**WebSocket Mode (WS/WSS):**
+```html
+<script 
+  id="chat-widget"
+  src="path/to/chat-widget.js"
+  data-server-url="wss://your-server.com/ws"
   data-position="bottom-right"
   data-color="#007bff"
   data-title="Chat with us">
@@ -91,15 +106,52 @@ The widget uses strictly ID-rooted CSS selectors to prevent affecting your site'
 
 ## API Integration
 
+The widget supports two transport protocols based on the server URL scheme:
+
+### JSONP Mode (HTTP/HTTPS)
 The widget expects a backend that supports the following endpoints (compatible with JSONP):
 
-### Handshake
+#### Handshake
 `GET /api/handshake?callback=cb`  
 Response: `{ status: "success", session_key: "..." }`
 
-### Send/Receive Messages
+#### Send/Receive Messages
 `GET /api/messages?callback=cb&message=...&session_key=...`  
 Response: `{ text: "Response message", sender: "bot" }`
+
+### WebSocket Mode (WS/WSS)
+For real-time features, use a WebSocket endpoint. The widget will automatically detect the protocol and establish a WebSocket connection.
+
+#### WebSocket Message Format
+The widget sends and receives JSON messages with the following structure:
+
+**Client → Server:**
+```json
+{
+  "type": "handshake|connect|message|typing|read_receipt",
+  "payload": { ... },
+  "session_key": "...",
+  "timestamp": 1234567890
+}
+```
+
+**Server → Client:**
+```json
+{
+  "type": "handshake|message|message:stream|typing|read_receipt",
+  "text": "...",
+  "widget": { ... },
+  "payload": { ... },
+  "session_key": "...",
+  "timestamp": 1234567890
+}
+```
+
+#### Real-Time Features
+- **Typing Indicators**: Send `{ type: "typing", payload: { typing: true } }` to show/hide typing indicators
+- **Read Receipts**: Send `{ type: "read_receipt", payload: { message_id: "..." } }` to confirm message reads
+- **Streaming Responses**: Send `{ type: "message:stream", text: "partial..." }` for character-by-character AI responses
+- **Custom Events**: Listen for `chatwidget:typing` and `chatwidget:read_receipt` events on the window object
 
 ## Development
 

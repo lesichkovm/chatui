@@ -1,4 +1,4 @@
-import { ChatAPI } from './api.js';
+import { HybridChatAPI } from './hybrid-api.js';
 import { injectStyles, createWidgetDOM, appendMessage } from './ui.js';
 import { ThemeManager } from './theme.js';
 import { adjustColor } from './utils.js';
@@ -52,7 +52,7 @@ export class ChatWidget {
       themeColors: themeConfig.colors,
     };
 
-    this.api = new ChatAPI({ serverUrl: this.config.serverUrl });
+    this.api = new HybridChatAPI({ serverUrl: this.config.serverUrl });
 
     // State initialization
     this.state = {
