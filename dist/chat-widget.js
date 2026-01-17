@@ -1642,14 +1642,14 @@
     document.head.appendChild(styleElement);
   }
   function createWidgetDOM(widgetId, config) {
-    const { mode, position, title, targetSelector } = config;
+    const { displayMode, position, title, targetSelector } = config;
     const container = document.createElement("div");
     container.id = widgetId;
-    container.className = mode;
+    container.className = displayMode;
     const chatWindow = document.createElement("div");
     chatWindow.className = "window";
     chatWindow.id = `${widgetId}-window`;
-    if (mode === "popup") {
+    if (displayMode === "popup") {
       chatWindow.style.cssText = `
       ${position.includes("bottom") ? "bottom: 20px;" : "top: 20px;"}
       ${position.includes("right") ? "right: 20px;" : "left: 20px;"}
@@ -1658,7 +1658,7 @@
     chatWindow.innerHTML = `
     <div class="header" id="${widgetId}-header">
       <h3>${title}</h3>
-      ${mode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">\xD7</button>` : ""}
+      ${displayMode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">\xD7</button>` : ""}
     </div>
     <div class="messages" id="${widgetId}-messages" role="log" aria-live="polite" aria-atomic="false"></div>
     <div class="input">
@@ -1667,7 +1667,7 @@
     </div>
   `;
     let chatButton = null;
-    if (mode === "popup") {
+    if (displayMode === "popup") {
       chatButton = document.createElement("button");
       chatButton.className = "button";
       chatButton.id = `${widgetId}-button`;
@@ -1685,7 +1685,7 @@
       container.appendChild(chatButton);
     }
     container.appendChild(chatWindow);
-    if (mode === "fullpage" && targetSelector) {
+    if (displayMode === "fullpage" && targetSelector) {
       const targetElement = document.querySelector(targetSelector);
       if (targetElement) {
         targetElement.appendChild(container);
@@ -1780,15 +1780,15 @@
      * Get theme name from data attribute, localStorage, or default
      */
     getTheme() {
+      const savedTheme = localStorage.getItem(this.storageKey);
+      if (savedTheme && THEMES[savedTheme]) {
+        return savedTheme;
+      }
       if (this.scriptElement) {
         const dataTheme = this.scriptElement.getAttribute("data-theme");
         if (dataTheme && THEMES[dataTheme]) {
           return dataTheme;
         }
-      }
-      const savedTheme = localStorage.getItem(this.storageKey);
-      if (savedTheme && THEMES[savedTheme]) {
-        return savedTheme;
       }
       return "default";
     }
@@ -1796,15 +1796,19 @@
      * Get mode (light/dark) from data attribute, localStorage, system preference, or default
      */
     getMode() {
+      const savedMode = localStorage.getItem(this.modeStorageKey);
+      if (savedMode === "light" || savedMode === "dark") {
+        return savedMode;
+      }
       if (this.scriptElement) {
+        const themeMode = this.scriptElement.getAttribute("data-theme-mode");
+        if (themeMode === "light" || themeMode === "dark") {
+          return themeMode;
+        }
         const dataMode = this.scriptElement.getAttribute("data-mode");
         if (dataMode === "light" || dataMode === "dark") {
           return dataMode;
         }
-      }
-      const savedMode = localStorage.getItem(this.modeStorageKey);
-      if (savedMode === "light" || savedMode === "dark") {
-        return savedMode;
       }
       if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
         return "dark";
@@ -1911,9 +1915,10 @@
         scriptElement = input;
         if (scriptElement._chatWidgetInitialized) return;
         scriptElement._chatWidgetInitialized = true;
+        const displayMode = scriptElement.getAttribute("data-display") || null;
         config = {
           id: scriptElement.id,
-          mode: scriptElement.getAttribute("data-mode"),
+          displayMode,
           position: scriptElement.getAttribute("data-position"),
           primaryColor: scriptElement.getAttribute("data-color"),
           title: scriptElement.getAttribute("data-title"),
@@ -1928,7 +1933,7 @@
       this.themeManager = new ThemeManager(this.widgetId, scriptElement);
       const themeConfig = this.themeManager.getThemeConfig();
       this.config = {
-        mode: config.mode || "popup",
+        displayMode: config.displayMode || config.mode || "popup",
         position: config.position || "bottom-right",
         primaryColor: config.primaryColor || config.color || themeConfig.colors.primary,
         title: config.title || "Chat with us",

@@ -15,7 +15,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-title="Test Chat">
@@ -51,7 +51,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="default"
@@ -83,7 +83,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="branded"
@@ -115,7 +115,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="default"
@@ -158,7 +158,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="default"
@@ -199,7 +199,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="default"
@@ -240,7 +240,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="default"
@@ -261,6 +261,8 @@ test.describe('Theme System', () => {
         }, widgetId);
 
         expect(newMode).toBe('dark');
+
+        await page.waitForTimeout(100);
 
         const mode = await page.getAttribute(`div#${widgetId}`, 'data-mode');
         expect(mode).toBe('dark');
@@ -285,7 +287,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-title="Test Chat">
@@ -325,7 +327,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="default"
@@ -374,7 +376,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="branded"
@@ -407,7 +409,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="${widgetId}"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="default"
@@ -441,7 +443,7 @@ test.describe('Theme System', () => {
         <body>
           <script 
             id="chat-widget-1"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-right"
             data-theme="default"
@@ -450,7 +452,7 @@ test.describe('Theme System', () => {
           </script>
           <script 
             id="chat-widget-2"
-            src="../dist/chat-widget.js"
+            src="/dist/chat-widget.js"
             data-server-url="http://localhost:3000"
             data-position="bottom-left"
             data-theme="branded"
