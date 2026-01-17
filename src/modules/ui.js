@@ -187,6 +187,41 @@ export function injectStyles(widgetId, primaryColor, mode) {
     #${widgetId} .send:hover {
       background: var(--chat-primary-color-dark);
     }
+    
+    #${widgetId} .widget {
+      margin-top: 8px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+    
+    #${widgetId} .widget-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    #${widgetId} .widget-button {
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+    
+    #${widgetId} .widget-button:hover {
+      background: var(--chat-primary-color);
+      color: white;
+      border-color: var(--chat-primary-color);
+    }
+    
+    #${widgetId} .widget-button:active {
+      transform: translateY(1px);
+    }
   `;
   document.head.appendChild(styleElement);
 }
@@ -264,11 +299,60 @@ export function createWidgetDOM(widgetId, config) {
   return { container, chatWindow, chatButton };
 }
 
-export function appendMessage(container, text, sender, widgetId) {
+export function appendMessage(container, text, sender, widgetId, widgetData = null) {
   const messageElement = document.createElement("div");
   messageElement.className = `message ${sender}-message`;
   messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  messageElement.innerHTML = text.replace(/\n/g, "<br>");
+  
+  // Create message content
+  const messageContent = document.createElement("div");
+  messageContent.innerHTML = text.replace(/\n/g, "<br>");
+  messageElement.appendChild(messageContent);
+  
+  // Add widget if present
+  if (widgetData && sender === "bot") {
+    const widgetElement = createWidgetElement(widgetData, widgetId);
+    messageElement.appendChild(widgetElement);
+  }
+  
   container.appendChild(messageElement);
   container.scrollTop = container.scrollHeight;
+}
+
+function createWidgetElement(widgetData, widgetId) {
+  const widgetContainer = document.createElement("div");
+  widgetContainer.className = "widget";
+  
+  if (widgetData.type === "buttons" && widgetData.options) {
+    const buttonsContainer = document.createElement("div");
+    buttonsContainer.className = "widget-buttons";
+    
+    widgetData.options.forEach(option => {
+      const button = document.createElement("button");
+      button.className = "widget-button";
+      button.textContent = option.text;
+      button.setAttribute("data-widget-id", widgetId);
+      button.setAttribute("data-option-id", option.id);
+      button.setAttribute("data-option-value", option.value);
+      
+      button.addEventListener("click", () => {
+        // Dispatch custom event for widget interaction
+        const event = new CustomEvent("widgetInteraction", {
+          detail: {
+            widgetId: widgetId,
+            optionId: option.id,
+            optionValue: option.value,
+            optionText: option.text
+          }
+        });
+        document.dispatchEvent(event);
+      });
+      
+      buttonsContainer.appendChild(button);
+    });
+    
+    widgetContainer.appendChild(buttonsContainer);
+  }
+  
+  return widgetContainer;
 }

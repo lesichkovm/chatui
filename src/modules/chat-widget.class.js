@@ -67,7 +67,14 @@ export class ChatWidget {
 
     this.bindEvents();
     this.api.performHandshake();
-    this.api.connect((text, sender) => this.addMessage(text, sender));
+    this.api.connect((text, sender, widgetData) => this.addMessage(text, sender, widgetData));
+    
+    // Listen for widget interactions
+    document.addEventListener("widgetInteraction", (event) => {
+      if (event.detail.widgetId === this.widgetId) {
+        this.handleWidgetInteraction(event.detail);
+      }
+    });
   }
 
   setState(newState) {
@@ -177,8 +184,8 @@ export class ChatWidget {
     const message = text || this.textarea.value.trim();
     if (message) {
       this.addMessage(message, "user");
-      this.api.sendMessage(message, (text, sender) =>
-        this.addMessage(text, sender)
+      this.api.sendMessage(message, (text2, sender, widgetData) =>
+        this.addMessage(text2, sender, widgetData)
       );
       if (!text) {
         this.textarea.value = "";
@@ -187,9 +194,20 @@ export class ChatWidget {
     }
   }
 
-  addMessage(text, sender) {
-    const messageObj = { text, sender, timestamp: Date.now() };
+  handleWidgetInteraction(interaction) {
+    // Send the selected option value as a message
+    const messageText = interaction.optionText;
+    this.addMessage(messageText, "user");
+    
+    // Send the option value to the API
+    this.api.sendMessage(interaction.optionValue, (text, sender, widgetData) =>
+      this.addMessage(text, sender, widgetData)
+    );
+  }
+
+  addMessage(text, sender, widgetData = null) {
+    const messageObj = { text, sender, timestamp: Date.now(), widgetData };
     this.state.messages.push(messageObj);
-    appendMessage(this.messagesContainer, text, sender, this.widgetId);
+    appendMessage(this.messagesContainer, text, sender, this.widgetId, widgetData);
   }
 }

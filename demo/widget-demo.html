@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatUI Widget Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .api-response {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ChatUI Widget Demo - Interactive Buttons</h1>
+        
+        <div class="demo-section">
+            <h2>How it works</h2>
+            <p>The chat widget now supports interactive buttons. When the backend responds with widget data, the widget will render clickable buttons that users can interact with.</p>
+            
+            <h3>Backend Response Format:</h3>
+            <div class="api-response">{
+  "text": "Please select an option:",
+  "widget": {
+    "type": "buttons",
+    "options": [
+      { "id": "opt1", "text": "Customer Support", "value": "support" },
+      { "id": "opt2", "text": "Sales Inquiry", "value": "sales" },
+      { "id": "opt3", "text": "Technical Help", "value": "technical" }
+    ]
+  }
+}</div>
+            
+            <p>When a user clicks a button, the option's <code>value</code> is sent to the API, and the option's <code>text</code> appears as a user message.</p>
+        </div>
+
+        <div class="demo-section">
+            <h2>Try it yourself</h2>
+            <p>Type "menu" or "options" in the chat to see the interactive buttons in action!</p>
+            <p>The demo simulates backend responses with widget data.</p>
+        </div>
+    </div>
+
+    <!-- Load the chat widget -->
+    <script 
+        id="chat-widget"
+        src="../dist/chat-widget.js"
+        data-server-url="http://localhost:3000"
+        data-position="bottom-right"
+        data-color="#007bff"
+        data-title="Widget Demo">
+    </script>
+</body>
+</html>

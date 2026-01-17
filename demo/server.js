@@ -38,20 +38,118 @@ function handleMessages(req, res, query) {
   const callback = query.callback;
   const message = query.message;
   const type = query.type;
+  const referer = req.headers.referer || '';
 
   let responseData;
 
   if (type === 'connect') {
-    responseData = {
-      text: 'Welcome to the demo chat! Server is running.',
-      sender: 'bot'
-    };
+    // Check if this is the widget demo
+    if (referer.includes('widget-demo.html')) {
+      responseData = {
+        text: 'Hello! I\'m your virtual assistant. Type "menu" to see interactive options, or just ask me anything!',
+        sender: 'bot'
+      };
+    } else {
+      responseData = {
+        text: 'Welcome to the demo chat! Server is running.',
+        sender: 'bot'
+      };
+    }
   } else if (message) {
     console.log('Received message:', message);
-    responseData = {
-      text: `Echo: ${message}`,
-      sender: 'bot'
-    };
+    
+    // Check if this is the widget demo
+    if (referer.includes('widget-demo.html')) {
+      // Widget demo responses with interactive buttons
+      const lowerMessage = message.toLowerCase();
+      
+      if (lowerMessage === 'menu') {
+        responseData = {
+          text: 'Welcome! How can I help you today?',
+          widget: {
+            type: 'buttons',
+            options: [
+              { id: 'opt1', text: 'Customer Support', value: 'support' },
+              { id: 'opt2', text: 'Sales Inquiry', value: 'sales' },
+              { id: 'opt3', text: 'Technical Help', value: 'technical' },
+              { id: 'opt4', text: 'Billing Question', value: 'billing' }
+            ]
+          }
+        };
+      } else if (lowerMessage === 'options') {
+        responseData = {
+          text: 'Choose your preferred department:',
+          widget: {
+            type: 'buttons',
+            options: [
+              { id: 'dept1', text: 'General Inquiry', value: 'general' },
+              { id: 'dept2', text: 'Product Information', value: 'product' },
+              { id: 'dept3', text: 'Account Issues', value: 'account' }
+            ]
+          }
+        };
+      } else if (lowerMessage === 'support') {
+        responseData = {
+          text: 'Connecting you to customer support... Our team will help you with any issues you\'re experiencing.',
+          widget: {
+            type: 'buttons',
+            options: [
+              { id: 'urgent', text: 'Urgent Issue', value: 'urgent_support' },
+              { id: 'callback', text: 'Request Callback', value: 'callback' },
+              { id: 'email', text: 'Email Support', value: 'email_support' }
+            ]
+          }
+        };
+      } else if (lowerMessage === 'sales') {
+        responseData = {
+          text: 'Our sales team is ready to help! What are you interested in?',
+          widget: {
+            type: 'buttons',
+            options: [
+              { id: 'pricing', text: 'Pricing Information', value: 'pricing' },
+              { id: 'demo', text: 'Product Demo', value: 'demo_request' },
+              { id: 'enterprise', text: 'Enterprise Plans', value: 'enterprise' }
+            ]
+          }
+        };
+      } else if (lowerMessage === 'technical') {
+        responseData = {
+          text: 'Let me help you with technical issues. What seems to be the problem?',
+          widget: {
+            type: 'buttons',
+            options: [
+              { id: 'login', text: 'Login Problems', value: 'login_help' },
+              { id: 'performance', text: 'Performance Issues', value: 'performance_help' },
+              { id: 'bug', text: 'Report a Bug', value: 'bug_report' }
+            ]
+          }
+        };
+      } else if (lowerMessage === 'billing') {
+        responseData = {
+          text: 'I can help with billing questions. What do you need assistance with?',
+          widget: {
+            type: 'buttons',
+            options: [
+              { id: 'invoice', text: 'Invoice Questions', value: 'invoice_help' },
+              { id: 'payment', text: 'Payment Issues', value: 'payment_help' },
+              { id: 'refund', text: 'Refund Request', value: 'refund_request' }
+            ]
+          }
+        };
+      } else {
+        // Default echo response for widget demo
+        responseData = {
+          text: `You said: "${message}". Try typing "menu" or "options" to see interactive buttons!`,
+          sender: 'bot'
+        };
+      }
+    } else {
+      // Regular demo responses (popup.html, full_page.htm, etc.)
+      responseData = {
+        text: `Echo: ${message}`,
+        sender: 'bot'
+      };
+    }
   } else {
     responseData = {
       status: 'error',

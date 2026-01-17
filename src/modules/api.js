@@ -51,7 +51,14 @@ export class ChatAPI {
     )}`;
 
     this._injectScript(url, callbackName, (response) => {
-      if (onMessage) onMessage(response.text, "bot");
+      if (onMessage) {
+        // Check if response contains widget data
+        if (response.widget) {
+          onMessage(response.text, "bot", response.widget);
+        } else {
+          onMessage(response.text, "bot");
+        }
+      }
     });
   }
 
@@ -67,7 +74,14 @@ export class ChatAPI {
     )}&session_key=${encodeURIComponent(sessionKey)}`;
 
     this._injectScript(url, callbackName, (response) => {
-      if (onResponse) onResponse(response.text, "bot");
+      if (onResponse) {
+        // Check if response contains widget data
+        if (response.widget) {
+          onResponse(response.text, "bot", response.widget);
+        } else {
+          onResponse(response.text, "bot");
+        }
+      }
     });
   }
 
