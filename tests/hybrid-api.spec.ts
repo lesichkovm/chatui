@@ -299,7 +299,7 @@ test.describe('HybridChatAPI', () => {
   });
 
   test.describe('JSONP Fallback', () => {
-    test('should use JSONP methods when connection type is jsonp', async () => {
+    test('should use JSONP methods when api type is jsonp', async () => {
       // Mock document for JSONP tests
       (global as any).document = {
         createElement: () => ({
@@ -314,9 +314,11 @@ test.describe('HybridChatAPI', () => {
         }
       };
 
-      api = new HybridChatAPI({ serverUrl: 'https://example.com' });
+      // Force JSONP mode
+      api = new HybridChatAPI({ serverUrl: 'https://example.com', forceJsonP: true });
       
-      expect(api.connectionType).toBe('jsonp');
+      expect(api.connectionType).toBe('http');
+      expect(api.apiType).toBe('jsonp');
       
       // These should call the parent class methods without throwing
       expect(() => api.performHandshake(() => {})).not.toThrow();

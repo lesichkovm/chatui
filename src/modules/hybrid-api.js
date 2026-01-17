@@ -141,7 +141,6 @@ export class HybridChatAPI extends ChatAPI {
 
   /**
    * Fallback from CORS to JSONP API
-   * @private
    */
   fallbackToJSONP() {
     this.fallbackAttempts++;

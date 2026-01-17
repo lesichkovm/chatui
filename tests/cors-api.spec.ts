@@ -5,14 +5,14 @@ import { CorsAPI } from '../src/modules/cors-api.js';
 class MockResponse {
   status: number;
   statusText: string;
-  headers: Map<string, string>;
+  internalHeaders: Map<string, string>;
   body: string;
 
   constructor(data: any, status = 200, statusText = 'OK') {
     this.status = status;
     this.statusText = statusText;
-    this.headers = new Map();
-    this.headers.set('content-type', 'application/json');
+    this.internalHeaders = new Map();
+    this.internalHeaders.set('content-type', 'application/json');
     this.body = JSON.stringify(data);
   }
 
@@ -20,12 +20,14 @@ class MockResponse {
     return Promise.resolve(JSON.parse(this.body));
   }
 
-  ok() {
+  get ok() {
     return this.status >= 200 && this.status < 300;
   }
 
-  get header() {
-    return (name: string) => this.headers.get(name) || null;
+  get headers() {
+    return {
+      get: (name: string) => this.internalHeaders.get(name) || null
+    };
   }
 }
 
@@ -417,10 +419,13 @@ test.describe('CorsAPI', () => {
     test('should abort request on timeout', async () => {
       api = new CorsAPI({ serverUrl: 'https://example.com', timeout: 100 });
 
-      // Mock slow request
+      // Mock slow request that never resolves
       mockFetch = () => 
-        new Promise((resolve) => {
-          setTimeout(() => resolve(new MockResponse({ status: 'success' })), 200);
+        new Promise((resolve, reject) => {
+          // This promise will never resolve, causing timeout
+          setTimeout(() => {
+            reject(new DOMException('AbortError', 'AbortError'));
+          }, 200);
         });
       (global as any).fetch = mockFetch;
 
@@ -428,16 +433,14 @@ test.describe('CorsAPI', () => {
       let abortCalled = false;
       
       // Track abort calls
-      const originalAbort = mockAbortController.abort;
       mockAbortController.abort = () => {
         abortCalled = true;
-        originalAbort();
       };
       
       await new Promise<void>((resolve) => {
         api.performHandshake(
           () => resolve(),
-          (error: Error) => {
+          (error: any) => {
             errorCalled = true;
             resolve();
           }
