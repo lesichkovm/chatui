@@ -2,172 +2,66 @@
 
 ## What This Project Is
 
-ChatUI is a **frontend-only, API-agnostic embeddable chat widget** designed to be easily integrated into any website. The project consists of a JavaScript widget that can connect to any backend API implementation, providing businesses with a flexible chat solution that works with their existing infrastructure.
+ChatUI is a **frontend-only, API-agnostic embeddable chat widget** designed for lightning-fast integration across any web environment. While competitors often require heavy frameworks, ChatUI is built on **pure Vanilla JavaScript**, offering an ultra-lightweight footprint (~12KB core) with zero external dependencies.
 
-## Project Goal
+It distinguishes itself through a **Rich Interactive Widget System**, enabling backends to deliver complex UI components (forms, ratings, file uploads) directly into the chat stream, making it a powerful tool for lead generation and customer support.
 
-The primary goal of ChatUI is to provide a **universal chat frontend** that:
+## Strategic Positioning & Vision
 
-- **Works with any backend** - API-agnostic design connects to any server implementation
-- **Eliminates frontend complexity** - No need to build chat UI from scratch
-- **Enables cross-domain communication** - JSONP support for flexible deployment scenarios
-- **Stays secure** - Built-in security features prevent XSS and other vulnerabilities
-- **Looks professional** - Customizable styling to match any website design
-- **Performs well** - Lightweight implementation with minimal overhead
+ChatUI is positioned as a **"Low-Friction, High-Performance"** alternative to comprehensive but heavy libraries like Alibaba's ChatUI. 
 
-## Key Features
+- **The Vision**: To provide the flexibility of a framework-based conversational UI without the framework lock-in or performance overhead.
+- **Competitive Advantage**: Works where others can't—legacy systems, performance-critical sites, and across diverse technical stacks without a build step.
 
-### Core Functionality
-- **Embeddable Widget**: Chat interface that can be added to any website
-- **API-Agnostic Backend**: Connects to any server implementation via standard REST endpoints
-- **Cross-Domain Support**: JSONP implementation for seamless integration across domains
-- **Real-time Messaging**: Send and receive messages through configurable API endpoints
-- **Flexible Integration**: Works with any business's existing chat infrastructure
+## Target Market Segments
 
-### Security & Reliability
-- **XSS Prevention**: Callback validation and message sanitization
-- **Secure Headers**: Proper Content-Type and CORS configuration
-- **Script Hijacking Protection**: Comment prefixes prevent injection attacks
+1. **Small to Medium Businesses (SMBs)**: Who need a professional chat solution that can be "live in 30 seconds" with zero development overhead.
+2. **Enterprises with Legacy Systems**: Organizations that cannot easily adopt modern frameworks (React/Vue) but require sophisticated, interactive chat capabilities.
+3. **Agencies & SaaS Providers**: Developers looking for a white-label, API-agnostic frontend that they can plug into their own proprietary backends.
 
-### Customization Options
-- **Positioning**: Four corner positions (top-left, top-right, bottom-left, bottom-right)
-- **Branding**: Custom colors and titles
-- **Multiple Widgets**: Support for multiple chat instances on one page
+## Key Features & Unique Value Propositions
+
+### Rich Interactive Widgets
+A self-contained library of 15+ specialized components (managed via `WidgetFactory`):
+- **Data Collection**: Star ratings, sliders, date/time pickers, and color pickers.
+- **Selection & Forms**: Multi-line textareas, searchable select menus, checkboxes, and radio buttons.
+- **Advanced Interaction**: Multi-file uploads, tags input, confirmation dialogs, and real-time progress bars.
+
+### Universal Compatibility & Performance
+- **Zero Dependencies**: No React, Vue, or jQuery required.
+- **Ultra-Lightweight**: Core widget is ~12KB; full bundle with all 15+ widgets is ~70KB.
+- **Cross-Domain Freedom**: Native JSONP support bypasses CORS restrictions for seamless multi-domain deployments.
+- **Dual Display Modes**: Supports both a sleek **Popup** (bottom-right/left) and a **Full-page/Embedded** mode for dedicated support pages.
+
+### Developer-Centric Design
+- **Single-Script Integration**: Configuration via standard HTML `data-` attributes.
+- **Programmatic API**: Full control via `ChatUI.init()`, allowing dynamic open/close and message sending.
+- **Scoped & Secure**: ID-rooted CSS (`#chat-widget-container`) prevents style bleeding; robust XSS prevention and callback validation.
 
 ## Technical Architecture
 
-### Frontend Components
-- **chat-widget.js**: Main widget implementation (12KB)
-- **popup.html**: Chat interface design
-- **demo.html**: Integration examples and documentation
+### Core Modules
+- **`src/modules/chat-widget.class.js`**: Central controller managing state, lifecycle, and event coordination.
+- **`src/modules/ui.js`**: Lean rendering engine with an internal CSS reset.
+- **`src/modules/api.js`**: Communication layer handling the Handshake and Message protocols.
+- **`src/modules/widgets/`**: Modular registry of interactive UI components.
 
-### Backend Integration (API-Agnostic)
-The widget connects to any backend that implements these standard endpoints:
-```
-GET  /api/messages    - Retrieve chat history
-POST /api/messages    - Send new messages
-```
+### Communication Protocol
+1. **Handshake**: Establishes session persistence via `/api/handshake`.
+2. **State Management**: Reactive state-driven UI updates using a predictable `setState` pattern.
+3. **Widget Interaction**: Centralized event bus (`widgetInteraction`) for capturing and relaying structured user data from widgets back to the server.
 
-**Backend Requirements:**
-- Support for JSONP callbacks (for cross-domain requests)
-- Standard REST API responses
-- Message sanitization (recommended)
-- CORS configuration (if needed)
+## Modernization Roadmap (Ongoing)
 
-### Integration Method
-```html
-<script 
-  id="chat-widget"
-  src="https://cdn.jsdelivr.net/gh/lesichkovm/chatui@latest/static/chat-widget.js"
-  data-api-server="http://your-api-server.com/api"
-  data-position="bottom-right"
-  data-color="#007bff"
-  data-title="Chat with us">
-</script>
-```
+We are currently executing a **Product Modernization Phase** to bring core conversational features to the vanilla ecosystem:
+- [x] **Modular Widget System**: 15+ interactive components.
+- [ ] **Modern Theme System**: Move to CSS Variables for deep, runtime-switchable branding (Light/Dark/Corporate).
+- [ ] **Real-time Pipeline**: Transitioning from polling/JSONP towards **WebSocket** support for live typing indicators and read receipts.
+- [ ] **Rich Content**: Native support for Markdown parsing and image/card message types.
 
-**GitHub Hosting Options:**
-- Raw file: `https://raw.githubusercontent.com/lesichkovm/chatui/main/static/chat-widget.js`
-- GitHub Pages: `https://lesichkovm.github.io/chatui/chat-widget.js`
+## Development & Testing
 
-**CDN Options:**
-- Latest version: `https://cdn.jsdelivr.net/gh/lesichkovm/chatui@latest/static/chat-widget.js`
-- Specific version: `https://cdn.jsdelivr.net/gh/lesichkovm/chatui@v1.0.0/static/chat-widget.js`
+- **Testing**: Industrial-grade E2E coverage using **Playwright**.
+- **Build System**: Parallelized `esbuild` pipeline for rapid development cycles.
+- **Demos**: Full suite of widget demonstrations available in the `demo/` directory.
 
-## Use Cases
-
-### Customer Support
-- Add live chat to e-commerce sites
-- Provide instant customer service
-- Reduce support ticket volume
-
-### Community Engagement
-- Enable user discussions on content sites
-- Create interactive learning environments
-- Foster community building
-
-### Internal Communication
-- Team chat for internal dashboards
-- Project collaboration tools
-- Status update interfaces
-
-## Development Status
-
-**Current State**: Complete frontend widget, ready for production use
-
-The ChatUI project provides a fully functional frontend chat widget that can be deployed immediately. The widget is designed to work with any backend API that implements the standard chat endpoints.
-
-**What's Included**:
-- Complete JavaScript widget implementation
-- Responsive HTML chat interface
-- Comprehensive customization options
-- Security features (XSS prevention, input sanitization)
-- Cross-domain support via JSONP
-- Multiple deployment examples
-
-**What Users Need to Provide**:
-- Backend API implementation (any language/framework)
-- Message storage and persistence
-- User authentication (if required)
-- Business logic for chat routing/handling
-
-## Implementation Guide
-
-### Step 1: Backend API
-Create API endpoints that match the widget's expected format:
-```
-GET  /api/messages?callback=funcName    // JSONP support
-POST /api/messages                     // Standard POST
-```
-
-### Step 2: Deploy Widget
-The widget is hosted on GitHub and available via multiple delivery methods:
-
-**Direct from GitHub:**
-- Raw file: `https://raw.githubusercontent.com/lesichkovm/chatui/main/static/chat-widget.js`
-- GitHub Pages: `https://lesichkovm.github.io/chatui/chat-widget.js`
-
-**CDN Options:**
-- Latest version: `https://cdn.jsdelivr.net/gh/lesichkovm/chatui@latest/static/chat-widget.js`
-- Specific version: `https://cdn.jsdelivr.net/gh/lesichkovm/chatui@v1.0.0/static/chat-widget.js`
-
-### Step 3: Configure Integration
-Update the data attributes to point to your API server and customize appearance.
-
-## Next Steps (Optional Enhancements)
-
-For users wanting to extend the widget:
-1. Add authentication tokens to API calls
-2. Implement file/image sharing
-3. Add typing indicators and read receipts
-4. Create admin dashboard for chat management
-5. Add chat history search functionality
-
-## Technical Considerations
-
-### Security Focus
-- JSONP callback validation prevents XSS attacks
-- Message sanitization removes malicious content
-- CORS headers control cross-origin access
-- Content-Type headers prevent MIME sniffing
-
-### Performance
-- Lightweight JavaScript footprint (~12KB)
-- In-memory storage for fast message retrieval
-- Minimal DOM manipulation
-- Efficient event handling
-
-### Compatibility
-- Works across different domains via JSONP
-- Browser-compatible implementation
-- Responsive design for mobile devices
-- No external dependencies required
-
-### Technical Details
-- **Language:** Plain JavaScript.
-- **Architecture:** Modular ES6 Class-based architecture.
-- **Build System:** Uses `esbuild` to bundle modules.
-- **Encapsulation:** ID-rooted CSS with a scoped reset.
-- **State & Events:** Managed within `ChatWidget` class using `setState` and centralized handlers.
-- **Accessibility:** Implemented ARIA roles, labels, and focus management.
-- **Programmatic API:** Exposes `ChatUI.init()` for code-based initialization and control.

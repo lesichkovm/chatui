@@ -1,17 +1,26 @@
 # ChatUI Widget
 
-A simple, embedded, API-agnostic chat UI widget with JSONP support for cross-domain communication.
+A professional, **ultra-lightweight (~12KB)**, API-agnostic chat UI widget built with **pure Vanilla JavaScript**. Zero framework lock-in (no React/Vue/jQuery), zero external dependencies, and built-in JSONP support for seamless cross-domain integration.
+
+## Strategic Position
+
+ChatUI provides the interactive power of a modern conversational UI without the performance overhead or technical complexity of framework-bound libraries. It is designed to be "live in 30 seconds" while remaining extensible enough for complex enterprise requirements.
+
+## Target Markets
+
+- **SMBs**: Professional chat with zero dev overhead.
+- **Enterprise Legacy Systems**: Modern interactivity without framework migrations.
+- **SaaS Platforms**: A lean, white-label frontend for proprietary backends.
 
 ## Features
 
-- **Lightweight & Fast**: Built with vanilla JavaScript, zero heavy dependencies.
-- **Cross-Domain Support**: Native JSONP support allows easy integration with any backend.
-- **Secure**: Input sanitization and secure callback handling.
-- **Customizable**: Configurable position, colors, and titles via data attributes or CSS.
-- **Multiple Modes**: Supports 'popup' (default) and 'fullpage' modes.
-- **Modular Architecture**: Built with modern ES6 classes and modules.
-- **Programmatic API**: Full control over the widget via JavaScript.
-- **Accessible**: Built-in ARIA support and focus management.
+- **Ultra-Lightweight**: ~12KB core footprint, minimal impact on host performance.
+- **Interactive Widget System**: Support for 15+ specialized UI components (Rating, Date Picker, File Upload, etc.).
+- **Zero Dependencies**: Pure vanilla JS, works with any stack.
+- **Cross-Domain Ready**: Native JSONP support bypasses CORS headaches.
+- **Dual Modes**: Supports both `popup` and `fullpage` embedded modes.
+- **Modular Architecture**: Built with modern ES6 classes and a dedicated `WidgetFactory`.
+- **Accessible & Secure**: ARIA-compliant focus management and robust XSS prevention.
 
 ## Installation & Usage
 
