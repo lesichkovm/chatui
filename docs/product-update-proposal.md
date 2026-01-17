@@ -13,90 +13,18 @@ We have successfully modernized the core infrastructure. The following features 
 - **Interactive Widget Library**: 15+ specialized components (Ratings, File Uploads, Date Pickers, etc.).
 - **Multi-Mode Support**: Seamless switching between Popup and Full-page Embedded modes.
 - **E2E Testing**: Industrial-grade coverage with Playwright.
+- **✅ Dynamic Theme Engine**: Data-attributes-first theming with CSS variables, runtime switching, and localStorage persistence.
 
 ---
 
 ## Phase 1: Modernization & AI Readiness (Immediate - 3 Months)
 
-### 1.1 Dynamic Theme Engine (CSS Variables)
-**Priority: High | Effort: 20 hours**
-- **Objective**: Move away from hardcoded hex colors to a runtime-switchable theme engine.
-- **Implementation**: 
-  - **Data-Attributes-First Approach**: All colors configurable via HTML attributes (`data-color`, `data-bg-color`, `data-surface-color`, `data-text-color`, `data-border-color`)
-  - **Two Base Themes**: "Default" (clean, minimal) and "Branded" (corporate-friendly)
-  - **Runtime Switching**: Each theme supports Light/Dark mode toggle via CSS variables
-  - **CSS Variables System**: `--chat-primary`, `--chat-bg`, `--chat-surface`, `--chat-text`, `--chat-border` with fallbacks
-  - **Non-Technical Friendly**: Simple HTML attributes, no CSS knowledge required
-  - **Theme Persistence**: User preference saved in localStorage
-  - **System Integration**: Respects `prefers-color-scheme` media query
-
-**Theme Structure:**
-```css
-/* CSS Variables controlled by data attributes */
-#chat-widget[data-theme="default"][data-mode="light"] {
-  --chat-primary: attr(data-color-light, #007bff);
-  --chat-bg: attr(data-bg-color-light, #ffffff);
-  --chat-surface: attr(data-surface-color-light, #f8f9fa);
-  --chat-text: attr(data-text-color-light, #212529);
-  --chat-border: attr(data-border-color-light, #e9ecef);
-}
-
-#chat-widget[data-theme="default"][data-mode="dark"] {
-  --chat-primary: attr(data-color-dark, #4dabf7);
-  --chat-bg: attr(data-bg-color-dark, #1a1a1a);
-  --chat-surface: attr(data-surface-color-dark, #2d2d2d);
-  --chat-text: attr(data-text-color-dark, #ffffff);
-  --chat-border: attr(data-border-color-dark, #404040);
-}
-
-#chat-widget[data-theme="branded"][data-mode="light"] {
-  --chat-primary: attr(data-color-light, #007bff);
-  --chat-bg: attr(data-bg-color-light, #ffffff);
-  --chat-surface: attr(data-surface-color-light, #f8f9fa);
-  --chat-text: attr(data-text-color-light, #212529);
-  --chat-border: attr(data-border-color-light, #e9ecef);
-}
-
-#chat-widget[data-theme="branded"][data-mode="dark"] {
-  --chat-primary: attr(data-color-dark, #4dabf7);
-  --chat-bg: attr(data-bg-color-dark, #1a1a1a);
-  --chat-surface: attr(data-surface-color-dark, #2d2d2d);
-  --chat-text: attr(data-text-color-dark, #ffffff);
-  --chat-border: attr(data-border-color-dark, #404040);
-}
-
-/* Runtime switching via JavaScript */
-widgetElement.setAttribute('data-theme', 'default');
-widgetElement.setAttribute('data-mode', 'dark');
-
-/* HTML Integration (separate light/dark color attributes) */
-<script 
-  id="chat-widget"
-  src="path/to/chat-widget.js"
-  data-server-url="http://your-server.com"
-  data-position="bottom-right"
-  data-color-light="#007bff"
-  data-color-dark="#4dabf7"
-  data-bg-color-light="#ffffff"
-  data-bg-color-dark="#1a1a1a"
-  data-surface-color-light="#f8f9fa"
-  data-surface-color-dark="#2d2d2d"
-  data-text-color-light="#212529"
-  data-text-color-dark="#ffffff"
-  data-border-color-light="#e9ecef"
-  data-border-color-dark="#404040"
-  data-theme="default"
-  data-mode="light"
-  data-title="Chat with us">
-</script>
-```
-
-### 1.2 WebSocket & Real-time Pipeline
+### 1.1 WebSocket & Real-time Pipeline
 **Priority: High | Effort: 40 hours**
 - **Objective**: Eliminate the latency of JSONP polling.
 - **Implementation**: Introduce a hybrid adapter that uses WebSockets for live typing indicators and read receipts, while maintaining JSONP/CORS as a fallback for restricted environments.
 
-### 1.3 UI Support for AI-Driven Patterns
+### 1.2 UI Support for AI-Driven Patterns
 **Priority: High | Effort: 20 hours**
 - **Objective**: Standardize how the widget renders modern AI/LLM conversational patterns.
 - **Implementation**: Add native UI support for **"Streaming Responses"** (character-by-character updates) and **"Reasoning/Thought Blocks"** (collapsible sections for model chain-of-thought), ensuring the frontend remains strictly agnostic to the backend provider.
@@ -136,9 +64,9 @@ To maintain the project's agility, we recommend a lean, high-output team:
 - **QA/Automations**: 0.5 FTE (Maintaining Playwright coverage).
 
 ### Budget Estimate (6-Month Pivot)
-- **Development & Ops**: $80,000 - $110,000
+- **Development & Ops**: $60,000 - $90,000 (reduced by $20K due to completed theme engine)
 - **Infrastructure (CDN/Demos)**: $2,400 annually
-- **Total Investment**: **$82,400 - $112,400**
+- **Total Investment**: **$62,400 - $92,400**
 
 ---
 
@@ -202,4 +130,4 @@ To maintain the project's agility, we recommend a lean, high-output team:
 
 ChatUI is no longer just a widget; it is a **performance-first alternative to framework bloat**. By focusing on AI integration, real-time responsiveness, and enterprise readiness while keeping our "Vanilla" promise, we will capture the mid-market segment that requires sophistication without technical debt.
 
-The revised 6-month timeline and $82K-$112K budget represents a strategic balance between ambition and execution, positioning ChatUI for sustainable growth and market leadership.
+The revised 6-month timeline and $62K-$92K budget represents a strategic balance between ambition and execution, positioning ChatUI for sustainable growth and market leadership.
