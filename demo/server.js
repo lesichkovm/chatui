@@ -36,27 +36,74 @@ function handleHandshake(req, res, query) {
 
 function handleMessages(req, res, query) {
   const callback = query.callback;
-  const message = query.message;
-  const type = query.type;
   const referer = req.headers.referer || '';
 
-  // Debug logging
-  console.log('Request details:');
-  console.log('- Message:', message);
-  console.log('- Type:', type);
-  console.log('- Referer:', referer);
+  // Handle both GET (query params) and POST (body) requests
+  let message, type, session_key;
+  
+  if (req.method === 'POST') {
+    // For POST requests, read the body
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    
+    req.on('end', () => {
+      try {
+        const postData = JSON.parse(body);
+        message = postData.message;
+        type = postData.type;
+        session_key = postData.session_key;
+        
+        processMessage(req, res, callback, message, type, session_key, referer);
+      } catch (error) {
+        console.error('Error parsing POST body:', error);
+        const errorResponse = {
+          status: 'error',
+          message: 'Invalid JSON in request body'
+        };
+        sendJSONP(res, callback, errorResponse);
+      }
+    });
+  } else {
+    // For GET requests, use query parameters
+    message = query.message;
+    type = query.type;
+    session_key = query.session_key;
+    
+    // Debug logging
+    console.log('Request details:');
+    console.log('- Message:', message);
+    console.log('- Type:', type);
+    console.log('- Referer:', referer);
+    
+    processMessage(req, res, callback, message, type, session_key, referer);
+  }
+}
 
+function processMessage(req, res, callback, message, type, session_key, referer) {
   let responseData;
+
+  // Debug logging for POST requests
+  if (req.method === 'POST') {
+    console.log('POST Request details:');
+    console.log('- Message:', message);
+    console.log('- Type:', type);
+    console.log('- Session Key:', session_key);
+    console.log('- Referer:', referer);
+  }
 
   if (type === 'connect') {
     // Welcome message - check if this is any widget demo for special welcome
     if (referer.includes('widget-demo.html') || referer.includes('buttons-widget-demo.html') || referer.includes('input-widget-demo.html') || referer.includes('select-widget-demo.html') || referer.includes('rating-widget-demo.html') || referer.includes('checkbox-widget-demo.html') || referer.includes('textarea-widget-demo.html') || referer.includes('slider-widget-demo.html') || referer.includes('toggle-widget-demo.html') || referer.includes('date-widget-demo.html') || referer.includes('tags-widget-demo.html') || referer.includes('file-upload-widget-demo.html') || referer.includes('color-picker-widget-demo.html') || referer.includes('confirmation-widget-demo.html') || referer.includes('radio-widget-demo.html') || referer.includes('progress-widget-demo.html')) {
       responseData = {
+        status: 'success',
         text: 'Hello! I\'m your virtual assistant. Try "show buttons", "show select", "show input", "show rating", "show checkbox", "show textarea", "show slider", "show toggle", "show date", "show tags", "show file", "show color", "show confirmation", "show radio", or "show progress" to see interactive widgets!',
         sender: 'bot'
       };
     } else {
       responseData = {
+        status: 'success',
         text: 'Welcome to the demo chat! Server is running.',
         sender: 'bot'
       };
@@ -71,6 +118,7 @@ function handleMessages(req, res, query) {
       // Widget responses - triggered by specific keywords
       if (lowerMessage === 'show buttons') {
         responseData = {
+          status: 'success',
           text: 'Welcome! How can I help you today?',
           widget: {
             type: 'buttons',
@@ -84,6 +132,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show select') {
         responseData = {
+          status: 'success',
           text: 'Please choose your preferred department:',
           widget: {
             type: 'select',
@@ -98,6 +147,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show input') {
         responseData = {
+          status: 'success',
           text: 'Please enter your email address:',
           widget: {
             type: 'input',
@@ -108,6 +158,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show rating') {
         responseData = {
+          status: 'success',
           text: 'How would you rate our service?',
           widget: {
             type: 'rating',
@@ -118,6 +169,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show checkbox') {
         responseData = {
+          status: 'success',
           text: 'Select your interests:',
           widget: {
             type: 'checkbox',
@@ -132,6 +184,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show textarea') {
         responseData = {
+          status: 'success',
           text: 'Please describe your issue in detail:',
           widget: {
             type: 'textarea',
@@ -143,6 +196,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show slider') {
         responseData = {
+          status: 'success',
           text: 'How satisfied are you with our service?',
           widget: {
             type: 'slider',
@@ -156,6 +210,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show toggle') {
         responseData = {
+          status: 'success',
           text: 'Would you like to enable notifications?',
           widget: {
             type: 'toggle',
@@ -166,6 +221,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show date') {
         responseData = {
+          status: 'success',
           text: 'When would you like to schedule your appointment?',
           widget: {
             type: 'date',
@@ -177,6 +233,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show tags') {
         responseData = {
+          status: 'success',
           text: 'What are your interests?',
           widget: {
             type: 'tags',
@@ -189,6 +246,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show file') {
         responseData = {
+          status: 'success',
           text: 'Please upload your documents:',
           widget: {
             type: 'file',
@@ -201,6 +259,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show color') {
         responseData = {
+          status: 'success',
           text: 'Choose your preferred theme color:',
           widget: {
             type: 'color',
@@ -212,6 +271,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show confirmation') {
         responseData = {
+          status: 'success',
           text: 'Are you sure you want to delete this item?',
           widget: {
             type: 'confirmation',
@@ -222,6 +282,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show radio') {
         responseData = {
+          status: 'success',
           text: 'What is your preferred contact method?',
           widget: {
             type: 'radio',
@@ -235,6 +296,7 @@ function handleMessages(req, res, query) {
         };
       } else if (lowerMessage === 'show progress') {
         responseData = {
+          status: 'success',
           text: 'Your download is in progress:',
           widget: {
             type: 'progress',
@@ -252,11 +314,13 @@ function handleMessages(req, res, query) {
           const totalSize = fileData.reduce((sum, f) => sum + f.size, 0);
           
           responseData = {
+            status: 'success',
             text: `Files uploaded successfully!\n\nFiles: ${fileNames}\nTotal size: ${Math.round(totalSize / 1024)}KB`,
             sender: 'bot'
           };
         } catch (e) {
           responseData = {
+            status: 'success',
             text: 'Files uploaded successfully!',
             sender: 'bot'
           };
@@ -264,6 +328,7 @@ function handleMessages(req, res, query) {
       }
     } else if (lowerMessage === 'support') {
       responseData = {
+        status: 'success',
         text: 'Connecting you to customer support... Our team will help you with any issues you\'re experiencing.',
         widget: {
           type: 'buttons',
@@ -276,6 +341,7 @@ function handleMessages(req, res, query) {
       };
     } else if (lowerMessage === 'sales') {
       responseData = {
+        status: 'success',
         text: 'Our sales team is ready to help! What are you interested in?',
         widget: {
           type: 'buttons',
@@ -288,6 +354,7 @@ function handleMessages(req, res, query) {
       };
     } else if (lowerMessage === 'technical') {
       responseData = {
+        status: 'success',
         text: 'Let me help you with technical issues. What seems to be the problem?',
         widget: {
           type: 'buttons',
@@ -300,6 +367,7 @@ function handleMessages(req, res, query) {
       };
     } else if (lowerMessage === 'billing') {
       responseData = {
+        status: 'success',
         text: 'I can help with billing questions. What do you need assistance with?',
         widget: {
           type: 'buttons',
@@ -314,11 +382,13 @@ function handleMessages(req, res, query) {
       // Default echo response
       if (referer.includes('widget-demo.html') || referer.includes('buttons-widget-demo.html') || referer.includes('input-widget-demo.html') || referer.includes('select-widget-demo.html') || referer.includes('rating-widget-demo.html') || referer.includes('checkbox-widget-demo.html') || referer.includes('textarea-widget-demo.html') || referer.includes('slider-widget-demo.html') || referer.includes('toggle-widget-demo.html') || referer.includes('date-widget-demo.html') || referer.includes('tags-widget-demo.html') || referer.includes('file-upload-widget-demo.html') || referer.includes('color-picker-widget-demo.html') || referer.includes('confirmation-widget-demo.html') || referer.includes('radio-widget-demo.html') || referer.includes('progress-widget-demo.html')) {
         responseData = {
+          status: 'success',
           text: `You said: "${message}". Try "show buttons", "show select", "show input", "show rating", "show checkbox", "show textarea", "show slider", "show toggle", "show date", "show tags", "show file", "show color", "show confirmation", "show radio", "show progress", or "help" to see interactive widgets!`,
           sender: 'bot'
         };
       } else {
         responseData = {
+          status: 'success',
           text: `Echo: ${message}`,
           sender: 'bot'
         };

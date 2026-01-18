@@ -491,7 +491,6 @@ test.describe('CorsAPI', () => {
 
         // Mock successful connect response
         return Promise.resolve(new MockResponse({
-          type: 'connect',
           status: 'success',
           text: "Welcome to ChatUI Widget Demo! I'm here to help you explore the features. Try typing 'menu' to see interactive widgets, or just say hello!",
           sender: 'bot',
@@ -515,6 +514,48 @@ test.describe('CorsAPI', () => {
       expect(connectResponse).not.toBeNull();
       expect(connectResponse!.text).toContain("Welcome to ChatUI Widget Demo");
       expect(connectResponse!.sender).toBe('bot');
+    });
+
+    test('should handle message POST request correctly', async () => {
+      // Override test environment detection to force actual API calls
+      api.isTestEnvironment = () => false;
+      api.setSessionKey('demo-session-1768694395068');
+
+      let messageSuccess = false;
+      let messageResponse: { text: string; sender: string } | null = null;
+
+      mockFetch = (url: string, options: any) => {
+        const body = JSON.parse(options.body);
+        expect(body.type).toBe('message');
+        expect(body.message).toBe('111');
+        expect(body.session_key).toBe('demo-session-1768694395068');
+        expect(body.timestamp).toBeDefined();
+
+        // Mock successful message response
+        return Promise.resolve(new MockResponse({
+          status: 'success',
+          text: 'Echo: 111',
+          sender: 'bot',
+          timestamp: Date.now(),
+          session_key: 'demo-session-1768694395068'
+        }));
+      };
+      (global as any).fetch = mockFetch;
+
+      await new Promise<void>((resolve) => {
+        api.sendMessage('111', (text: string, sender: string) => {
+          messageSuccess = true;
+          messageResponse = { text, sender };
+          resolve();
+        }, (error: any) => {
+          resolve();
+        });
+      });
+
+      expect(messageSuccess).toBe(true);
+      expect(messageResponse).not.toBeNull();
+      expect(messageResponse!.text).toBe('Echo: 111');
+      expect(messageResponse!.sender).toBe('bot');
     });
   });
 
