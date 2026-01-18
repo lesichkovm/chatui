@@ -41,6 +41,11 @@ export class ToggleWidget extends BaseWidget {
       const toggleSlider = document.createElement("span");
       toggleSlider.className = "widget-toggle-slider";
       
+      // Add click handler to slider to toggle the checkbox
+      toggleSlider.addEventListener("click", () => {
+        toggle.checked = !toggle.checked;
+      });
+      
       const submitButton = document.createElement("button");
       submitButton.className = "widget-toggle-submit";
       submitButton.textContent = this.widgetData.buttonText || 'Submit';

@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-18T00:18:29.151Z
+ * Generated on: 2026-01-18T00:25:36.784Z
  */
 
 
@@ -1445,6 +1445,9 @@
         }
         const toggleSlider = document.createElement("span");
         toggleSlider.className = "widget-toggle-slider";
+        toggleSlider.addEventListener("click", () => {
+          toggle.checked = !toggle.checked;
+        });
         const submitButton = document.createElement("button");
         submitButton.className = "widget-toggle-submit";
         submitButton.textContent = this.widgetData.buttonText || "Submit";

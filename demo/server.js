@@ -108,290 +108,299 @@ function processMessage(req, res, callback, message, type, session_key, referer)
         sender: 'bot'
       };
     }
-  } else if (message) {
+  } else if (message !== undefined && message !== null) {
     console.log('Received message:', message);
     
-    // Check for widget trigger keywords regardless of page
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage === 'show buttons' || lowerMessage === 'show select' || lowerMessage === 'show input' || lowerMessage === 'show rating' || lowerMessage === 'show checkbox' || lowerMessage === 'show textarea' || lowerMessage === 'show slider' || lowerMessage === 'show toggle' || lowerMessage === 'show date' || lowerMessage === 'show tags' || lowerMessage === 'show file' || lowerMessage === 'show color' || lowerMessage === 'show confirmation' || lowerMessage === 'show radio' || lowerMessage === 'show progress' || lowerMessage === 'help') {
-      // Widget responses - triggered by specific keywords
-      if (lowerMessage === 'show buttons') {
+    // Handle boolean values from toggle widget
+    if (typeof message === 'boolean') {
+      responseData = {
+        status: 'success',
+        text: `Toggle ${message ? 'enabled' : 'disabled'}`,
+        sender: 'bot'
+      };
+    } else {
+      // Check for widget trigger keywords regardless of page
+      const lowerMessage = message.toLowerCase();
+      
+      if (lowerMessage === 'show buttons' || lowerMessage === 'show select' || lowerMessage === 'show input' || lowerMessage === 'show rating' || lowerMessage === 'show checkbox' || lowerMessage === 'show textarea' || lowerMessage === 'show slider' || lowerMessage === 'show toggle' || lowerMessage === 'show date' || lowerMessage === 'show tags' || lowerMessage === 'show file' || lowerMessage === 'show color' || lowerMessage === 'show confirmation' || lowerMessage === 'show radio' || lowerMessage === 'show progress' || lowerMessage === 'help') {
+        // Widget responses - triggered by specific keywords
+        if (lowerMessage === 'show buttons') {
+          responseData = {
+            status: 'success',
+            text: 'Welcome! How can I help you today?',
+            widget: {
+              type: 'buttons',
+              options: [
+                { id: 'opt1', text: 'Customer Support', value: 'support' },
+                { id: 'opt2', text: 'Sales Inquiry', value: 'sales' },
+                { id: 'opt3', text: 'Technical Help', value: 'technical' },
+                { id: 'opt4', text: 'Billing Question', value: 'billing' }
+              ]
+            }
+          };
+        } else if (lowerMessage === 'show select') {
+          responseData = {
+            status: 'success',
+            text: 'Please choose your preferred department:',
+            widget: {
+              type: 'select',
+              placeholder: 'Select a department...',
+              options: [
+                { id: 'dept1', text: 'Customer Support', value: 'support' },
+                { id: 'dept2', text: 'Sales', value: 'sales' },
+                { id: 'dept3', text: 'Technical Support', value: 'tech' },
+                { id: 'dept4', text: 'Billing', value: 'billing' }
+              ]
+            }
+          };
+        } else if (lowerMessage === 'show input') {
+          responseData = {
+            status: 'success',
+            text: 'Please enter your email address:',
+            widget: {
+              type: 'input',
+              inputType: 'email',
+              placeholder: 'Enter your email...',
+              buttonText: 'Submit'
+            }
+          };
+        } else if (lowerMessage === 'show rating') {
+          responseData = {
+            status: 'success',
+            text: 'How would you rate our service?',
+            widget: {
+              type: 'rating',
+              label: 'Rate your experience',
+              maxRating: 5,
+              iconType: 'stars'
+            }
+          };
+        } else if (lowerMessage === 'show checkbox') {
+          responseData = {
+            status: 'success',
+            text: 'Select your interests:',
+            widget: {
+              type: 'checkbox',
+              buttonText: 'Submit',
+              options: [
+                { id: 'tech', text: 'Technology', 'value': 'tech' },
+                { id: 'sports', text: 'Sports', 'value': 'sports' },
+                { id: 'music', text: 'Music', 'value': 'music' },
+                { id: 'travel', text: 'Travel', 'value': 'travel' }
+              ]
+            }
+          };
+        } else if (lowerMessage === 'show textarea') {
+          responseData = {
+            status: 'success',
+            text: 'Please describe your issue in detail:',
+            widget: {
+              type: 'textarea',
+              placeholder: 'Describe your issue here...',
+              rows: 6,
+              maxLength: 500,
+              buttonText: 'Submit'
+            }
+          };
+        } else if (lowerMessage === 'show slider') {
+          responseData = {
+            status: 'success',
+            text: 'How satisfied are you with our service?',
+            widget: {
+              type: 'slider',
+              label: 'Satisfaction Rating',
+              min: 0,
+              max: 10,
+              step: 1,
+              defaultValue: 5,
+              buttonText: 'Submit'
+            }
+          };
+        } else if (lowerMessage === 'show toggle') {
+          responseData = {
+            status: 'success',
+            text: 'Would you like to enable notifications?',
+            widget: {
+              type: 'toggle',
+              label: 'Enable Notifications',
+              defaultValue: false,
+              buttonText: 'Save'
+            }
+          };
+        } else if (lowerMessage === 'show date') {
+          responseData = {
+            status: 'success',
+            text: 'When would you like to schedule your appointment?',
+            widget: {
+              type: 'date',
+              label: 'Select Date',
+              minDate: '2024-01-01',
+              maxDate: '2024-12-31',
+              buttonText: 'Schedule'
+            }
+          };
+        } else if (lowerMessage === 'show tags') {
+          responseData = {
+            status: 'success',
+            text: 'What are your interests?',
+            widget: {
+              type: 'tags',
+              label: 'Select Your Interests',
+              placeholder: 'Type and press Enter',
+              suggestions: ['Technology', 'Sports', 'Music', 'Travel', 'Food'],
+              maxTags: 5,
+              buttonText: 'Submit'
+            }
+          };
+        } else if (lowerMessage === 'show file') {
+          responseData = {
+            status: 'success',
+            text: 'Please upload your documents:',
+            widget: {
+              type: 'file',
+              label: 'Upload Documents',
+              accept: '.pdf,.doc,.docx',
+              maxFiles: 3,
+              maxSize: 5242880,
+              buttonText: 'Upload Files'
+            }
+          };
+        } else if (lowerMessage === 'show color') {
+          responseData = {
+            status: 'success',
+            text: 'Choose your preferred theme color:',
+            widget: {
+              type: 'color',
+              label: 'Select Theme Color',
+              defaultColor: '#007bff',
+              presetColors: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8'],
+              buttonText: 'Apply'
+            }
+          };
+        } else if (lowerMessage === 'show confirmation') {
+          responseData = {
+            status: 'success',
+            text: 'Are you sure you want to delete this item?',
+            widget: {
+              type: 'confirmation',
+              message: 'This action cannot be undone. Are you sure?',
+              confirmText: 'Delete',
+              cancelText: 'Cancel'
+            }
+          };
+        } else if (lowerMessage === 'show radio') {
+          responseData = {
+            status: 'success',
+            text: 'What is your preferred contact method?',
+            widget: {
+              type: 'radio',
+              buttonText: 'Submit',
+              options: [
+                { id: 'email', text: 'Email', 'value': 'email' },
+                { id: 'phone', text: 'Phone', 'value': 'phone' },
+                { id: 'sms', text: 'SMS', 'value': 'sms' }
+              ]
+            }
+          };
+        } else if (lowerMessage === 'show progress') {
+          responseData = {
+            status: 'success',
+            text: 'Your download is in progress:',
+            widget: {
+              type: 'progress',
+              label: 'Download Progress',
+              value: 75,
+              max: 100,
+              showPercentage: true
+            }
+          };
+        } else if (message && message.startsWith('[') && message.endsWith(']')) {
+          // Handle file upload responses (JSON array string)
+          try {
+            const fileData = JSON.parse(decodeURIComponent(message));
+            const fileNames = fileData.map(f => f.name).join(', ');
+            const totalSize = fileData.reduce((sum, f) => sum + f.size, 0);
+            
+            responseData = {
+              status: 'success',
+              text: `Files uploaded successfully!\n\nFiles: ${fileNames}\nTotal size: ${Math.round(totalSize / 1024)}KB`,
+              sender: 'bot'
+            };
+          } catch (e) {
+            responseData = {
+              status: 'success',
+              text: 'Files uploaded successfully!',
+              sender: 'bot'
+            };
+          }
+        }
+      } else if (lowerMessage === 'support') {
         responseData = {
           status: 'success',
-          text: 'Welcome! How can I help you today?',
+          text: 'Connecting you to customer support... Our team will help you with any issues you\'re experiencing.',
           widget: {
             type: 'buttons',
             options: [
-              { id: 'opt1', text: 'Customer Support', value: 'support' },
-              { id: 'opt2', text: 'Sales Inquiry', value: 'sales' },
-              { id: 'opt3', text: 'Technical Help', value: 'technical' },
-              { id: 'opt4', text: 'Billing Question', value: 'billing' }
+              { id: 'urgent', text: 'Urgent Issue', value: 'urgent_support' },
+              { id: 'callback', text: 'Request Callback', value: 'callback' },
+              { id: 'email', text: 'Email Support', value: 'email_support' }
             ]
           }
         };
-      } else if (lowerMessage === 'show select') {
+      } else if (lowerMessage === 'sales') {
         responseData = {
           status: 'success',
-          text: 'Please choose your preferred department:',
+          text: 'Our sales team is ready to help! What are you interested in?',
           widget: {
-            type: 'select',
-            placeholder: 'Select a department...',
+            type: 'buttons',
             options: [
-              { id: 'dept1', text: 'Customer Support', value: 'support' },
-              { id: 'dept2', text: 'Sales', value: 'sales' },
-              { id: 'dept3', text: 'Technical Support', value: 'tech' },
-              { id: 'dept4', text: 'Billing', value: 'billing' }
+              { id: 'pricing', text: 'Pricing Information', value: 'pricing' },
+              { id: 'demo', text: 'Product Demo', value: 'demo_request' },
+              { id: 'enterprise', text: 'Enterprise Plans', value: 'enterprise' }
             ]
           }
         };
-      } else if (lowerMessage === 'show input') {
+      } else if (lowerMessage === 'technical') {
         responseData = {
           status: 'success',
-          text: 'Please enter your email address:',
+          text: 'Let me help you with technical issues. What seems to be the problem?',
           widget: {
-            type: 'input',
-            inputType: 'email',
-            placeholder: 'Enter your email...',
-            buttonText: 'Submit'
-          }
-        };
-      } else if (lowerMessage === 'show rating') {
-        responseData = {
-          status: 'success',
-          text: 'How would you rate our service?',
-          widget: {
-            type: 'rating',
-            label: 'Rate your experience',
-            maxRating: 5,
-            iconType: 'stars'
-          }
-        };
-      } else if (lowerMessage === 'show checkbox') {
-        responseData = {
-          status: 'success',
-          text: 'Select your interests:',
-          widget: {
-            type: 'checkbox',
-            buttonText: 'Submit',
+            type: 'buttons',
             options: [
-              { id: 'tech', text: 'Technology', 'value': 'tech' },
-              { id: 'sports', text: 'Sports', 'value': 'sports' },
-              { id: 'music', text: 'Music', 'value': 'music' },
-              { id: 'travel', text: 'Travel', 'value': 'travel' }
+              { id: 'login', text: 'Login Problems', value: 'login_help' },
+              { id: 'performance', text: 'Performance Issues', value: 'performance_help' },
+              { id: 'bug', text: 'Report a Bug', value: 'bug_report' }
             ]
           }
         };
-      } else if (lowerMessage === 'show textarea') {
+      } else if (lowerMessage === 'billing') {
         responseData = {
           status: 'success',
-          text: 'Please describe your issue in detail:',
+          text: 'I can help with billing questions. What do you need assistance with?',
           widget: {
-            type: 'textarea',
-            placeholder: 'Describe your issue here...',
-            rows: 6,
-            maxLength: 500,
-            buttonText: 'Submit'
-          }
-        };
-      } else if (lowerMessage === 'show slider') {
-        responseData = {
-          status: 'success',
-          text: 'How satisfied are you with our service?',
-          widget: {
-            type: 'slider',
-            label: 'Satisfaction Rating',
-            min: 0,
-            max: 10,
-            step: 1,
-            defaultValue: 5,
-            buttonText: 'Submit'
-          }
-        };
-      } else if (lowerMessage === 'show toggle') {
-        responseData = {
-          status: 'success',
-          text: 'Would you like to enable notifications?',
-          widget: {
-            type: 'toggle',
-            label: 'Enable Notifications',
-            defaultValue: false,
-            buttonText: 'Save'
-          }
-        };
-      } else if (lowerMessage === 'show date') {
-        responseData = {
-          status: 'success',
-          text: 'When would you like to schedule your appointment?',
-          widget: {
-            type: 'date',
-            label: 'Select Date',
-            minDate: '2024-01-01',
-            maxDate: '2024-12-31',
-            buttonText: 'Schedule'
-          }
-        };
-      } else if (lowerMessage === 'show tags') {
-        responseData = {
-          status: 'success',
-          text: 'What are your interests?',
-          widget: {
-            type: 'tags',
-            label: 'Select Your Interests',
-            placeholder: 'Type and press Enter',
-            suggestions: ['Technology', 'Sports', 'Music', 'Travel', 'Food'],
-            maxTags: 5,
-            buttonText: 'Submit'
-          }
-        };
-      } else if (lowerMessage === 'show file') {
-        responseData = {
-          status: 'success',
-          text: 'Please upload your documents:',
-          widget: {
-            type: 'file',
-            label: 'Upload Documents',
-            accept: '.pdf,.doc,.docx',
-            maxFiles: 3,
-            maxSize: 5242880,
-            buttonText: 'Upload Files'
-          }
-        };
-      } else if (lowerMessage === 'show color') {
-        responseData = {
-          status: 'success',
-          text: 'Choose your preferred theme color:',
-          widget: {
-            type: 'color',
-            label: 'Select Theme Color',
-            defaultColor: '#007bff',
-            presetColors: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8'],
-            buttonText: 'Apply'
-          }
-        };
-      } else if (lowerMessage === 'show confirmation') {
-        responseData = {
-          status: 'success',
-          text: 'Are you sure you want to delete this item?',
-          widget: {
-            type: 'confirmation',
-            message: 'This action cannot be undone. Are you sure?',
-            confirmText: 'Delete',
-            cancelText: 'Cancel'
-          }
-        };
-      } else if (lowerMessage === 'show radio') {
-        responseData = {
-          status: 'success',
-          text: 'What is your preferred contact method?',
-          widget: {
-            type: 'radio',
-            buttonText: 'Submit',
+            type: 'buttons',
             options: [
-              { id: 'email', text: 'Email', 'value': 'email' },
-              { id: 'phone', text: 'Phone', 'value': 'phone' },
-              { id: 'sms', text: 'SMS', 'value': 'sms' }
+              { id: 'invoice', text: 'Invoice Questions', value: 'invoice_help' },
+              { id: 'payment', text: 'Payment Issues', value: 'payment_help' },
+              { id: 'refund', text: 'Refund Request', value: 'refund_request' }
             ]
           }
-        };
-      } else if (lowerMessage === 'show progress') {
-        responseData = {
-          status: 'success',
-          text: 'Your download is in progress:',
-          widget: {
-            type: 'progress',
-            label: 'Download Progress',
-            value: 75,
-            max: 100,
-            showPercentage: true
-          }
-        };
-      } else if (message && message.startsWith('[') && message.endsWith(']')) {
-        // Handle file upload responses (JSON array string)
-        try {
-          const fileData = JSON.parse(decodeURIComponent(message));
-          const fileNames = fileData.map(f => f.name).join(', ');
-          const totalSize = fileData.reduce((sum, f) => sum + f.size, 0);
-          
-          responseData = {
-            status: 'success',
-            text: `Files uploaded successfully!\n\nFiles: ${fileNames}\nTotal size: ${Math.round(totalSize / 1024)}KB`,
-            sender: 'bot'
-          };
-        } catch (e) {
-          responseData = {
-            status: 'success',
-            text: 'Files uploaded successfully!',
-            sender: 'bot'
-          };
-        }
-      }
-    } else if (lowerMessage === 'support') {
-      responseData = {
-        status: 'success',
-        text: 'Connecting you to customer support... Our team will help you with any issues you\'re experiencing.',
-        widget: {
-          type: 'buttons',
-          options: [
-            { id: 'urgent', text: 'Urgent Issue', value: 'urgent_support' },
-            { id: 'callback', text: 'Request Callback', value: 'callback' },
-            { id: 'email', text: 'Email Support', value: 'email_support' }
-          ]
-        }
-      };
-    } else if (lowerMessage === 'sales') {
-      responseData = {
-        status: 'success',
-        text: 'Our sales team is ready to help! What are you interested in?',
-        widget: {
-          type: 'buttons',
-          options: [
-            { id: 'pricing', text: 'Pricing Information', value: 'pricing' },
-            { id: 'demo', text: 'Product Demo', value: 'demo_request' },
-            { id: 'enterprise', text: 'Enterprise Plans', value: 'enterprise' }
-          ]
-        }
-      };
-    } else if (lowerMessage === 'technical') {
-      responseData = {
-        status: 'success',
-        text: 'Let me help you with technical issues. What seems to be the problem?',
-        widget: {
-          type: 'buttons',
-          options: [
-            { id: 'login', text: 'Login Problems', value: 'login_help' },
-            { id: 'performance', text: 'Performance Issues', value: 'performance_help' },
-            { id: 'bug', text: 'Report a Bug', value: 'bug_report' }
-          ]
-        }
-      };
-    } else if (lowerMessage === 'billing') {
-      responseData = {
-        status: 'success',
-        text: 'I can help with billing questions. What do you need assistance with?',
-        widget: {
-          type: 'buttons',
-          options: [
-            { id: 'invoice', text: 'Invoice Questions', value: 'invoice_help' },
-            { id: 'payment', text: 'Payment Issues', value: 'payment_help' },
-            { id: 'refund', text: 'Refund Request', value: 'refund_request' }
-          ]
-        }
-      };
-    } else {
-      // Default echo response
-      if (referer.includes('widget-demo.html') || referer.includes('buttons-widget-demo.html') || referer.includes('input-widget-demo.html') || referer.includes('select-widget-demo.html') || referer.includes('rating-widget-demo.html') || referer.includes('checkbox-widget-demo.html') || referer.includes('textarea-widget-demo.html') || referer.includes('slider-widget-demo.html') || referer.includes('toggle-widget-demo.html') || referer.includes('date-widget-demo.html') || referer.includes('tags-widget-demo.html') || referer.includes('file-upload-widget-demo.html') || referer.includes('color-picker-widget-demo.html') || referer.includes('confirmation-widget-demo.html') || referer.includes('radio-widget-demo.html') || referer.includes('progress-widget-demo.html')) {
-        responseData = {
-          status: 'success',
-          text: `You said: "${message}". Try "show buttons", "show select", "show input", "show rating", "show checkbox", "show textarea", "show slider", "show toggle", "show date", "show tags", "show file", "show color", "show confirmation", "show radio", "show progress", or "help" to see interactive widgets!`,
-          sender: 'bot'
         };
       } else {
-        responseData = {
-          status: 'success',
-          text: `Echo: ${message}`,
-          sender: 'bot'
-        };
+        // Default echo response
+        if (referer.includes('widget-demo.html') || referer.includes('buttons-widget-demo.html') || referer.includes('input-widget-demo.html') || referer.includes('select-widget-demo.html') || referer.includes('rating-widget-demo.html') || referer.includes('checkbox-widget-demo.html') || referer.includes('textarea-widget-demo.html') || referer.includes('slider-widget-demo.html') || referer.includes('toggle-widget-demo.html') || referer.includes('date-widget-demo.html') || referer.includes('tags-widget-demo.html') || referer.includes('file-upload-widget-demo.html') || referer.includes('color-picker-widget-demo.html') || referer.includes('confirmation-widget-demo.html') || referer.includes('radio-widget-demo.html') || referer.includes('progress-widget-demo.html')) {
+          responseData = {
+            status: 'success',
+            text: `You said: "${message}". Try "show buttons", "show select", "show input", "show rating", "show checkbox", "show textarea", "show slider", "show toggle", "show date", "show tags", "show file", "show color", "show confirmation", "show radio", "show progress", or "help" to see interactive widgets!`,
+            sender: 'bot'
+          };
+        } else {
+          responseData = {
+            status: 'success',
+            text: `Echo: ${message}`,
+            sender: 'bot'
+          };
+        }
       }
     }
   } else {

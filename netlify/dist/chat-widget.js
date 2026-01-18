@@ -1431,6 +1431,9 @@
         }
         const toggleSlider = document.createElement("span");
         toggleSlider.className = "widget-toggle-slider";
+        toggleSlider.addEventListener("click", () => {
+          toggle.checked = !toggle.checked;
+        });
         const submitButton = document.createElement("button");
         submitButton.className = "widget-toggle-submit";
         submitButton.textContent = this.widgetData.buttonText || "Submit";
