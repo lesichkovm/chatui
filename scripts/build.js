@@ -18,26 +18,14 @@ const generatedFileHeader = `/*!
 `;
 
 async function build() {
-  // 1. Build to src/chat-widget.js so tests and demos (which depend on src) continue to work
-  await esbuild.build({
-    entryPoints: ['src/entry.js'],
-    bundle: true,
-    outfile: 'src/chat-widget.js',
-    format: 'iife',
-    minify: false,
-    banner: {
-      js: generatedFileHeader
-    }
-  });
-
-  // 2. Ensure dist and netlify/dist directories exist
+  // 1. Ensure dist and netlify/dist directories exist
   ['dist', 'netlify/dist'].forEach(dir => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
   });
 
-  // 3. Build unminified versions
+  // 2. Build unminified versions
   const unminifiedTargets = ['dist/chat-widget.js', 'netlify/dist/chat-widget.js'];
   for (const outfile of unminifiedTargets) {
     await esbuild.build({
@@ -47,13 +35,12 @@ async function build() {
       format: 'iife',
       minify: false,
       banner: {
-        // not needeed for dist files
-        // js: generatedFileHeader
+        js: generatedFileHeader
       }
     });
   }
 
-  // 4. Build minified versions (no header for minified files)
+  // 3. Build minified versions (no header for minified files)
   const minifiedTargets = ['dist/chat-widget.min.js', 'netlify/dist/chat-widget.min.js'];
   for (const outfile of minifiedTargets) {
     await esbuild.build({

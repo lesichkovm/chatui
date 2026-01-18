@@ -214,7 +214,6 @@ To see the widget in action with a live backend:
 
 - `src/modules/`: Individual source modules (API, UI, Utils, Class)
 - `src/entry.js`: Entry point for the bundler
-- `src/chat-widget.js`: Bundle used for local tests/demos
 - `dist/chat-widget.js`: Final distribution bundle
 - `dist/chat-widget.min.js`: Minified distribution bundle
 - `tests/`: Playwright test suites

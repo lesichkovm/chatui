@@ -893,6 +893,108 @@ export function injectStyles(widgetId, themeConfig) {
       color: var(--chat-text);
     }
     
+    #${widgetId} .widget-file-label {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--chat-text);
+    }
+    
+    #${widgetId} .widget-file-dropzone {
+      position: relative;
+    }
+    
+    #${widgetId} .widget-file-dropzone-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--chat-text);
+    }
+    
+    #${widgetId} .widget-file-dropzone-content svg {
+      color: var(--chat-text);
+      opacity: 0.6;
+    }
+    
+    #${widgetId} .widget-file-dropzone-active {
+      border-color: var(--chat-primary) !important;
+      background: var(--chat-surface) !important;
+    }
+    
+    #${widgetId} .widget-file-list {
+      margin-top: 12px;
+    }
+    
+    #${widgetId} .widget-file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--chat-surface);
+      border: 1px solid var(--chat-border);
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    
+    #${widgetId} .widget-file-name {
+      flex: 1;
+      font-size: 14px;
+      color: var(--chat-text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    #${widgetId} .widget-file-size {
+      font-size: 12px;
+      color: var(--chat-text);
+      opacity: 0.7;
+      margin-left: 8px;
+    }
+    
+    #${widgetId} .widget-file-remove {
+      background: none;
+      border: none;
+      color: var(--chat-text);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 4px;
+      margin-left: 8px;
+      opacity: 0.6;
+      transition: all 0.2s ease;
+    }
+    
+    #${widgetId} .widget-file-remove:hover {
+      opacity: 1;
+      background: var(--chat-border);
+    }
+    
+    #${widgetId} .widget-file-submit {
+      width: 100%;
+      margin-top: 12px;
+      padding: 8px 16px;
+      background: var(--chat-primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+    
+    #${widgetId} .widget-file-submit:hover:not(:disabled) {
+      background: var(--chat-primary-dark);
+    }
+    
+    #${widgetId} .widget-file-upload.widget-file-disabled,
+    #${widgetId} .widget-file-submit.widget-file-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
     #${widgetId} .widget-color {
       margin-top: 8px;
     }
