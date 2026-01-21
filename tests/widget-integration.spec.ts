@@ -5,7 +5,7 @@ declare global {
   interface Window {
     widgetSystem: {
       createWidget: (widgetData: any, widgetId: string) => HTMLElement | null;
-      addMessage: (text: string, sender: string, widgetData?: any) => void;
+      addMessage: (message: string | { widgets?: any[], text?: string }, sender: string, widgetData?: any) => void;
       simulateBotResponse: (userInput: string) => void;
       sendMessage: (message: string) => void;
     };
@@ -134,22 +134,81 @@ test.describe('Widget Integration Tests', () => {
             });
             
             widgetContainer.appendChild(buttonsContainer);
+          } else if (widgetData.type === 'text' && widgetData.props) {
+            // Handle composable text widget
+            const textElement = document.createElement('div');
+            textElement.className = `widget-text format-${widgetData.props.format || 'plain'}`;
+            
+            if (widgetData.props.format === 'markdown') {
+              textElement.innerHTML = widgetData.props.content
+                .replace(/## (.*)/g, '<h2>$1</h2>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+            } else {
+              textElement.textContent = widgetData.props.content;
+            }
+            
+            widgetContainer.appendChild(textElement);
+          } else if (widgetData.type === 'card') {
+            // Handle composable card widget
+            const cardElement = document.createElement('div');
+            cardElement.className = `widget-card variant-${widgetData.props?.variant || 'default'} padding-${widgetData.props?.padding || 'medium'}`;
+            
+            if (widgetData.children) {
+              widgetData.children.forEach((child: any) => {
+                const childElement = this.createWidget(child, widgetId);
+                if (childElement) {
+                  cardElement.appendChild(childElement);
+                }
+              });
+            }
+            
+            widgetContainer.appendChild(cardElement);
+          } else if (widgetData.type === 'container') {
+            // Handle composable container widget
+            const containerElement = document.createElement('div');
+            containerElement.className = `widget-container layout-${widgetData.props?.layout || 'vertical'} gap-${widgetData.props?.gap || 'medium'}`;
+            
+            if (widgetData.children) {
+              widgetData.children.forEach((child: any) => {
+                const childElement = this.createWidget(child, widgetId);
+                if (childElement) {
+                  containerElement.appendChild(childElement);
+                }
+              });
+            }
+            
+            widgetContainer.appendChild(containerElement);
           }
           
           return widgetContainer;
         },
         
-        addMessage: function(text: string, sender: string, widgetData?: any) {
+        addMessage: function(message: string | { widgets?: any[], text?: string }, sender: string, widgetData?: any) {
           const messagesContainer = document.getElementById('messages');
           if (!messagesContainer) return;
           const messageElement = document.createElement('div');
           messageElement.className = sender + '-message';
-          messageElement.innerHTML = text.replace(/\n/g, '<br>');
           
-          if (widgetData && sender === 'bot') {
-            const widgetElement = this.createWidget(widgetData, 'test-widget');
-            if (widgetElement) {
-              messageElement.appendChild(widgetElement);
+          // Handle new composable message format
+          if (typeof message === 'object' && message.widgets) {
+            // New composable widget format
+            message.widgets.forEach((widgetConfig: any) => {
+              const widgetElement = this.createWidget(widgetConfig, 'test-widget');
+              if (widgetElement) {
+                messageElement.appendChild(widgetElement);
+              }
+            });
+          } else {
+            // Legacy format or plain text
+            const messageText = typeof message === 'string' ? message : (message.text || '');
+            messageElement.innerHTML = messageText.replace(/\n/g, '<br>');
+            
+            if (widgetData && sender === 'bot') {
+              const widgetElement = this.createWidget(widgetData, 'test-widget');
+              if (widgetElement) {
+                messageElement.appendChild(widgetElement);
+              }
             }
           }
           
@@ -259,6 +318,80 @@ test.describe('Widget Integration Tests', () => {
         (window as any).widgetSystem.addMessage('Hello! I\'m your virtual assistant. Type \'menu\' to see interactive options or \'options\' for more choices.', 'bot');
       }
     });
+  });
+
+  test('should handle composable message format', async ({ page }) => {
+    // Test the new widget-based message format
+    await page.evaluate(() => {
+      const composableMessage = {
+        widgets: [
+          {
+            type: 'text',
+            props: {
+              content: '## Order Confirmation',
+              format: 'markdown'
+            }
+          },
+          {
+            type: 'card',
+            props: {
+              variant: 'default',
+              padding: 'medium'
+            },
+            children: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Product: Widget X\nPrice: $99.99',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'container',
+                props: {
+                  layout: 'horizontal',
+                  gap: 'small'
+                },
+                children: [
+                  {
+                    type: 'text',
+                    props: {
+                      content: '[Confirm]',
+                      format: 'plain'
+                    }
+                  },
+                  {
+                    type: 'text',
+                    props: {
+                      content: '[Cancel]',
+                      format: 'plain'
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      };
+      
+      if ((window as any).widgetSystem && (window as any).widgetSystem.addMessage) {
+        (window as any).widgetSystem.addMessage(composableMessage, 'bot');
+      }
+    });
+
+    // Wait for the message to be rendered
+    await page.waitForTimeout(100);
+
+    // Verify the composable message structure
+    const botMessages = page.locator('.bot-message');
+    await expect(botMessages).toHaveCount(2); // Updated to account for welcome message
+
+    const messageContent = botMessages.last(); // Get the last message (our test message)
+    await expect(messageContent.locator('.widget-text').filter({ hasText: 'Order Confirmation' })).toContainText('Order Confirmation');
+    await expect(messageContent.locator('.widget-card')).toBeVisible();
+    await expect(messageContent.locator('.widget-container')).toBeVisible();
+    await expect(messageContent.locator('.widget-text').filter({ hasText: '[Confirm]' })).toContainText('[Confirm]');
+    await expect(messageContent.locator('.widget-text').filter({ hasText: '[Cancel]' })).toContainText('[Cancel]');
   });
 
   test('should handle complete widget interaction flow', async ({ page }) => {

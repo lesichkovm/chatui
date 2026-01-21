@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatUI Widget Gallery - Enhanced with Composable System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .widget-card {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .widget-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        .widget-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .widget-card p {
+            margin-bottom: 20px;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .widget-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .widget-link:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        .widget-link.composable {
+            background: #8e44ad;
+        }
+        .widget-link.composable:hover {
+            background: #7b3f99;
+        }
+        .widget-link.legacy {
+            background: #95a5a6;
+        }
+        .widget-link.legacy:hover {
+            background: #7f8c8d;
+        }
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge.new {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge.enhanced {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .badge.legacy {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        .category-section {
+            margin-bottom: 50px;
+        }
+        .category-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        .feature-list li {
+            padding: 4px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .feature-list li::before {
+            content: "•";
+            margin-right: 8px;
+            color: #3498db;
+        }
+        .demo-section {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        .demo-section h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .demo-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .demo-button {
+            padding: 12px 24px;
+            background: #8e44ad;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .demo-button:hover {
+            background: #7b3f99;
+            transform: translateY(-2px);
+        }
+        .demo-button.secondary {
+            background: #3498db;
+        }
+        .demo-button.secondary:hover {
+            background: #2980b9;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .stat h4 {
+            margin: 0 0 10px 0;
+            font-size: 2em;
+            color: #4ade80;
+        }
+        .stat p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 ChatUI Widget Gallery</h1>
+        <p>Explore our comprehensive widget collection with enhanced security and composable system</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <h4>16</h4>
+            <p>Widget Types</p>
+        </div>
+        <div class="stat">
+            <h4>🆕</h4>
+            <p>Composable System</p>
+        </div>
+        <div class="stat">
+            <h4>🔒</h4>
+            <p>Security Enhanced</p>
+        </div>
+        <div class="stat">
+            <h4>100%</h4>
+            <p>Backward Compatible</p>
+        </div>
+    </div>
+
+    <!-- Composable Widgets Section -->
+    <div class="category-section">
+        <h2 class="category-title">🧩 Composable Widgets (New System)</h2>
+        <div class="widget-grid">
+            <div class="widget-card">
+                <span class="badge new">New</span>
+                <h3>📝 Text Widget</h3>
+                <p>Enhanced text rendering with markdown support and flexible formatting.</p>
+                <ul class="feature-list">
+                    <li>Markdown support</li>
+                    <li>HTML escaping</li>
+                    <li>Line break handling</li>
+                    <li>Rich formatting</li>
+                </ul>
+                <a href="../composable-widgets-demo.html" class="widget-link composable">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge new">New</span>
+                <h3>📦 Container Widget</h3>
+                <p>Flexible layout containers for organizing widgets with various layout options.</p>
+                <ul class="feature-list">
+                    <li>Vertical/horizontal layouts</li>
+                    <li>Configurable gaps</li>
+                    <li>Recursive nesting</li>
+                    <li>Responsive design</li>
+                </ul>
+                <a href="../composable-widgets-demo.html" class="widget-link composable">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge new">New</span>
+                <h3>🃏 Card Widget</h3>
+                <p>Styled content cards with variants and padding options for structured content.</p>
+                <ul class="feature-list">
+                    <li>Multiple variants</li>
+                    <li>Flexible padding</li>
+                    <li>Child widgets</li>
+                    <li>Visual hierarchy</li>
+                </ul>
+                <a href="../composable-widgets-demo.html" class="widget-link composable">View Demo</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Widgets Section -->
+    <div class="category-section">
+        <h2 class="category-title">🎯 Interactive Widgets</h2>
+        <div class="widget-grid">
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>🔘 Buttons Widget</h3>
+                <p>Interactive button options with click handling and automatic disable.</p>
+                <ul class="feature-list">
+                    <li>Multiple button options</li>
+                    <li>Click event handling</li>
+                    <li>Auto-disable on selection</li>
+                    <li>Custom styling</li>
+                </ul>
+                <a href="buttons-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>📝 Input Widget</h3>
+                <p>Text input form with customizable types and submission handling.</p>
+                <ul class="feature-list">
+                    <li>Multiple input types</li>
+                    <li>Validation support</li>
+                    <li>Placeholder text</li>
+                    <li>Submit handling</li>
+                </ul>
+                <a href="input-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>📋 Select Widget</h3>
+                <p>Dropdown selection menu with multiple options and placeholder text.</p>
+                <ul class="feature-list">
+                    <li>Multiple options</li>
+                    <li>Placeholder support</li>
+                    <li>Custom styling</li>
+                    <li>Change events</li>
+                </ul>
+                <a href="select-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>☑️ Checkbox Widget</h3>
+                <p>Multi-select checkboxes for choosing multiple options.</p>
+                <ul class="feature-list">
+                    <li>Multiple selection</li>
+                    <li>Custom labels</li>
+                    <li>Group support</li>
+                    <li>Validation</li>
+                </ul>
+                <a href="checkbox-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>⭕ Radio Widget</h3>
+                <p>Radio buttons for single selection from multiple options.</p>
+                <ul class="feature-list">
+                    <li>Single selection</li>
+                    <li>Group behavior</li>
+                    <li>Custom labels</li>
+                    <li>Validation</li>
+                </ul>
+                <a href="radio-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>📄 Textarea Widget</h3>
+                <p>Multi-line text input for longer responses.</p>
+                <ul class="feature-list">
+                    <li>Multi-line support</li>
+                    <li>Resizable</li>
+                    <li>Character limit</li>
+                    <li>Auto-resize</li>
+                </ul>
+                <a href="textarea-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selection Widgets Section -->
+    <div class="category-section">
+        <h2 class="category-title">🎛️ Selection & Control Widgets</h2>
+        <div class="widget-grid">
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>🎚️ Slider Widget</h3>
+                <p>Numeric range slider for selecting values.</p>
+                <ul class="feature-list">
+                    <li>Range selection</li>
+                    <li>Step values</li>
+                    <li>Min/max limits</li>
+                    <li>Live updates</li>
+                </ul>
+                <a href="slider-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>⭐ Rating Widget</h3>
+                <p>Star or emoji-based rating system.</p>
+                <ul class="feature-list">
+                    <li>Star ratings</li>
+                    <li>Emoji ratings</li>
+                    <li>Custom values</li>
+                    <li>Interactive</li>
+                </ul>
+                <a href="rating-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>🔄 Toggle Widget</h3>
+                <p>On/off switch for binary choices.</p>
+                <ul class="feature-list">
+                    <li>Binary selection</li>
+                    <li>Animated toggle</li>
+                    <li>Custom labels</li>
+                    <li>State management</li>
+                </ul>
+                <a href="toggle-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>📅 Date Widget</h3>
+                <p>Date picker for selecting dates.</p>
+                <ul class="feature-list">
+                    <li>Date selection</li>
+                    <li>Calendar view</li>
+                    <li>Min/max dates</li>
+                    <li>Format options</li>
+                </ul>
+                <a href="date-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>🏷️ Tags Widget</h3>
+                <p>Tag input with autocomplete for multiple keywords.</p>
+                <ul class="feature-list">
+                    <li>Multiple tags</li>
+                    <li>Autocomplete</li>
+                    <li>Tag removal</li>
+                    <li>Custom styling</li>
+                </ul>
+                <a href="tags-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>🎨 Color Picker Widget</h3>
+                <p>Color selection for visual preferences.</p>
+                <ul class="feature-list">
+                    <li>Color selection</li>
+                    <li>Palette options</li>
+                    <li>Custom colors</li>
+                    <li>Preview</li>
+                </ul>
+                <a href="color-picker-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Specialized Widgets Section -->
+    <div class="category-section">
+        <h2 class="category-title">🔧 Specialized Widgets</h2>
+        <div class="widget-grid">
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>📎 File Upload Widget</h3>
+                <p>File upload with drag-and-drop support.</p>
+                <ul class="feature-list">
+                    <li>Drag & drop</li>
+                    <li>Multiple files</li>
+                    <li>File type validation</li>
+                    <li>Progress tracking</li>
+                </ul>
+                <a href="file-upload-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>🔐 Password Widget</h3>
+                <p>Secure password input with visibility toggle.</p>
+                <ul class="feature-list">
+                    <li>Password masking</li>
+                    <li>Visibility toggle</li>
+                    <li>Strength indicator</li>
+                    <li>Validation</li>
+                </ul>
+                <a href="password-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>❓ Confirmation Widget</h3>
+                <p>Confirm/cancel action dialog.</p>
+                <ul class="feature-list">
+                    <li>Confirm actions</li>
+                    <li>Custom messages</li>
+                    <li>Callback handling</li>
+                    <li>Modal style</li>
+                </ul>
+                <a href="confirmation-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+
+            <div class="widget-card">
+                <span class="badge enhanced">Enhanced</span>
+                <h3>📊 Progress Widget</h3>
+                <p>Read-only progress indicator.</p>
+                <ul class="feature-list">
+                    <li>Progress bars</li>
+                    <li>Percentage display</li>
+                    <li>Custom colors</li>
+                    <li>Animated</li>
+                </ul>
+                <a href="progress-widget-demo.html" class="widget-link">View Demo</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Section -->
+    <div class="demo-section">
+        <h3>🚀 Interactive Demos</h3>
+        <p>Experience the full power of ChatUI widgets with our comprehensive demos:</p>
+        <div class="demo-buttons">
+            <a href="../composable-widgets-demo.html" class="demo-button">🧩 Composable Widgets</a>
+            <a href="../security-demo.html" class="demo-button secondary">🔒 Security Features</a>
+            <a href="../enhanced-popup.html" class="demo-button secondary">💬 Enhanced Chat</a>
+            <a href="../enhanced-index.html" class="demo-button secondary">🎯 Main Demo</a>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to widget cards
+            const cards = document.querySelectorAll('.widget-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add click tracking for analytics (mock)
+            const links = document.querySelectorAll('.widget-link, .demo-button');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const widgetName = this.closest('.widget-card')?.querySelector('h3')?.textContent || 'Demo';
+                    console.log('Widget demo clicked:', widgetName);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

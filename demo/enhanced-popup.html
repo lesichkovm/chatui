@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget Demo - Enhanced Security & Composable Widgets</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            background: #d4edda;
+            color: #155724;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab:hover {
+            background: rgba(0,0,0,0.05);
+        }
+        .tab.active {
+            border-bottom-color: #007bff;
+            color: #007bff;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-list li::before {
+            content: "✅";
+            margin-right: 10px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .security-features {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #27ae60;
+        }
+        .composable-features {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #8e44ad;
+        }
+        .demo-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.2s;
+            margin: 5px;
+        }
+        .demo-button:hover {
+            background: #0056b3;
+        }
+        .demo-button.security {
+            background: #27ae60;
+        }
+        .demo-button.security:hover {
+            background: #229954;
+        }
+        .demo-button.composable {
+            background: #8e44ad;
+        }
+        .demo-button.composable:hover {
+            background: #7b3f99;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Enhanced Chat Widget Demo</h1>
+        <p>Experience the next-generation chat widget with enhanced security and composable widgets</p>
+        <div class="status-badge">✅ Production Ready</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('installation')">Installation</div>
+        <div class="tab" onclick="showTab('security')">Security Features</div>
+        <div class="tab" onclick="showTab('composable')">Composable Widgets</div>
+        <div class="tab" onclick="showTab('examples')">Examples</div>
+    </div>
+
+    <div id="installation" class="tab-content active">
+        <h2>📦 Installation</h2>
+        <p>Add the ChatUI widget to your website with enhanced security and composable widgets:</p>
+        
+        <div class="code">
+&lt;!-- Enhanced ChatUI Widget --&gt;
+&lt;script 
+    id="chat-widget" 
+    src="../dist/chat-widget.js"
+    data-server-url="https://your-chat-server.com"
+    data-display="popup"
+    data-position="bottom-right"
+    data-color="#007bff"
+    data-title="Chat with Support"&gt;
+&lt;/script&gt;
+        </div>
+
+        <h3>🔧 Configuration Options</h3>
+        <ul class="feature-list">
+            <li><strong>data-server-url</strong>: Your chat server endpoint</li>
+            <li><strong>data-display</strong>: Display mode ('popup' or 'fullpage')</li>
+            <li><strong>data-position</strong>: Popup position ('bottom-right', 'bottom-left', 'top-right', 'top-left')</li>
+            <li><strong>data-color</strong>: Primary color for the widget</li>
+            <li><strong>data-title</strong>: Widget title</li>
+            <li><strong>data-force-jsonp</strong>: Force JSONP fallback (true/false)</li>
+        </ul>
+    </div>
+
+    <div id="security" class="tab-content">
+        <h2>🔒 Enhanced Security Features</h2>
+        <p>ChatUI now includes comprehensive security protections:</p>
+        
+        <div class="security-features">
+            <h3>🛡️ XSS Protection</h3>
+            <ul class="feature-list">
+                <li>HTML sanitization for all user input</li>
+                <li>Script tag removal and escaping</li>
+                <li>JavaScript protocol filtering</li>
+                <li>Event handler removal</li>
+            </ul>
+        </div>
+
+        <div class="security-features">
+            <h3>🔐 Input Validation</h3>
+            <ul class="feature-list">
+                <li>Type checking for message content</li>
+                <li>Length validation (max 10,000 characters)</li>
+                <li>Empty message prevention</li>
+                <li>Dangerous pattern detection</li>
+            </ul>
+        </div>
+
+        <div class="security-features">
+            <h3>⚡ Rate Limiting</h3>
+            <ul class="feature-list">
+                <li>1-second minimum message interval</li>
+                <li>Spam prevention</li>
+                <li>Automatic message throttling</li>
+            </ul>
+        </div>
+
+        <div class="security-features">
+            <h3>🔒 Secure Storage</h3>
+            <ul class="feature-list">
+                <li>Session storage migration from localStorage</li>
+                <li>Session-scoped data for better security</li>
+                <li>Automatic cleanup on session end</li>
+            </ul>
+        </div>
+
+        <div class="security-features">
+            <h3>🛡️ JSONP Security</h3>
+            <ul class="feature-list">
+                <li>Cryptographically secure callback names</li>
+                <li>Response structure validation</li>
+                <li>Callback manipulation prevention</li>
+            </ul>
+        </div>
+
+        <h3>🧪 Security Testing</h3>
+        <p>Test the security features with our interactive demo:</p>
+        <a href="../tests/test-xss-protection.html" class="demo-button security">Test XSS Protection</a>
+        <a href="enhanced-index.html#security-demo" class="demo-button security">Security Demo</a>
+    </div>
+
+    <div id="composable" class="tab-content">
+        <h2>🧩 Composable Widget System</h2>
+        <p>Next-generation widget system with recursive composition:</p>
+        
+        <div class="composable-features">
+            <h3>📦 Widget Types</h3>
+            <ul class="feature-list">
+                <li><strong>Text Widgets</strong>: Plain text and markdown support</li>
+                <li><strong>Container Widgets</strong>: Flexible layout containers</li>
+                <li><strong>Card Widgets</strong>: Styled content cards</li>
+                <li><strong>Legacy Widgets</strong>: Backward compatibility</li>
+            </ul>
+        </div>
+
+        <div class="composable-features">
+            <h3>🎨 Layout System</h3>
+            <ul class="feature-list">
+                <li>Vertical and horizontal layouts</li>
+                <li>Configurable gaps and spacing</li>
+                <li>Responsive design</li>
+                <li>Nested widget support</li>
+            </ul>
+        </div>
+
+        <div class="composable-features">
+            <h3>📝 Markdown Support</h3>
+            <ul class="feature-list">
+                <li>Headers (##, ###)</li>
+                <li>Bold and italic text</li>
+                <li>Inline code</li>
+                <li>Line breaks</li>
+            </ul>
+        </div>
+
+        <h3>💻 Example Composable Widget</h3>
+        <div class="code">
+{
+  "type": "card",
+  "props": {
+    "variant": "elevated",
+    "padding": "large"
+  },
+  "children": [
+    {
+      "type": "text",
+      "props": {
+        "content": "## Welcome!",
+        "format": "markdown"
+      }
+    },
+    {
+      "type": "container",
+      "props": {
+        "layout": "horizontal",
+        "gap": "medium"
+      },
+      "children": [
+        {
+          "type": "text",
+          "props": {
+            "content": "[Start Chat]",
+            "format": "plain"
+          }
+        },
+        {
+          "type": "text",
+          "props": {
+            "content": "[Learn More]",
+            "format": "plain"
+          }
+        }
+      ]
+    }
+  ]
+}
+        </div>
+
+        <h3>🎯 Try Composable Widgets</h3>
+        <a href="enhanced-index.html#composable-demo" class="demo-button composable">Interactive Demo</a>
+        <a href="widgets/index.html" class="demo-button composable">Widget Gallery</a>
+    </div>
+
+    <div id="examples" class="tab-content">
+        <h2>🎨 Live Examples</h2>
+        <p>Experience the enhanced ChatUI widget in action:</p>
+        
+        <h3>💬 Basic Chat Widget</h3>
+        <p>Classic chat interface with enhanced security:</p>
+        <a href="full_page.htm" class="demo-button">Full Page Demo</a>
+        <a href="#" class="demo-button" onclick="loadPopupDemo()">Popup Demo</a>
+
+        <h3>🔒 Security Demo</h3>
+        <p>Test XSS protection and input validation:</p>
+        <a href="../tests/test-xss-protection.html" class="demo-button security">XSS Protection Test</a>
+        <a href="enhanced-index.html#security-demo" class="demo-button security">Security Features</a>
+
+        <h3>🧩 Composable Widgets</h3>
+        <p>Explore the new widget system:</p>
+        <a href="enhanced-index.html#composable-demo" class="demo-button composable">Composable Demo</a>
+        <a href="widgets/index.html" class="demo-button composable">Widget Gallery</a>
+
+        <h3>🎨 Theme System</h3>
+        <p>Customizable themes and styling:</p>
+        <a href="theme-demo.html?theme=default" class="demo-button">Default Theme</a>
+        <a href="theme-demo.html?theme=branded" class="demo-button">Branded Theme</a>
+    </div>
+
+    <!-- Popup Demo Container -->
+    <div id="popup-demo-container"></div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all tab buttons
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function loadPopupDemo() {
+            // Create popup demo
+            const container = document.getElementById('popup-demo-container');
+            container.innerHTML = `
+                <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+                    <button 
+                        id="demo-chat-button"
+                        style="
+                            background: #007bff;
+                            color: white;
+                            border: none;
+                            border-radius: 50%;
+                            width: 60px;
+                            height: 60px;
+                            font-size: 24px;
+                            cursor: pointer;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                            transition: all 0.3s ease;
+                        "
+                        onclick="toggleDemoChat()">
+                        💬
+                    </button>
+                    
+                    <div 
+                        id="demo-chat-window"
+                        style="
+                            display: none;
+                            position: absolute;
+                            bottom: 80px;
+                            right: 0;
+                            width: 350px;
+                            height: 450px;
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+                            overflow: hidden;
+                        ">
+                        <div style="background: #007bff; color: white; padding: 15px; font-weight: bold;">
+                            Enhanced ChatUI Demo
+                            <button 
+                                onclick="toggleDemoChat()"
+                                style="float: right; background: none; border: none; color: white; font-size: 18px; cursor: pointer;"
+                            >×</button>
+                        </div>
+                        <div style="padding: 15px; height: 320px; overflow-y: auto; background: #f8f9fa;">
+                            <div style="background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <strong>🤖 Support Bot</strong><br>
+                                Welcome to the enhanced ChatUI demo! Try our new features:
+                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                    <li>🔒 Enhanced security protection</li>
+                                    <li>🧩 Composable widgets</li>
+                                    <li>⚡ Rate limiting</li>
+                                    <li>📝 Markdown support</li>
+                                </ul>
+                            </div>
+                            <div style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <strong>👤 You</strong><br>
+                                This looks amazing! Tell me more about the security features.
+                            </div>
+                            <div style="background: white; padding: 10px; border-radius: 8px;">
+                                <strong>🤖 Support Bot</strong><br>
+                                Our security features include:
+                                <div style="background: #f0f4ff; padding: 10px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #8e44ad;">
+                                    <strong>🛡️ XSS Protection:</strong> All user input is sanitized and HTML-escaped
+                                </div>
+                                <div style="background: #e8f5e8; padding: 10px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #27ae60;">
+                                    <strong>⚡ Rate Limiting:</strong> Prevents spam and rapid message sending
+                                </div>
+                                <div style="background: #fff3cd; padding: 10px; border-radius: 6px; margin: 10px 0; border-left: 4px solid #ffc107;">
+                                    <strong>🔒 Secure Storage:</strong> Session-based storage for better security
+                                </div>
+                            </div>
+                        </div>
+                        <div style="padding: 15px; border-top: 1px solid #e9ecef;">
+                            <div style="display: flex; gap: 10px;">
+                                <input 
+                                    type="text" 
+                                    placeholder="Type a message..." 
+                                    style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                                    onkeypress="if(event.key==='Enter') sendMessageDemo()"
+                                >
+                                <button 
+                                    onclick="sendMessageDemo()"
+                                    style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;"
+                                >Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleDemoChat() {
+            const chatWindow = document.getElementById('demo-chat-window');
+            const chatButton = document.getElementById('demo-chat-button');
+            
+            if (chatWindow.style.display === 'none') {
+                chatWindow.style.display = 'block';
+                chatButton.style.transform = 'scale(0.9)';
+            } else {
+                chatWindow.style.display = 'none';
+                chatButton.style.transform = 'scale(1)';
+            }
+        }
+
+        function sendMessageDemo() {
+            const input = document.querySelector('#demo-chat-window input');
+            const message = input.value.trim();
+            
+            if (message) {
+                // Simulate rate limiting
+                const now = Date.now();
+                if (window.lastMessageTime && now - window.lastMessageTime < 1000) {
+                    alert('⚠️ Rate limiting active. Please wait before sending another message.');
+                    return;
+                }
+                
+                window.lastMessageTime = now;
+                
+                // Add user message
+                const messagesContainer = document.querySelector('#demo-chat-window div[style*="overflow-y: auto"]');
+                const userMessage = document.createElement('div');
+                userMessage.style.cssText = 'background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 10px;';
+                userMessage.innerHTML = `<strong>👤 You</strong><br>${message}`;
+                messagesContainer.appendChild(userMessage);
+                
+                // Simulate bot response
+                setTimeout(() => {
+                    const botMessage = document.createElement('div');
+                    botMessage.style.cssText = 'background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px;';
+                    
+                    if (message.toLowerCase().includes('security')) {
+                        botMessage.innerHTML = `<strong>🤖 Support Bot</strong><br>Our security features protect against XSS, injection attacks, and ensure safe messaging!`;
+                    } else if (message.toLowerCase().includes('widget')) {
+                        botMessage.innerHTML = `<strong>🤖 Support Bot</strong><br>Try our composable widgets! They support recursive nesting, markdown, and flexible layouts.`;
+                    } else {
+                        botMessage.innerHTML = `<strong>🤖 Support Bot</strong><br>Thanks for your message! Try asking about our security features or composable widgets.`;
+                    }
+                    
+                    messagesContainer.appendChild(botMessage);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 1000);
+                
+                input.value = '';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>

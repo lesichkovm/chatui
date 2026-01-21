@@ -1233,6 +1233,109 @@ export function injectStyles(widgetId, themeConfig) {
         transform: scale(1);
       }
     }
+    
+    /* New Composable Widget Styles */
+    #${widgetId} .widget-container {
+      display: flex;
+      margin: 4px 0;
+    }
+    
+    #${widgetId} .widget-container.layout-vertical {
+      flex-direction: column;
+    }
+    
+    #${widgetId} .widget-container.layout-horizontal {
+      flex-direction: row;
+    }
+    
+    #${widgetId} .widget-container.gap-small {
+      gap: 4px;
+    }
+    
+    #${widgetId} .widget-container.gap-medium {
+      gap: 8px;
+    }
+    
+    #${widgetId} .widget-container.gap-large {
+      gap: 16px;
+    }
+    
+    #${widgetId} .widget-container.align-start {
+      align-items: flex-start;
+    }
+    
+    #${widgetId} .widget-container.align-center {
+      align-items: center;
+    }
+    
+    #${widgetId} .widget-container.align-end {
+      align-items: flex-end;
+    }
+    
+    #${widgetId} .widget-container.align-stretch {
+      align-items: stretch;
+    }
+    
+    #${widgetId} .widget-card {
+      background: var(--chat-surface);
+      border: 1px solid var(--chat-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 8px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    #${widgetId} .widget-card.variant-elevated {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    #${widgetId} .widget-card.variant-outlined {
+      background: transparent;
+      border: 2px solid var(--chat-border);
+    }
+    
+    #${widgetId} .widget-card.padding-small {
+      padding: 8px;
+    }
+    
+    #${widgetId} .widget-card.padding-medium {
+      padding: 12px;
+    }
+    
+    #${widgetId} .widget-card.padding-large {
+      padding: 16px;
+    }
+    
+    #${widgetId} .widget-text {
+      margin: 4px 0;
+      color: var(--chat-text);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    
+    #${widgetId} .widget-text.format-plain {
+      white-space: pre-wrap;
+    }
+    
+    #${widgetId} .widget-text.format-markdown strong {
+      font-weight: 600;
+    }
+    
+    #${widgetId} .widget-text.format-markdown em {
+      font-style: italic;
+    }
+    
+    #${widgetId} .widget-text.format-markdown code {
+      background: var(--chat-border);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    
+    #${widgetId} .widget-text.format-html {
+      /* HTML content rendered as-is */
+    }
   `;
   document.head.appendChild(styleElement);
 }
@@ -1320,27 +1423,68 @@ export function createWidgetDOM(widgetId, config) {
 }
 
 /**
- * Append a message to the messages container
- * @param {HTMLElement} container - Messages container element
- * @param {string} text - Message text
+ * Append a message to the chat container
+ * @param {HTMLElement} container - Chat messages container
+ * @param {string|Object} message - Message text or message object with widgets
  * @param {string} sender - Message sender ('user' or 'bot')
  * @param {string} widgetId - Widget ID for generating unique message IDs
- * @param {Object} [widgetData] - Optional widget data for bot messages
+ * @param {Object} [legacyWidgetData] - Optional legacy widget data for backward compatibility
  */
-export function appendMessage(container, text, sender, widgetId, widgetData = null) {
+/**
+ * Sanitize HTML content to prevent XSS attacks
+ * @param {string} text - Text content to sanitize
+ * @returns {string} Sanitized text with safe HTML only
+ */
+function sanitizeHTML(text) {
+  if (typeof text !== 'string') return '';
+  
+  // Create a temporary div to escape HTML
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * Create safe HTML content with line breaks
+ * @param {string} text - Text content to process
+ * @returns {string} Safe HTML with line breaks
+ */
+function createSafeMessageHTML(text) {
+  if (typeof text !== 'string') return '';
+  
+  // Escape HTML and then add safe line breaks
+  const escapedText = sanitizeHTML(text);
+  return escapedText.replace(/\n/g, '<br>');
+}
+
+export function appendMessage(container, message, sender, widgetId, legacyWidgetData = null) {
   const messageElement = document.createElement("div");
   messageElement.className = `message ${sender}-message`;
   messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  // Create message content
-  const messageContent = document.createElement("div");
-  messageContent.innerHTML = text.replace(/\n/g, "<br>");
-  messageElement.appendChild(messageContent);
+  // Handle new widget-based message format
+  if (typeof message === 'object' && message.widgets) {
+    // New composable widget format
+    message.widgets.forEach(widgetConfig => {
+      const widgetElement = createWidgetElement(widgetConfig, widgetId);
+      if (widgetElement) {
+        messageElement.appendChild(widgetElement);
+      }
+    });
+  } else {
+    // Legacy format or plain text
+    const text = typeof message === 'string' ? message : (message.text || '');
+    
+    // Create message content with sanitized HTML
+    const messageContent = document.createElement("div");
+    messageContent.innerHTML = createSafeMessageHTML(text);
+    messageElement.appendChild(messageContent);
 
-  // Add widget if present
-  if (widgetData && sender === "bot") {
-    const widgetElement = createWidgetElement(widgetData, widgetId);
-    messageElement.appendChild(widgetElement);
+    // Add legacy widget if present
+    if (legacyWidgetData && sender === "bot") {
+      const widgetElement = createWidgetElement(legacyWidgetData, widgetId);
+      messageElement.appendChild(widgetElement);
+    }
   }
 
   container.appendChild(messageElement);

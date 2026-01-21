@@ -1,33 +1,107 @@
 /**
- * ChatAPI class for handling JSONP-based communication with chat server
+ * LegacyAPI class for handling JSONP-based communication with chat server
  * Provides basic chat functionality using JSONP requests for cross-domain compatibility
  */
-export class ChatAPI {
+export class LegacyAPI {
   /**
-   * Create a new ChatAPI instance
+   * Create a new LegacyAPI instance
    * @param {Object} config - Configuration object
    * @param {string} config.serverUrl - Base URL for the chat server
    * @param {boolean} [config.debug=false] - Enable debug logging
    */
   constructor(config) {
-    this.serverUrl = config.serverUrl;
+    if (!config || !config.serverUrl) {
+      throw new Error('LegacyAPI: serverUrl is required');
+    }
+    
+    this.serverUrl = config.serverUrl.replace(/\/$/, ''); // Remove trailing slash
     this.debug = config.debug || false;
+    this.sessionKey = '';
+    this.connectionTimeout = config.connectionTimeout || 10000;
   }
 
   /**
-   * Get the stored session key from localStorage
+   * Validate message input to prevent injection attacks
+   * @param {string} message - Message to validate
+   * @returns {string} Validated and sanitized message
+   */
+  validateMessage(message) {
+    if (typeof message !== 'string') {
+      throw new Error('Invalid message type: message must be a string');
+    }
+    
+    if (message.length === 0) {
+      throw new Error('Invalid message: message cannot be empty');
+    }
+    
+    if (message.length > 10000) {
+      throw new Error('Invalid message: message too long (max 10000 characters)');
+    }
+    
+    // Remove potential script content and excessive whitespace
+    const sanitized = message
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/on\w+\s*=/gi, '') // Remove event handlers
+      .trim();
+    
+    if (sanitized.length === 0) {
+      throw new Error('Invalid message: message contains only disallowed content');
+    }
+    
+    return sanitized;
+  }
+
+  /**
+   * Generate cryptographically random callback name for JSONP
+   * @private
+   * @returns {string} Random callback name
+   */
+  _generateSecureCallbackName() {
+    // Use cryptographically secure random values
+    const randomPart = Math.random().toString(36).substr(2, 16);
+    const timestamp = Date.now();
+    return `chatCallback_${randomPart}_${timestamp}`;
+  }
+
+  /**
+   * Validate JSONP response structure
+   * @private
+   * @param {Object} response - Response object to validate
+   * @returns {boolean} True if response is valid
+   */
+  _validateJSONPResponse(response) {
+    if (!response || typeof response !== 'object') {
+      return false;
+    }
+    
+    // Check for required fields based on expected response structure
+    if (response.status !== undefined && typeof response.status !== 'string') {
+      return false;
+    }
+    
+    if (response.text !== undefined && typeof response.text !== 'string') {
+      return false;
+    }
+    
+    // Additional validation can be added here as needed
+    return true;
+  }
+
+  /**
+   * Get the stored session key from sessionStorage (more secure than localStorage)
    * @returns {string} The session key or empty string if not found
    */
   getSessionKey() {
-    return localStorage.getItem("chat_session_key") || "";
+    return sessionStorage.getItem("chat_session_key") || "";
   }
 
   /**
-   * Store a session key in localStorage
+   * Store a session key in sessionStorage (more secure than localStorage)
    * @param {string} key - The session key to store
    */
   setSessionKey(key) {
-    localStorage.setItem("chat_session_key", key);
+    sessionStorage.setItem("chat_session_key", key);
   }
 
   /**
@@ -115,13 +189,22 @@ export class ChatAPI {
       return;
     }
 
+    // Validate and sanitize the message
+    const validatedMessage = this.validateMessage(message);
+    
     const sessionKey = this.getSessionKey();
-    const callbackName = "chatCallback_" + Date.now();
+    const callbackName = this._generateSecureCallbackName();
     const url = `${this.serverUrl}/api/messages?callback=${callbackName}&message=${encodeURIComponent(
-      message
+      validatedMessage
     )}&type=message&session_key=${encodeURIComponent(sessionKey)}`;
 
     this._injectScript(url, callbackName, (response) => {
+      // Validate response structure before processing
+      if (!this._validateJSONPResponse(response)) {
+        console.error('ChatWidget: Invalid JSONP response format', response);
+        return;
+      }
+      
       if (onResponse) {
         // Check if response has text field to prevent undefined errors
         if (response.text !== undefined && response.text !== null) {

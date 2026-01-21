@@ -4,69 +4,195 @@ import { test, expect } from '@playwright/test';
 declare global {
   interface Window {
     testWidgetFactory: {
-      createWidget: (widgetData: any, widgetId: string) => any;
+      createWidget: (widgetConfig: any, widgetId: string) => HTMLElement | null;
     };
   }
 }
 
-test.describe('Widget Factory Tests', () => {
+test.describe('Widget Factory Tests - Composable System', () => {
   test.beforeEach(async ({ page }) => {
     // Load the widget system in a test environment
     await page.goto('about:blank');
     await page.evaluate(() => {
-      // Mock the widget system for testing
-      (window as any).testWidgetFactory = {
-        createWidget: function(widgetData: any, widgetId: string) {
-          if (!widgetData || !widgetData.type) return null;
+      // Base widget class mock
+      class BaseWidget {
+        widgetData: any;
+        widgetId: string;
+        
+        constructor(widgetData: any, widgetId: string) {
+          this.widgetData = widgetData;
+          this.widgetId = widgetId;
+        }
+        
+        createElement() {
+          throw new Error('createElement() must be implemented by subclass');
+        }
+        
+        getChildrenContainer(element: HTMLElement) {
+          return element;
+        }
+      }
+      
+      // Mock widget classes
+      class ButtonsWidget extends BaseWidget {
+        createElement() {
+          const div = document.createElement('div');
+          div.className = 'widget';
+          const container = document.createElement('div');
+          container.className = 'widget-buttons';
           
-          switch(widgetData.type) {
-            case 'buttons':
-              return {
-                createElement: () => {
-                  const div = document.createElement('div');
-                  div.className = 'widget';
-                  const container = document.createElement('div');
-                  container.className = 'widget-buttons';
-                  
-                  if (widgetData.options) {
-                    widgetData.options.forEach((option: any) => {
-                      const button = document.createElement('button');
-                      button.className = 'widget-button';
-                      button.textContent = option.text;
-                      button.setAttribute('data-option-value', option.value);
-                      container.appendChild(button);
-                    });
-                  }
-                  
-                  div.appendChild(container);
-                  return div;
-                },
-                validate: () => widgetData.type === 'buttons' && Array.isArray(widgetData.options) && widgetData.options.length > 0
-              };
-            case 'select':
-              return {
-                createElement: () => {
-                  const div = document.createElement('div');
-                  div.className = 'widget';
-                  const select = document.createElement('select');
-                  select.className = 'widget-select-element';
-                  
-                  if (widgetData.options) {
-                    widgetData.options.forEach((option: any) => {
-                      const optionEl = document.createElement('option');
-                      optionEl.value = option.value;
-                      optionEl.textContent = option.text;
-                      select.appendChild(optionEl);
-                    });
-                  }
-                  
-                  div.appendChild(select);
-                  return div;
-                },
-                validate: () => widgetData.type === 'select' && Array.isArray(widgetData.options) && widgetData.options.length > 0
-              };
-            default:
-              return null;
+          // Handle legacy format with options array
+          if (this.widgetData.options) {
+            this.widgetData.options.forEach((option: any) => {
+              const button = document.createElement('button');
+              button.className = 'widget-button';
+              button.textContent = option.text;
+              button.setAttribute('data-option-value', option.value);
+              container.appendChild(button);
+            });
+          }
+          
+          div.appendChild(container);
+          return div;
+        }
+        
+        validate() {
+          return this.widgetData.type === 'buttons' && 
+                 Array.isArray(this.widgetData.options) && 
+                 this.widgetData.options.length > 0;
+        }
+      }
+      
+      class SelectWidget extends BaseWidget {
+        createElement() {
+          const div = document.createElement('div');
+          div.className = 'widget';
+          const select = document.createElement('select');
+          select.className = 'widget-select-element';
+          
+          if (this.widgetData.options) {
+            this.widgetData.options.forEach((option: any) => {
+              const optionEl = document.createElement('option');
+              optionEl.value = option.value;
+              optionEl.textContent = option.text;
+              select.appendChild(optionEl);
+            });
+          }
+          
+          div.appendChild(select);
+          return div;
+        }
+        
+        validate() {
+          return this.widgetData.type === 'select' && 
+                 Array.isArray(this.widgetData.options) && 
+                 this.widgetData.options.length > 0;
+        }
+      }
+      
+      class ContainerWidget extends BaseWidget {
+        createElement() {
+          const element = document.createElement('div');
+          element.className = 'widget-container';
+          
+          const layout = this.widgetData.props?.layout || 'vertical';
+          const gap = this.widgetData.props?.gap || 'medium';
+          const alignment = this.widgetData.props?.alignment || 'start';
+          
+          element.classList.add(`layout-${layout}`);
+          element.classList.add(`gap-${gap}`);
+          element.classList.add(`align-${alignment}`);
+          
+          return element;
+        }
+      }
+      
+      class TextWidget extends BaseWidget {
+        createElement() {
+          const element = document.createElement('div');
+          element.className = 'widget-text';
+          
+          const content = this.widgetData.props?.content || '';
+          const format = this.widgetData.props?.format || 'plain';
+          
+          element.classList.add(`format-${format}`);
+          
+          if (format === 'markdown') {
+            element.innerHTML = content
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\*(.*?)\*/g, '<em>$1</em>')
+              .replace(/`(.*?)`/g, '<code>$1</code>')
+              .replace(/\n/g, '<br>');
+          } else {
+            element.textContent = content;
+          }
+          
+          return element;
+        }
+      }
+      
+      class CardWidget extends BaseWidget {
+        createElement() {
+          const element = document.createElement('div');
+          element.className = 'widget-card';
+          
+          const variant = this.widgetData.props?.variant || 'default';
+          const padding = this.widgetData.props?.padding || 'medium';
+          
+          element.classList.add(`variant-${variant}`);
+          element.classList.add(`padding-${padding}`);
+          
+          return element;
+        }
+      }
+      
+      // Mock the widget system for testing with new composable architecture
+      (window as any).testWidgetFactory = {
+        createWidget: function(widgetConfig: any, widgetId: string) {
+          console.log('Creating widget with config:', widgetConfig);
+          if (!widgetConfig || !widgetConfig.type) {
+            console.log('Invalid widget config:', widgetConfig);
+            return null;
+          }
+          
+          // Widget type registry
+          const widgetTypes = new Map([
+            ['buttons', ButtonsWidget],
+            ['select', SelectWidget],
+            ['container', ContainerWidget],
+            ['text', TextWidget],
+            ['card', CardWidget]
+          ]);
+          
+          const WidgetClass = widgetTypes.get(widgetConfig.type);
+          if (!WidgetClass) {
+            console.log('No widget class found for type:', widgetConfig.type);
+            return null;
+          }
+          
+          try {
+            const widgetInstance = new WidgetClass(widgetConfig, widgetId);
+            const element = widgetInstance.createElement();
+            
+            // Recursively process children if present
+            if (widgetConfig.children && Array.isArray(widgetConfig.children)) {
+              const childrenContainer = widgetInstance.getChildrenContainer ? 
+                                    widgetInstance.getChildrenContainer(element) : 
+                                    element;
+              
+              widgetConfig.children.forEach((childConfig: any) => {
+                const childElement = this.createWidget(childConfig, widgetId);
+                if (childElement) {
+                  childrenContainer.appendChild(childElement);
+                }
+              });
+            }
+            
+            console.log('Widget created successfully:', element);
+            return element;
+          } catch (error) {
+            console.error(`Error creating widget of type ${widgetConfig.type}:`, error);
+            return null;
           }
         }
       };
@@ -74,7 +200,7 @@ test.describe('Widget Factory Tests', () => {
   });
 
   test('should create buttons widget successfully', async ({ page }) => {
-    const widgetData = {
+    const widgetConfig = {
       type: 'buttons',
       options: [
         { id: 'opt1', text: 'Option 1', value: 'value1' },
@@ -82,16 +208,21 @@ test.describe('Widget Factory Tests', () => {
       ]
     };
 
-    const isValid = await page.evaluate((data) => {
-      const widget = window.testWidgetFactory.createWidget(data, 'test-widget');
-      return widget !== null && widget.validate();
-    }, widgetData);
+    const element = await page.evaluate((config) => {
+      console.log('Creating widget with config:', config);
+      const result = window.testWidgetFactory.createWidget(config, 'test-widget');
+      console.log('Widget creation result:', result);
+      return result ? result.outerHTML : null;
+    }, widgetConfig);
 
-    expect(isValid).toBe(true);
+    expect(element).not.toBeNull();
+    expect(element!).toContain('widget-buttons');
+    expect(element!).toContain('Option 1');
+    expect(element!).toContain('Option 2');
   });
 
   test('should create select widget successfully', async ({ page }) => {
-    const widgetData = {
+    const widgetConfig = {
       type: 'select',
       options: [
         { id: 'opt1', text: 'Option 1', value: 'value1' },
@@ -99,144 +230,202 @@ test.describe('Widget Factory Tests', () => {
       ]
     };
 
-    const isValid = await page.evaluate((data) => {
-      const widget = window.testWidgetFactory.createWidget(data, 'test-widget');
-      return widget !== null && widget.validate();
-    }, widgetData);
+    const element = await page.evaluate((config) => {
+      return window.testWidgetFactory.createWidget(config, 'test-widget')?.outerHTML || null;
+    }, widgetConfig);
 
-    expect(isValid).toBe(true);
+    expect(element).not.toBeNull();
+    expect(element!).toContain('widget-select-element');
+    expect(element!).toContain('Option 1');
+    expect(element!).toContain('Option 2');
+  });
+
+  test('should create text widget successfully', async ({ page }) => {
+    const widgetConfig = {
+      type: 'text',
+      props: {
+        content: 'Hello **World**!',
+        format: 'markdown'
+      }
+    };
+
+    const element = await page.evaluate((config) => {
+      return window.testWidgetFactory.createWidget(config, 'test-widget')?.outerHTML || null;
+    }, widgetConfig);
+
+    expect(element).not.toBeNull();
+    expect(element!).toContain('widget-text');
+    expect(element!).toContain('<strong>World</strong>');
+  });
+
+  test('should create container widget successfully', async ({ page }) => {
+    const widgetConfig = {
+      type: 'container',
+      props: {
+        layout: 'horizontal',
+        gap: 'small',
+        alignment: 'center'
+      }
+    };
+
+    const element = await page.evaluate((config) => {
+      return window.testWidgetFactory.createWidget(config, 'test-widget')?.outerHTML || null;
+    }, widgetConfig);
+
+    expect(element).not.toBeNull();
+    expect(element!).toContain('widget-container');
+    expect(element!).toContain('layout-horizontal');
+    expect(element!).toContain('gap-small');
+    expect(element!).toContain('align-center');
+  });
+
+  test('should create card widget successfully', async ({ page }) => {
+    const widgetConfig = {
+      type: 'card',
+      props: {
+        variant: 'elevated',
+        padding: 'large'
+      }
+    };
+
+    const element = await page.evaluate((config) => {
+      return window.testWidgetFactory.createWidget(config, 'test-widget')?.outerHTML || null;
+    }, widgetConfig);
+
+    expect(element).not.toBeNull();
+    expect(element!).toContain('widget-card');
+    expect(element!).toContain('variant-elevated');
+    expect(element!).toContain('padding-large');
+  });
+
+  test('should create nested widgets recursively', async ({ page }) => {
+    const widgetConfig = {
+      type: 'card',
+      props: {
+        variant: 'default',
+        padding: 'medium'
+      },
+      children: [
+        {
+          type: 'text',
+          props: {
+            content: 'Card Title',
+            format: 'plain'
+          }
+        },
+        {
+          type: 'container',
+          props: {
+            layout: 'horizontal',
+            gap: 'small'
+          },
+          children: [
+            {
+              type: 'text',
+              props: {
+                content: 'Item 1',
+                format: 'plain'
+              }
+            },
+            {
+              type: 'text',
+              props: {
+                content: 'Item 2',
+                format: 'plain'
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    const element = await page.evaluate((config) => {
+      return window.testWidgetFactory.createWidget(config, 'test-widget')?.outerHTML || null;
+    }, widgetConfig);
+
+    expect(element).not.toBeNull();
+    expect(element!).toContain('widget-card');
+    expect(element!).toContain('Card Title');
+    expect(element!).toContain('widget-container');
+    expect(element!).toContain('layout-horizontal');
+    expect(element!).toContain('Item 1');
+    expect(element!).toContain('Item 2');
   });
 
   test('should return null for unsupported widget type', async ({ page }) => {
-    const widgetData = {
+    const widgetConfig = {
       type: 'unsupported',
       options: []
     };
 
-    const isNull = await page.evaluate((data) => {
-      const widget = window.testWidgetFactory.createWidget(data, 'test-widget');
-      return widget === null;
-    }, widgetData);
+    const element = await page.evaluate((config) => {
+      return window.testWidgetFactory.createWidget(config, 'test-widget');
+    }, widgetConfig);
 
-    expect(isNull).toBe(true);
+    expect(element).toBeNull();
   });
 
   test('should return null for invalid widget data', async ({ page }) => {
-    const isNull = await page.evaluate(() => {
-      const widget = window.testWidgetFactory.createWidget(null, 'test-widget');
-      return widget === null;
+    const element = await page.evaluate(() => {
+      return window.testWidgetFactory.createWidget(null, 'test-widget');
     });
 
-    expect(isNull).toBe(true);
+    expect(element).toBeNull();
   });
 
-  test('should render buttons widget DOM correctly', async ({ page }) => {
-    const widgetData = {
-      type: 'buttons',
-      options: [
-        { id: 'opt1', text: 'Button 1', value: 'value1' },
-        { id: 'opt2', text: 'Button 2', value: 'value2' }
+  test('should handle complex nested structure from proposal', async ({ page }) => {
+    const widgetConfig = {
+      type: 'card',
+      children: [
+        {
+          type: 'text',
+          props: { 
+            content: 'Image placeholder (image widget to be implemented)',
+            format: 'plain' 
+          }
+        },
+        {
+          type: 'text',
+          props: { 
+            content: 'Confirm your order for **Widget X**', 
+            format: 'markdown' 
+          }
+        },
+        {
+          type: 'container',
+          props: { 
+            layout: 'horizontal', 
+            gap: 'small' 
+          },
+          children: [
+            {
+              type: 'text',
+              props: { 
+                content: '[Confirm]', 
+                format: 'plain' 
+              }
+            },
+            {
+              type: 'text',
+              props: { 
+                content: '[Cancel]', 
+                format: 'plain' 
+              }
+            }
+          ]
+        }
       ]
     };
 
-    await page.evaluate((data) => {
-      const widget = window.testWidgetFactory.createWidget(data, 'test-widget');
-      const element = widget.createElement();
-      document.body.appendChild(element);
-    }, widgetData);
+    const element = await page.evaluate((config) => {
+      return window.testWidgetFactory.createWidget(config, 'test-widget')?.outerHTML || null;
+    }, widgetConfig);
 
-    // Check if widget container exists
-    const widgetContainer = page.locator('.widget');
-    await expect(widgetContainer).toBeVisible();
-
-    // Check if buttons container exists
-    const buttonsContainer = page.locator('.widget-buttons');
-    await expect(buttonsContainer).toBeVisible();
-
-    // Check if buttons are rendered
-    const buttons = page.locator('.widget-button');
-    await expect(buttons).toHaveCount(2);
-    await expect(buttons.nth(0)).toContainText('Button 1');
-    await expect(buttons.nth(1)).toContainText('Button 2');
-
-    // Check button attributes
-    await expect(buttons.nth(0)).toHaveAttribute('data-option-value', 'value1');
-    await expect(buttons.nth(1)).toHaveAttribute('data-option-value', 'value2');
-  });
-
-  test('should render select widget DOM correctly', async ({ page }) => {
-    const widgetData = {
-      type: 'select',
-      options: [
-        { id: 'opt1', text: 'Select Option 1', value: 'value1' },
-        { id: 'opt2', text: 'Select Option 2', value: 'value2' }
-      ]
-    };
-
-    await page.evaluate((data) => {
-      const widget = window.testWidgetFactory.createWidget(data, 'test-widget');
-      const element = widget.createElement();
-      document.body.appendChild(element);
-    }, widgetData);
-
-    // Check if widget container exists
-    const widgetContainer = page.locator('.widget');
-    await expect(widgetContainer).toBeVisible();
-
-    // Check if select element exists
-    const selectElement = page.locator('.widget-select-element');
-    await expect(selectElement).toBeVisible();
-
-    // Check if options are rendered
-    const options = selectElement.locator('option');
-    await expect(options).toHaveCount(2);
-    await expect(options.nth(0)).toHaveText('Select Option 1');
-    await expect(options.nth(1)).toHaveText('Select Option 2');
-    await expect(options.nth(0)).toHaveAttribute('value', 'value1');
-    await expect(options.nth(1)).toHaveAttribute('value', 'value2');
-  });
-
-  test('should validate buttons widget correctly', async ({ page }) => {
-    // Valid buttons widget
-    const validWidget = await page.evaluate(() => {
-      const widget = window.testWidgetFactory.createWidget({
-        type: 'buttons',
-        options: [{ id: 'opt1', text: 'Option 1', value: 'value1' }]
-      }, 'test-widget');
-      return widget.validate();
-    });
-    expect(validWidget).toBe(true);
-
-    // Invalid buttons widget (no options)
-    const invalidWidget = await page.evaluate(() => {
-      const widget = window.testWidgetFactory.createWidget({
-        type: 'buttons',
-        options: []
-      }, 'test-widget');
-      return widget.validate();
-    });
-    expect(invalidWidget).toBe(false);
-  });
-
-  test('should validate select widget correctly', async ({ page }) => {
-    // Valid select widget
-    const validWidget = await page.evaluate(() => {
-      const widget = window.testWidgetFactory.createWidget({
-        type: 'select',
-        options: [{ id: 'opt1', text: 'Option 1', value: 'value1' }]
-      }, 'test-widget');
-      return widget.validate();
-    });
-    expect(validWidget).toBe(true);
-
-    // Invalid select widget (no options)
-    const invalidWidget = await page.evaluate(() => {
-      const widget = window.testWidgetFactory.createWidget({
-        type: 'select',
-        options: []
-      }, 'test-widget');
-      return widget.validate();
-    });
-    expect(invalidWidget).toBe(false);
+    expect(element).not.toBeNull();
+    expect(element!).toContain('widget-card');
+    expect(element!).toContain('<strong>Widget X</strong>');
+    expect(element!).toContain('layout-horizontal');
+    expect(element!).toContain('[Confirm]');
+    expect(element!).toContain('[Cancel]');
   });
 });

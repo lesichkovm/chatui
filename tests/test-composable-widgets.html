@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Composable Widget Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .test-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Phase 1: Composable Widget System Test</h1>
+        <p>This page demonstrates the new widget-based message API implementation.</p>
+        
+        <div class="test-section">
+            <div class="test-title">Test 1: Basic Text Widget</div>
+            <div class="test-description">Simple text widget with markdown formatting</div>
+            <div id="test-text"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">Test 2: Container with Layout</div>
+            <div class="test-description">Horizontal container with multiple text widgets</div>
+            <div id="test-container"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">Test 3: Card with Nested Content</div>
+            <div class="test-description">Card containing text and nested containers</div>
+            <div id="test-card"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">Test 4: Complex Nested Structure</div>
+            <div class="test-description">Example from the proposal: card with image, text, and button row</div>
+            <div id="test-complex"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the widget system
+        import { WidgetFactory } from '../src/modules/widgets/widget-factory.js';
+        
+        // Mock theme config for testing
+        const mockThemeConfig = {
+            theme: 'default',
+            mode: 'light',
+            colors: {
+                primary: '#007bff',
+                bg: '#ffffff',
+                surface: '#f8f9fa',
+                text: '#212529',
+                border: '#e9ecef'
+            }
+        };
+
+        // Test 1: Basic Text Widget
+        const textWidget = {
+            type: 'text',
+            props: {
+                content: 'Hello **World**! This is a *test* with `code` formatting.',
+                format: 'markdown'
+            }
+        };
+        
+        const textElement = WidgetFactory.createWidget(textWidget, 'test-widget');
+        if (textElement) {
+            document.getElementById('test-text').appendChild(textElement);
+        }
+
+        // Test 2: Container with Layout
+        const containerWidget = {
+            type: 'container',
+            props: {
+                layout: 'horizontal',
+                gap: 'medium',
+                alignment: 'center'
+            },
+            children: [
+                {
+                    type: 'text',
+                    props: {
+                        content: 'First item',
+                        format: 'plain'
+                    }
+                },
+                {
+                    type: 'text',
+                    props: {
+                        content: 'Second item',
+                        format: 'plain'
+                    }
+                },
+                {
+                    type: 'text',
+                    props: {
+                        content: 'Third item',
+                        format: 'plain'
+                    }
+                }
+            ]
+        };
+        
+        const containerElement = WidgetFactory.createWidget(containerWidget, 'test-widget');
+        if (containerElement) {
+            document.getElementById('test-container').appendChild(containerElement);
+        }
+
+        // Test 3: Card with Nested Content
+        const cardWidget = {
+            type: 'card',
+            props: {
+                variant: 'elevated',
+                padding: 'large'
+            },
+            children: [
+                {
+                    type: 'text',
+                    props: {
+                        content: '## Card Title\nThis is a card with nested content.',
+                        format: 'markdown'
+                    }
+                },
+                {
+                    type: 'container',
+                    props: {
+                        layout: 'vertical',
+                        gap: 'small'
+                    },
+                    children: [
+                        {
+                            type: 'text',
+                            props: {
+                                content: 'Nested item 1',
+                                format: 'plain'
+                            }
+                        },
+                        {
+                            type: 'text',
+                            props: {
+                                content: 'Nested item 2',
+                                format: 'plain'
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+        
+        const cardElement = WidgetFactory.createWidget(cardWidget, 'test-widget');
+        if (cardElement) {
+            document.getElementById('test-card').appendChild(cardElement);
+        }
+
+        // Test 4: Complex Nested Structure (from proposal)
+        const complexWidget = {
+            type: 'card',
+            children: [
+                {
+                    type: 'text',
+                    props: { 
+                        content: 'Image placeholder (image widget to be implemented)',
+                        format: 'plain' 
+                    }
+                },
+                {
+                    type: 'text',
+                    props: { 
+                        content: 'Confirm your order for **Widget X**', 
+                        format: 'markdown' 
+                    }
+                },
+                {
+                    type: 'container',
+                    props: { 
+                        layout: 'horizontal', 
+                        gap: 'small' 
+                    },
+                    children: [
+                        {
+                            type: 'text',
+                            props: { 
+                                content: '[Confirm]', 
+                                format: 'plain' 
+                            }
+                        },
+                        {
+                            type: 'text',
+                            props: { 
+                                content: '[Cancel]', 
+                                format: 'plain' 
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+        
+        const complexElement = WidgetFactory.createWidget(complexWidget, 'test-widget');
+        if (complexElement) {
+            document.getElementById('test-complex').appendChild(complexElement);
+        }
+
+        console.log('Phase 1 Composable Widget System Test Complete!');
+    </script>
+</body>
+</html>

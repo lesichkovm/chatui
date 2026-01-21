@@ -8,28 +8,64 @@ export class CorsAPI {
    * @param {Object} config - Configuration object
    * @param {string} config.serverUrl - Base URL for the chat server
    * @param {boolean} [config.debug=false] - Enable debug logging
-   * @param {number} [config.timeout=5000] - Request timeout in milliseconds
    */
   constructor(config) {
-    this.serverUrl = config.serverUrl;
+    if (!config || !config.serverUrl) {
+      throw new Error('CorsAPI: serverUrl is required');
+    }
+    
+    this.serverUrl = config.serverUrl.replace(/\/$/, ''); // Remove trailing slash
     this.debug = config.debug || false;
-    this.timeout = config.timeout || 5000;
+    this.sessionKey = '';
+    this.connectionTimeout = config.connectionTimeout || 10000;
   }
 
   /**
-   * Get the stored session key from localStorage
+   * Validate message input to prevent injection attacks
+   * @param {string} message - Message to validate
+   * @returns {string} Validated and sanitized message
+   */
+  validateMessage(message) {
+    if (typeof message !== 'string') {
+      throw new Error('Invalid message type: message must be a string');
+    }
+    
+    if (message.length === 0) {
+      throw new Error('Invalid message: message cannot be empty');
+    }
+    
+    if (message.length > 10000) {
+      throw new Error('Invalid message: message too long (max 10000 characters)');
+    }
+    
+    // Remove potential script content and excessive whitespace
+    const sanitized = message
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/on\w+\s*=/gi, '') // Remove event handlers
+      .trim();
+    
+    if (sanitized.length === 0) {
+      throw new Error('Invalid message: message contains only disallowed content');
+    }
+    
+    return sanitized;
+  }
+
+  /**
+   * Get the stored session key from sessionStorage (more secure than localStorage)
    * @returns {string} The session key or empty string if not found
    */
   getSessionKey() {
-    return localStorage.getItem("chat_session_key") || "";
+    return sessionStorage.getItem("chat_session_key") || "";
   }
 
   /**
-   * Store a session key in localStorage
+   * Store a session key in sessionStorage (more secure than localStorage)
    * @param {string} key - The session key to store
    */
   setSessionKey(key) {
-    localStorage.setItem("chat_session_key", key);
+    sessionStorage.setItem("chat_session_key", key);
   }
 
   /**
@@ -197,6 +233,9 @@ export class CorsAPI {
       return;
     }
 
+    // Validate and sanitize the message
+    const validatedMessage = this.validateMessage(message);
+    
     const sessionKey = this.getSessionKey();
     const url = `${this.serverUrl}/api/messages`;
 
@@ -205,19 +244,25 @@ export class CorsAPI {
         method: 'POST',
         body: JSON.stringify({
           type: 'message',
-          message: message,
+          message: validatedMessage,
           session_key: sessionKey,
           timestamp: Date.now()
         })
       });
 
       if (onResponse) {
-        // Check if response is successful and has text field
-        if (response.status === "success" && response.text) {
-          if (response.widget) {
-            onResponse(response.text, "bot", response.widget);
-          } else {
-            onResponse(response.text, "bot");
+        // Check if response is successful and has widgets array or text field (backward compatibility)
+        if (response.status === "success") {
+          if (response.widgets && Array.isArray(response.widgets)) {
+            // New composable widget format
+            onResponse(response.widgets, "bot");
+          } else if (response.text) {
+            // Backward compatibility: old format with text field
+            if (response.widget) {
+              onResponse(response.text, "bot", response.widget);
+            } else {
+              onResponse(response.text, "bot");
+            }
           }
         } else if (response.status === "error") {
           // Don't call onResponse for error responses, let onError handle it

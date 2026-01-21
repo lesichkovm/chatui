@@ -4,6 +4,7 @@
  */
 
 export const WIDGET_TYPES = {
+  // Legacy widget types
   BUTTONS: 'buttons',
   SELECT: 'select',
   INPUT: 'input',
@@ -19,7 +20,17 @@ export const WIDGET_TYPES = {
   COLOR_PICKER: 'color_picker',
   CONFIRMATION: 'confirmation',
   RADIO: 'radio',
-  PROGRESS: 'progress'
+  PROGRESS: 'progress',
+  
+  // New composable widget types
+  TEXT: 'text',
+  CONTAINER: 'container',
+  CARD: 'card',
+  IMAGE: 'image',
+  ICON: 'icon',
+  BUTTON: 'button',
+  ROW: 'row',
+  COLUMN: 'column'
 };
 
 // Legacy type mappings for backward compatibility

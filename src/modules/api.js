@@ -1,4 +1,4 @@
-import { ChatAPI } from './api-legacy.js';
+import { LegacyAPI as ChatAPI } from './api-legacy.js';
 import { CorsAPI } from './api-cors.js';
 
 /**
@@ -173,10 +173,17 @@ export class HybridChatAPI extends ChatAPI {
       }));
 
       this.wsConnection.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'handshake' && data.status === 'success') {
-          this.setSessionKey(data.session_key);
-          if (onSuccess) onSuccess();
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'handshake' && data.status === 'success') {
+            this.setSessionKey(data.session_key);
+            if (onSuccess) onSuccess();
+          }
+        } catch (error) {
+          console.error('ChatWidget: Invalid WebSocket message format:', error);
+          if (this.debug) {
+            console.error('Received data:', event.data);
+          }
         }
       };
     }).catch((error) => {
@@ -245,20 +252,34 @@ export class HybridChatAPI extends ChatAPI {
       
       // Set up message handler even if already connected
       this.wsConnection.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'message') {
-          if (onMessage) {
-            if (data.widget) {
-              onMessage(data.text, 'bot', data.widget);
-            } else {
-              onMessage(data.text, 'bot');
+        try {
+          const data = JSON.parse(event.data);
+          
+          // Handle both old format (status: success) and new format (type: message)
+          if (data.type === 'message' || (data.status === 'success' && (data.widgets || data.text))) {
+            if (onMessage) {
+              if (data.widgets && Array.isArray(data.widgets)) {
+                // New composable widget format
+                onMessage(data.widgets, 'bot');
+              } else if (data.text) {
+                // Backward compatibility: old format with text field
+                if (data.widget) {
+                  onMessage(data.text, 'bot', data.widget);
+                } else {
+                  onMessage(data.text, 'bot');
+                }
+              }
             }
+          } else if (data.type === 'typing') {
+            this.handleTypingIndicator(data);
+          } else if (data.type === 'read_receipt') {
+            this.handleReadReceipt(data);
           }
-        } else if (data.type === 'typing') {
-          this.handleTypingIndicator(data);
-        } else if (data.type === 'read_receipt') {
-          this.handleReadReceipt(data);
+        } catch (error) {
+          console.error('ChatWidget: Invalid WebSocket message format:', error);
+          if (this.debug) {
+            console.error('Received data:', event.data);
+          }
         }
       };
       return;
@@ -266,20 +287,34 @@ export class HybridChatAPI extends ChatAPI {
 
     this.initWebSocket().then(() => {
       this.wsConnection.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'message') {
-          if (onMessage) {
-            if (data.widget) {
-              onMessage(data.text, 'bot', data.widget);
-            } else {
-              onMessage(data.text, 'bot');
+        try {
+          const data = JSON.parse(event.data);
+          
+          // Handle both old format (status: success) and new format (type: message)
+          if (data.type === 'message' || (data.status === 'success' && (data.widgets || data.text))) {
+            if (onMessage) {
+              if (data.widgets && Array.isArray(data.widgets)) {
+                // New composable widget format
+                onMessage(data.widgets, 'bot');
+              } else if (data.text) {
+                // Backward compatibility: old format with text field
+                if (data.widget) {
+                  onMessage(data.text, 'bot', data.widget);
+                } else {
+                  onMessage(data.text, 'bot');
+                }
+              }
             }
+          } else if (data.type === 'typing') {
+            this.handleTypingIndicator(data);
+          } else if (data.type === 'read_receipt') {
+            this.handleReadReceipt(data);
           }
-        } else if (data.type === 'typing') {
-          this.handleTypingIndicator(data);
-        } else if (data.type === 'read_receipt') {
-          this.handleReadReceipt(data);
+        } catch (error) {
+          console.error('ChatWidget: Invalid WebSocket message format:', error);
+          if (this.debug) {
+            console.error('Received data:', event.data);
+          }
         }
       };
     }).catch((error) => {
@@ -352,13 +387,28 @@ export class HybridChatAPI extends ChatAPI {
 
       if (onResponse) {
         this.wsConnection.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'message' || data.type === 'message:stream') {
-            if (data.widget) {
-              onResponse(data.text, 'bot', data.widget);
-            } else {
-              onResponse(data.text, 'bot');
+          try {
+            const data = JSON.parse(event.data);
+            
+            // Handle both old format (status: success) and new format (type: message)
+            if (data.type === 'message' || data.type === 'message:stream' || 
+                (data.status === 'success' && (data.widgets || data.text))) {
+              if (data.widgets && Array.isArray(data.widgets)) {
+                // New composable widget format
+                onResponse(data.widgets, 'bot');
+              } else if (data.text) {
+                // Backward compatibility: old format with text field
+                if (data.widget) {
+                  onResponse(data.text, 'bot', data.widget);
+                } else {
+                  onResponse(data.text, 'bot');
+                }
+              }
+            }
+          } catch (error) {
+            console.error('ChatWidget: Invalid WebSocket message format:', error);
+            if (this.debug) {
+              console.error('Received data:', event.data);
             }
           }
         };

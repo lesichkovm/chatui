@@ -98,14 +98,28 @@ function processMessage(req, res, callback, message, type, session_key, referer)
     if (referer.includes('widget-demo.html') || referer.includes('buttons-widget-demo.html') || referer.includes('input-widget-demo.html') || referer.includes('select-widget-demo.html') || referer.includes('rating-widget-demo.html') || referer.includes('checkbox-widget-demo.html') || referer.includes('textarea-widget-demo.html') || referer.includes('slider-widget-demo.html') || referer.includes('toggle-widget-demo.html') || referer.includes('date-widget-demo.html') || referer.includes('tags-widget-demo.html') || referer.includes('file-upload-widget-demo.html') || referer.includes('color-picker-widget-demo.html') || referer.includes('confirmation-widget-demo.html') || referer.includes('radio-widget-demo.html') || referer.includes('progress-widget-demo.html')) {
       responseData = {
         status: 'success',
-        text: 'Hello! I\'m your virtual assistant. Try "show buttons", "show select", "show input", "show rating", "show checkbox", "show textarea", "show slider", "show toggle", "show date", "show tags", "show file", "show color", "show confirmation", "show radio", or "show progress" to see interactive widgets!',
-        sender: 'bot'
+        widgets: [
+          {
+            type: 'text',
+            props: {
+              content: 'Hello! I\'m your virtual assistant. Try "show buttons", "show select", "show input", "show rating", "show checkbox", "show textarea", "show slider", "show toggle", "show date", "show tags", "show file", "show color", "show confirmation", "show radio", or "show progress" to see interactive widgets!',
+              format: 'plain'
+            }
+          }
+        ]
       };
     } else {
       responseData = {
         status: 'success',
-        text: 'Welcome to the demo chat! Server is running.',
-        sender: 'bot'
+        widgets: [
+          {
+            type: 'text',
+            props: {
+              content: 'Welcome to the demo chat! Server is running.',
+              format: 'plain'
+            }
+          }
+        ]
       };
     }
   } else if (message !== undefined && message !== null) {
@@ -115,8 +129,15 @@ function processMessage(req, res, callback, message, type, session_key, referer)
     if (typeof message === 'boolean') {
       responseData = {
         status: 'success',
-        text: `Toggle ${message ? 'enabled' : 'disabled'}`,
-        sender: 'bot'
+        widgets: [
+          {
+            type: 'text',
+            props: {
+              content: `Toggle ${message ? 'enabled' : 'disabled'}`,
+              format: 'plain'
+            }
+          }
+        ]
       };
     } else {
       // Check for widget trigger keywords regardless of page
@@ -127,192 +148,356 @@ function processMessage(req, res, callback, message, type, session_key, referer)
         if (lowerMessage === 'show buttons') {
           responseData = {
             status: 'success',
-            text: 'Welcome! How can I help you today?',
-            widget: {
-              type: 'buttons',
-              options: [
-                { id: 'opt1', text: 'Customer Support', value: 'support' },
-                { id: 'opt2', text: 'Sales Inquiry', value: 'sales' },
-                { id: 'opt3', text: 'Technical Help', value: 'technical' },
-                { id: 'opt4', text: 'Billing Question', value: 'billing' }
-              ]
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Welcome! How can I help you today?',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'buttons',
+                  options: [
+                    { id: 'opt1', text: 'Customer Support', value: 'support' },
+                    { id: 'opt2', text: 'Sales Inquiry', value: 'sales' },
+                    { id: 'opt3', text: 'Technical Help', value: 'technical' },
+                    { id: 'opt4', text: 'Billing Question', value: 'billing' }
+                  ]
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show select') {
           responseData = {
             status: 'success',
-            text: 'Please choose your preferred department:',
-            widget: {
-              type: 'select',
-              placeholder: 'Select a department...',
-              options: [
-                { id: 'dept1', text: 'Customer Support', value: 'support' },
-                { id: 'dept2', text: 'Sales', value: 'sales' },
-                { id: 'dept3', text: 'Technical Support', value: 'tech' },
-                { id: 'dept4', text: 'Billing', value: 'billing' }
-              ]
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Please choose your preferred department:',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'select',
+                  placeholder: 'Select a department...',
+                  options: [
+                    { id: 'dept1', text: 'Customer Support', value: 'support' },
+                    { id: 'dept2', text: 'Sales', value: 'sales' },
+                    { id: 'dept3', text: 'Technical Support', value: 'tech' },
+                    { id: 'dept4', text: 'Billing', value: 'billing' }
+                  ]
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show input') {
           responseData = {
             status: 'success',
-            text: 'Please enter your email address:',
-            widget: {
-              type: 'input',
-              inputType: 'email',
-              placeholder: 'Enter your email...',
-              buttonText: 'Submit'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Please enter your email address:',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'input',
+                  inputType: 'email',
+                  placeholder: 'Enter your email...',
+                  buttonText: 'Submit'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show rating') {
           responseData = {
             status: 'success',
-            text: 'How would you rate our service?',
-            widget: {
-              type: 'rating',
-              label: 'Rate your experience',
-              maxRating: 5,
-              iconType: 'stars'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'How would you rate our service?',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'rating',
+                  label: 'Rate your experience',
+                  maxRating: 5,
+                  iconType: 'stars'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show checkbox') {
           responseData = {
             status: 'success',
-            text: 'Select your interests:',
-            widget: {
-              type: 'checkbox',
-              buttonText: 'Submit',
-              options: [
-                { id: 'tech', text: 'Technology', 'value': 'tech' },
-                { id: 'sports', text: 'Sports', 'value': 'sports' },
-                { id: 'music', text: 'Music', 'value': 'music' },
-                { id: 'travel', text: 'Travel', 'value': 'travel' }
-              ]
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Select your interests:',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'checkbox',
+                  buttonText: 'Submit',
+                  options: [
+                    { id: 'tech', text: 'Technology', 'value': 'tech' },
+                    { id: 'sports', text: 'Sports', 'value': 'sports' },
+                    { id: 'music', text: 'Music', 'value': 'music' },
+                    { id: 'travel', text: 'Travel', 'value': 'travel' }
+                  ]
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show textarea') {
           responseData = {
             status: 'success',
-            text: 'Please describe your issue in detail:',
-            widget: {
-              type: 'textarea',
-              placeholder: 'Describe your issue here...',
-              rows: 6,
-              maxLength: 500,
-              buttonText: 'Submit'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Please describe your issue in detail:',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'textarea',
+                  placeholder: 'Describe your issue here...',
+                  rows: 6,
+                  maxLength: 500,
+                  buttonText: 'Submit'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show slider') {
           responseData = {
             status: 'success',
-            text: 'How satisfied are you with our service?',
-            widget: {
-              type: 'slider',
-              label: 'Satisfaction Rating',
-              min: 0,
-              max: 10,
-              step: 1,
-              defaultValue: 5,
-              buttonText: 'Submit'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'How satisfied are you with our service?',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'slider',
+                  label: 'Satisfaction Level',
+                  min: 0,
+                  max: 100,
+                  step: 10,
+                  value: 50
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show toggle') {
           responseData = {
             status: 'success',
-            text: 'Would you like to enable notifications?',
-            widget: {
-              type: 'toggle',
-              label: 'Enable Notifications',
-              defaultValue: false,
-              buttonText: 'Save'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Would you like to enable notifications?',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'toggle',
+                  label: 'Enable Notifications',
+                  defaultValue: false,
+                  buttonText: 'Save'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show date') {
           responseData = {
             status: 'success',
-            text: 'When would you like to schedule your appointment?',
-            widget: {
-              type: 'date',
-              label: 'Select Date',
-              minDate: '2024-01-01',
-              maxDate: '2024-12-31',
-              buttonText: 'Schedule'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'When would you like to schedule your appointment?',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'date',
+                  label: 'Select Date',
+                  minDate: '2024-01-01',
+                  maxDate: '2024-12-31',
+                  buttonText: 'Schedule'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show tags') {
           responseData = {
             status: 'success',
-            text: 'What are your interests?',
-            widget: {
-              type: 'tags',
-              label: 'Select Your Interests',
-              placeholder: 'Type and press Enter',
-              suggestions: ['Technology', 'Sports', 'Music', 'Travel', 'Food'],
-              maxTags: 5,
-              buttonText: 'Submit'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'What are your interests?',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'tags',
+                  label: 'Select Your Interests',
+                  placeholder: 'Type and press Enter',
+                  suggestions: ['Technology', 'Sports', 'Music', 'Travel', 'Food'],
+                  maxTags: 5,
+                  buttonText: 'Submit'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show file') {
           responseData = {
             status: 'success',
-            text: 'Please upload your documents:',
-            widget: {
-              type: 'file',
-              label: 'Upload Documents',
-              accept: '.pdf,.doc,.docx',
-              maxFiles: 3,
-              maxSize: 5242880,
-              buttonText: 'Upload Files'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Please upload your documents:',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'file',
+                  label: 'Upload Documents',
+                  accept: '.pdf,.doc,.docx',
+                  maxFiles: 3,
+                  maxSize: 5242880,
+                  buttonText: 'Upload Files'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show color') {
           responseData = {
             status: 'success',
-            text: 'Choose your preferred theme color:',
-            widget: {
-              type: 'color',
-              label: 'Select Theme Color',
-              defaultColor: '#007bff',
-              presetColors: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8'],
-              buttonText: 'Apply'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Choose your preferred theme color:',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'color',
+                  label: 'Select Theme Color',
+                  defaultColor: '#007bff',
+                  presetColors: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8'],
+                  buttonText: 'Apply'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show confirmation') {
           responseData = {
             status: 'success',
-            text: 'Are you sure you want to delete this item?',
-            widget: {
-              type: 'confirmation',
-              message: 'This action cannot be undone. Are you sure?',
-              confirmText: 'Delete',
-              cancelText: 'Cancel'
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Are you sure you want to delete this item?',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'confirmation',
+                  message: 'This action cannot be undone. Are you sure?',
+                  confirmText: 'Delete',
+                  cancelText: 'Cancel'
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show radio') {
           responseData = {
             status: 'success',
-            text: 'What is your preferred contact method?',
-            widget: {
-              type: 'radio',
-              buttonText: 'Submit',
-              options: [
-                { id: 'email', text: 'Email', 'value': 'email' },
-                { id: 'phone', text: 'Phone', 'value': 'phone' },
-                { id: 'sms', text: 'SMS', 'value': 'sms' }
-              ]
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'What is your preferred contact method?',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'radio',
+                  buttonText: 'Submit',
+                  options: [
+                    { id: 'email', text: 'Email', 'value': 'email' },
+                    { id: 'phone', text: 'Phone', 'value': 'phone' },
+                    { id: 'sms', text: 'SMS', 'value': 'sms' }
+                  ]
+                }
+              }
+            ]
           };
         } else if (lowerMessage === 'show progress') {
           responseData = {
             status: 'success',
-            text: 'Your download is in progress:',
-            widget: {
-              type: 'progress',
-              label: 'Download Progress',
-              value: 75,
-              max: 100,
-              showPercentage: true
-            }
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: 'Your download is in progress:',
+                  format: 'plain'
+                }
+              },
+              {
+                type: 'widget',
+                props: {
+                  type: 'progress',
+                  label: 'Download Progress',
+                  value: 75,
+                  max: 100,
+                  showPercentage: true
+                }
+              }
+            ]
           };
         } else if (message && message.startsWith('[') && message.endsWith(']')) {
           // Handle file upload responses (JSON array string)
@@ -323,82 +508,154 @@ function processMessage(req, res, callback, message, type, session_key, referer)
             
             responseData = {
               status: 'success',
-              text: `Files uploaded successfully!\n\nFiles: ${fileNames}\nTotal size: ${Math.round(totalSize / 1024)}KB`,
-              sender: 'bot'
+              widgets: [
+                {
+                  type: 'text',
+                  props: {
+                    content: `Files uploaded successfully!\n\nFiles: ${fileNames}\nTotal size: ${Math.round(totalSize / 1024)}KB`,
+                    format: 'plain'
+                  }
+                }
+              ]
             };
           } catch (e) {
             responseData = {
               status: 'success',
-              text: 'Files uploaded successfully!',
-              sender: 'bot'
+              widgets: [
+                {
+                  type: 'text',
+                  props: {
+                    content: 'Files uploaded successfully!',
+                    format: 'plain'
+                  }
+                }
+              ]
             };
           }
         }
       } else if (lowerMessage === 'support') {
         responseData = {
           status: 'success',
-          text: 'Connecting you to customer support... Our team will help you with any issues you\'re experiencing.',
-          widget: {
-            type: 'buttons',
-            options: [
-              { id: 'urgent', text: 'Urgent Issue', value: 'urgent_support' },
-              { id: 'callback', text: 'Request Callback', value: 'callback' },
-              { id: 'email', text: 'Email Support', value: 'email_support' }
-            ]
-          }
+          widgets: [
+            {
+              type: 'text',
+              props: {
+                content: 'Connecting you to customer support... Our team will help you with any issues you\'re experiencing.',
+                format: 'plain'
+              }
+            },
+            {
+              type: 'widget',
+              props: {
+                type: 'buttons',
+                options: [
+                  { id: 'urgent', text: 'Urgent Issue', value: 'urgent_support' },
+                  { id: 'callback', text: 'Request Callback', value: 'callback' },
+                  { id: 'email', text: 'Email Support', value: 'email_support' }
+                ]
+              }
+            }
+          ]
         };
       } else if (lowerMessage === 'sales') {
         responseData = {
           status: 'success',
-          text: 'Our sales team is ready to help! What are you interested in?',
-          widget: {
-            type: 'buttons',
-            options: [
-              { id: 'pricing', text: 'Pricing Information', value: 'pricing' },
-              { id: 'demo', text: 'Product Demo', value: 'demo_request' },
-              { id: 'enterprise', text: 'Enterprise Plans', value: 'enterprise' }
-            ]
-          }
+          widgets: [
+            {
+              type: 'text',
+              props: {
+                content: 'Our sales team is ready to help! What are you interested in?',
+                format: 'plain'
+              }
+            },
+            {
+              type: 'widget',
+              props: {
+                type: 'buttons',
+                options: [
+                  { id: 'pricing', text: 'Pricing Information', value: 'pricing' },
+                  { id: 'demo', text: 'Product Demo', value: 'demo_request' },
+                  { id: 'enterprise', text: 'Enterprise Plans', value: 'enterprise' }
+                ]
+              }
+            }
+          ]
         };
       } else if (lowerMessage === 'technical') {
         responseData = {
           status: 'success',
-          text: 'Let me help you with technical issues. What seems to be the problem?',
-          widget: {
-            type: 'buttons',
-            options: [
-              { id: 'login', text: 'Login Problems', value: 'login_help' },
-              { id: 'performance', text: 'Performance Issues', value: 'performance_help' },
-              { id: 'bug', text: 'Report a Bug', value: 'bug_report' }
-            ]
-          }
+          widgets: [
+            {
+              type: 'text',
+              props: {
+                content: 'Let me help you with technical issues. What seems to be the problem?',
+                format: 'plain'
+              }
+            },
+            {
+              type: 'widget',
+              props: {
+                type: 'buttons',
+                options: [
+                  { id: 'login', text: 'Login Problems', value: 'login_help' },
+                  { id: 'performance', text: 'Performance Issues', value: 'performance_help' },
+                  { id: 'bug', text: 'Report a Bug', value: 'bug_report' }
+                ]
+              }
+            }
+          ]
         };
       } else if (lowerMessage === 'billing') {
         responseData = {
           status: 'success',
-          text: 'I can help with billing questions. What do you need assistance with?',
-          widget: {
-            type: 'buttons',
-            options: [
-              { id: 'invoice', text: 'Invoice Questions', value: 'invoice_help' },
-              { id: 'payment', text: 'Payment Issues', value: 'payment_help' },
-              { id: 'refund', text: 'Refund Request', value: 'refund_request' }
-            ]
-          }
+          widgets: [
+            {
+              type: 'text',
+              props: {
+                content: 'I can help with billing questions. What do you need assistance with?',
+                format: 'plain'
+              }
+            },
+            {
+              type: 'widget',
+              props: {
+                type: 'buttons',
+                options: [
+                  { id: 'invoice', text: 'Invoice Questions', value: 'invoice_help' },
+                  { id: 'payment', text: 'Payment Issues', value: 'payment_help' },
+                  { id: 'refund', text: 'Refund Request', value: 'refund_request' }
+                ]
+              }
+            }
+          ]
         };
       } else {
         // Default echo response
         if (referer.includes('widget-demo.html') || referer.includes('buttons-widget-demo.html') || referer.includes('input-widget-demo.html') || referer.includes('select-widget-demo.html') || referer.includes('rating-widget-demo.html') || referer.includes('checkbox-widget-demo.html') || referer.includes('textarea-widget-demo.html') || referer.includes('slider-widget-demo.html') || referer.includes('toggle-widget-demo.html') || referer.includes('date-widget-demo.html') || referer.includes('tags-widget-demo.html') || referer.includes('file-upload-widget-demo.html') || referer.includes('color-picker-widget-demo.html') || referer.includes('confirmation-widget-demo.html') || referer.includes('radio-widget-demo.html') || referer.includes('progress-widget-demo.html')) {
           responseData = {
             status: 'success',
-            text: `You said: "${message}". Try "show buttons", "show select", "show input", "show rating", "show checkbox", "show textarea", "show slider", "show toggle", "show date", "show tags", "show file", "show color", "show confirmation", "show radio", "show progress", or "help" to see interactive widgets!`,
-            sender: 'bot'
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: `You said: "${message}". Try "show buttons", "show select", "show input", "show rating", "show checkbox", "show textarea", "show slider", "show toggle", "show date", "show tags", "show file", "show color", "show confirmation", "show radio", "show progress", or "help" to see interactive widgets!`,
+                  format: 'plain'
+                }
+              }
+            ]
           };
         } else {
           responseData = {
             status: 'success',
-            text: `Echo: ${message}`,
-            sender: 'bot'
+            widgets: [
+              {
+                type: 'text',
+                props: {
+                  content: `Echo: ${message}`,
+                  format: 'plain'
+                }
+              }
+            ]
           };
         }
       }

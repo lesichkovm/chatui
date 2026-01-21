@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat UI Demo - Enhanced Security & Composable Widgets</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .demo-card {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        .demo-card h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .demo-card p {
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .demo-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .demo-button:hover {
+            background: #2980b9;
+        }
+        .demo-button.security {
+            background: #27ae60;
+        }
+        .demo-button.security:hover {
+            background: #229954;
+        }
+        .demo-button.composable {
+            background: #8e44ad;
+        }
+        .demo-button.composable:hover {
+            background: #7b3f99;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status-safe {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-improved {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-new {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-list li::before {
+            content: "✅";
+            margin-right: 10px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .security-demo {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .security-demo h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .security-demo textarea {
+            width: 100%;
+            height: 80px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        .security-demo button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .security-demo button:hover {
+            background: #c0392b;
+        }
+        .security-demo .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .security-demo .safe {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .security-demo .unsafe {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .composable-demo {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .composable-demo h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .composable-demo .widget-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .composable-demo .widget-preview pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()">
+        🌙️ Toggle Theme
+    </div>
+
+    <div class="header">
+        <h1>🚀 ChatUI Enhanced Demo</h1>
+        <p>Experience the next-generation chat widget with enhanced security and composable widgets</p>
+        <div class="status-badge status-safe">✅ Production Ready</div>
+    </div>
+
+    <div class="demo-grid">
+        <!-- Basic Chat Widget Demo -->
+        <div class="demo-card">
+            <h3>💬 Basic Chat Widget</h3>
+            <p>Classic chat interface with real-time messaging and widget support.</p>
+            <a href="full_page.htm" class="demo-button">Open Full Page</a>
+            <a href="popup.html" class="demo-button">Open Popup</a>
+        </div>
+
+        <!-- Security Features Demo -->
+        <div class="demo-card">
+            <h3>🔒 Security Features</h3>
+            <p>Enhanced protection against XSS, injection attacks, and rate limiting.</p>
+            <div class="feature-list">
+                <li>XSS Protection & Input Sanitization</li>
+                <li>Secure JSONP Callbacks</li>
+                <li>Rate Limiting & Message Validation</li>
+                <li>Session Storage Migration</li>
+                <li>WebSocket Error Handling</li>
+            </div>
+            <a href="#security-demo" class="demo-button security">Test Security</a>
+            <span class="status-badge status-improved">✅ Improved</span>
+        </div>
+
+        <!-- Composable Widgets Demo -->
+        <div class="demo-card">
+            <h3>🧩 Composable Widgets</h3>
+            <p>Next-generation widget system with recursive composition and flexible layouts.</p>
+            <div class="feature-list">
+                <li>Recursive Widget Trees</li>
+                <li>Container & Card Widgets</li>
+                <li>Markdown Text Rendering</li>
+                <li>Flexible Layout System</li>
+                <li>Backward Compatible</li>
+            </div>
+            <a href="#composable-demo" class="demo-button composable">Try Composables</a>
+            <span class="status-badge status-new">🆕 New</span>
+        </div>
+
+        <!-- Widget Gallery -->
+        <div class="demo-card">
+            <h3>🎨 Widget Gallery</h3>
+            <p>Explore various widget types and configurations.</p>
+            <a href="widgets/index.html" class="demo-button">View Gallery</a>
+        </div>
+
+        <!-- API Documentation -->
+        <div class="demo-card">
+            <h3>📚 API Documentation</h3>
+            <p>Comprehensive documentation for developers and integrators.</p>
+            <a href="../docs/overview.md" class="demo-button">View Docs</a>
+        </div>
+    </div>
+
+    <!-- Security Testing Section -->
+    <div id="security-demo" class="demo-card">
+        <h3>🔒 Security Testing</h3>
+        <p>Test the enhanced security features implemented in ChatUI:</p>
+        
+        <div class="security-demo">
+            <h4>XSS Protection Test</h4>
+            <textarea id="xss-input" placeholder="Try entering: &lt;script&gt;alert('XSS')&lt;/script&gt;Hello World"></textarea>
+            <button onclick="testXSSProtection()">Test XSS Protection</button>
+            <div id="xss-result" class="result"></div>
+        </div>
+
+        <div class="security-demo">
+            <h4>Rate Limiting Test</h4>
+            <textarea id="rate-input" placeholder="Type rapidly to test rate limiting (1 second minimum)"></textarea>
+            <button onclick="testRateLimiting()">Send Rapid Messages</button>
+            <div id="rate-result" class="result"></div>
+        </div>
+
+        <div class="security-demo">
+            <h4>Input Validation Test</h4>
+            <textarea id="validation-input" placeholder="Try very long messages or special characters"></textarea>
+            <button onclick="testInputValidation()">Test Validation</button>
+            <div id="validation-result" class="result"></div>
+        </div>
+    </div>
+
+    <!-- Composable Widgets Section -->
+    <div id="composable-demo" class="demo-card">
+        <h3>🧩 Composable Widgets Demo</h3>
+        <p>Experience the new recursive widget system with live examples:</p>
+        
+        <div class="composable-demo">
+            <h4>Interactive Widget Builder</h4>
+            <div class="widget-preview">
+                <pre id="widget-preview">{
+  "type": "card",
+  "props": {
+    "variant": "elevated",
+    "padding": "large"
+  },
+  "children": [
+    {
+      "type": "text",
+      "props": {
+        "content": "## Welcome to Composable Widgets!",
+        "format": "markdown"
+      }
+    },
+    {
+      "type": "container",
+      "props": {
+        "layout": "horizontal",
+        "gap": "small"
+      },
+      "children": [
+        {
+          "type": "text",
+          "props": {
+            "content": "[Start Chat]",
+            "format": "plain"
+          }
+        },
+        {
+          "type": "text",
+          "props": {
+            "content": "[Learn More]",
+            "format": "plain"
+          }
+        }
+      ]
+    }
+  ]
+}</pre>
+            </div>
+            <button onclick="renderComposableWidget()">Render Widget</button>
+            <div id="composable-result"></div>
+        </div>
+
+        <div class="composable-demo">
+            <h4>Predefined Examples</h4>
+            <button onclick="renderExample('order-confirmation')" class="demo-button composable">Order Confirmation</button>
+            <button onclick="renderExample('product-card')" class="demo-button composable">Product Card</button>
+            <button onclick="renderExample('welcome-message')" class="demo-button composable">Welcome Message</button>
+            <div id="examples-result"></div>
+        </div>
+    </div>
+
+    <!-- Widget Container for Composables -->
+    <div id="widget-container" style="display: none; margin: 20px 0;"></div>
+
+    <script>
+        // Mock widget system for demo
+        const mockWidgetSystem = {
+            createWidget: function(widgetConfig, widgetId) {
+                if (!widgetConfig || !widgetConfig.type) return null;
+                
+                const element = document.createElement('div');
+                element.className = 'widget-demo-container';
+                
+                if (widgetConfig.type === 'text') {
+                    const textElement = document.createElement('div');
+                    textElement.className = 'widget-text';
+                    
+                    const content = widgetConfig.props?.content || '';
+                    const format = widgetConfig.props?.format || 'plain';
+                    
+                    textElement.classList.add(`format-${format}`);
+                    
+                    if (format === 'markdown') {
+                        textElement.innerHTML = content
+                            .replace(/## (.*)/g, '<h2>$1</h2>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                            .replace(/`(.*?)`/g, '<code>$1</code>')
+                            .replace(/\n/g, '<br>');
+                    } else {
+                        textElement.textContent = content;
+                    }
+                    
+                    element.appendChild(textElement);
+                } else if (widgetConfig.type === 'container') {
+                    const containerElement = document.createElement('div');
+                    containerElement.className = 'widget-container';
+                    
+                    const layout = widgetConfig.props?.layout || 'vertical';
+                    const gap = widgetConfig.props?.gap || 'medium';
+                    
+                    containerElement.classList.add(`layout-${layout}`);
+                    containerElement.classList.add(`gap-${gap}`);
+                    
+                    if (widgetConfig.children) {
+                        widgetConfig.children.forEach(child => {
+                            const childElement = this.createWidget(child, widgetId);
+                            if (childElement) {
+                                containerElement.appendChild(childElement);
+                            }
+                        });
+                    }
+                    
+                    element.appendChild(containerElement);
+                } else if (widgetConfig.type === 'card') {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'widget-card';
+                    
+                    const variant = widgetConfig.props?.variant || 'default';
+                    const padding = widgetConfig.props?.padding || 'medium';
+                    
+                    cardElement.classList.add(`variant-${variant}`);
+                    cardElement.classList.add(`padding-${padding}`);
+                    
+                    if (widgetConfig.children) {
+                        widgetConfig.children.forEach(child => {
+                            const childElement = this.createWidget(child, widgetId);
+                            if (childElement) {
+                                cardElement.appendChild(childElement);
+                            }
+                        });
+                    }
+                    
+                    element.appendChild(cardElement);
+                }
+                
+                return element;
+            },
+            
+            renderMessage: function(message, container) {
+                if (typeof message === 'object' && message.widgets) {
+                    message.widgets.forEach(widgetConfig => {
+                        const widgetElement = this.createWidget(widgetConfig, 'demo');
+                        if (widgetElement) {
+                            container.appendChild(widgetElement);
+                        }
+                    });
+                } else {
+                    const textElement = document.createElement('div');
+                    textElement.textContent = message;
+                    textElement.className = 'demo-message';
+                    textElement.style.background = 'rgba(255,255,255,0.1)';
+                    textElement.style.padding = '10px';
+                    textElement.style.borderRadius = '4px';
+                    textElement.style.margin = '5px 0';
+                    container.appendChild(textElement);
+                }
+            }
+        };
+
+        // Security testing functions
+        function testXSSProtection() {
+            const input = document.getElementById('xss-input').value;
+            const resultDiv = document.getElementById('xss-result');
+            
+            try {
+                // Simulate XSS protection
+                const sanitized = input
+                    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                    .replace(/javascript:/gi, '')
+                    .replace(/on\w+\s*=/gi, '')
+                    .trim();
+                
+                const safeHTML = sanitized.replace(/\n/g, '<br>');
+                
+                const hasScript = safeHTML.includes('&lt;script&gt;') && !safeHTML.includes('<script>');
+                const hasJS = safeHTML.includes('javascript:');
+                const hasEvent = safeHTML.includes('onerror=');
+                
+                if (hasScript && !hasJS && !hasEvent) {
+                    resultDiv.className = 'result safe';
+                    resultDiv.innerHTML = '✅ XSS Protection Active<br><br>Input sanitized successfully';
+                } else {
+                    resultDiv.className = 'result unsafe';
+                    resultDiv.innerHTML = '❌ Security Risk Detected<br><br>Please check input';
+                }
+            } catch (error) {
+                resultDiv.className = 'result safe';
+                resultDiv.innerHTML = '✅ Input Blocked<br><br>Error: ' + error.message;
+            }
+        }
+
+        let messageCount = 0;
+        let lastMessageTime = 0;
+        
+        function testRateLimiting() {
+            const input = document.getElementById('rate-input').value;
+            const resultDiv = document.getElementById('rate-result');
+            
+            const now = Date.now();
+            const minInterval = 1000; // 1 second
+            
+            if (now - lastMessageTime < minInterval) {
+                resultDiv.className = 'result safe';
+                resultDiv.innerHTML = '✅ Rate Limiting Active<br><br>Please wait before sending another message.';
+                return;
+            }
+            
+            lastMessageTime = now;
+            messageCount++;
+            
+            resultDiv.className = 'result safe';
+            resultDiv.innerHTML = `✅ Message #${messageCount} sent successfully<br><br>Rate limiting allows next message in ${minInterval/1000} seconds.`;
+            
+            // Simulate message sending
+            console.log('Message sent:', input);
+        }
+
+        function testInputValidation() {
+            const input = document.getElementById('validation-input').value;
+            const resultDiv = document.getElementById('validation-result');
+            
+            const maxLength = 10000;
+            
+            if (input.length > maxLength) {
+                resultDiv.className = 'result safe';
+                resultDiv.innerHTML = `✅ Input Validation Active<br><br>Message blocked: Too long (max ${maxLength} characters)`;
+                return;
+            }
+            
+            // Test for dangerous patterns
+            const dangerousPatterns = [
+                /<script/i,
+                /javascript:/i,
+                /on\w+\s*=/i,
+                /data:text\/html/i,
+                /vbscript:/i
+            ];
+            
+            const hasDangerousPattern = dangerousPatterns.some(pattern => pattern.test(input));
+            
+            if (hasDangerousPattern) {
+                resultDiv.className = 'result safe';
+                resultDiv.innerHTML = `✅ Input Validation Active<br><br>Dangerous content detected and removed`;
+            } else {
+                resultDiv.className = 'result safe';
+                resultDiv.innerHTML = `✅ Message Validated<br><br>Length: ${input.length} characters`;
+            }
+        }
+
+        // Composable widget functions
+        function renderComposableWidget() {
+            const preview = document.getElementById('widget-preview').textContent;
+            const resultDiv = document.getElementById('composable-result');
+            const container = document.getElementById('widget-container');
+            
+            try {
+                const widgetConfig = JSON.parse(preview);
+                container.innerHTML = '';
+                mockWidgetSystem.renderMessage(widgetConfig, container);
+                container.style.display = 'block';
+                resultDiv.className = 'result safe';
+                resultDiv.innerHTML = '✅ Widget Rendered Successfully<br><br>Check the widget above!';
+            } catch (error) {
+                resultDiv.className = 'result unsafe';
+                resultDiv.innerHTML = '❌ Widget Error<br><br>' + error.message;
+            }
+        }
+
+        const examples = {
+            'order-confirmation': {
+                type: 'card',
+                props: {
+                    variant: 'elevated',
+                    padding: 'large'
+                },
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## Order Confirmation',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'text',
+                        props: {
+                            content: 'Your order has been received and is being processed.',
+                            format: 'plain'
+                        }
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'horizontal',
+                            gap: 'medium'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '[Confirm Order]',
+                                    format: 'plain'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '[Cancel Order]',
+                                    format: 'plain'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'product-card': {
+                type: 'card',
+                props: {
+                    variant: 'outlined',
+                    padding: 'medium'
+                },
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## Premium Widget Pro',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'text',
+                        props: {
+                            content: 'Advanced features with enhanced security and performance.',
+                            format: 'plain'
+                        }
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'vertical',
+                            gap: 'small'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '✨ Enterprise Ready',
+                                    format: 'plain'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '🔒 Security Hardened',
+                                    format: 'plain'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '📱 Composable Widgets',
+                                    format: 'plain'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            'welcome-message': {
+                type: 'container',
+                props: {
+                    layout: 'vertical',
+                    gap: 'medium'
+                },
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## Welcome to ChatUI!',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'text',
+                        props: {
+                            content: 'Experience our enhanced security and composable widget system.',
+                            format: 'plain'
+                        }
+                    },
+                    {
+                        type: 'card',
+                        props: {
+                            variant: 'elevated',
+                            padding: 'medium'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '🚀 Production Ready',
+                                    format: 'plain'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '🔒 Security Hardened',
+                                    format: 'plain'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        function renderExample(exampleName) {
+            const resultDiv = document.getElementById('examples-result');
+            const container = document.getElementById('widget-container');
+            
+            const widgetConfig = examples[exampleName];
+            if (!widgetConfig) {
+                resultDiv.className = 'result unsafe';
+                resultDiv.innerHTML = '❌ Example not found';
+                return;
+            }
+            
+            container.innerHTML = '';
+            mockWidgetSystem.renderMessage(widgetConfig, container);
+            container.style.display = 'block';
+            
+            resultDiv.className = 'result safe';
+            resultDiv.innerHTML = `✅ ${exampleName} rendered successfully!`;
+        }
+
+        // Theme toggle
+        let isDarkTheme = false;
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.style.background = isDarkTheme 
+                ? 'linear-gradient(135deg, #1a1a1a 0%, #2d3748 100%)' 
+                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }
+
+        // Initialize with a welcome message
+        window.addEventListener('load', () => {
+            const container = document.getElementById('widget-container');
+            mockWidgetSystem.renderMessage({
+                widgets: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## 🎉 Security & Composable Widgets Demo',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'card',
+                        props: {
+                            variant: 'elevated',
+                            padding: 'large'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '✅ **Security Enhanced** - XSS protection, input validation, rate limiting',
+                                    format: 'markdown'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '🧩 **Composable System** - Recursive widgets, flexible layouts, markdown support',
+                                    format: 'markdown'
+                                }
+                            },
+                            {
+                                type: 'container',
+                                props: {
+                                    layout: 'horizontal',
+                                    gap: 'small'
+                                },
+                                children: [
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: 'Try the interactive demos above!',
+                                            format: 'plain'
+                                        }
+                                    },
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: 'or build your own widgets!',
+                                            format: 'plain'
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }, container);
+            container.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

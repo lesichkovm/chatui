@@ -50,6 +50,11 @@ export class ChatWidget {
     this.widgetId =
       config.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
 
+    // Rate limiting configuration
+    this.lastMessageTime = 0;
+    this.minMessageInterval = 1000; // 1 second between messages
+    this.maxMessageLength = 10000; // Maximum message length
+
     // Capture explicit color from config (programmatic)
     const explicitColor = config.primaryColor || config.color;
 
@@ -329,7 +334,22 @@ export class ChatWidget {
    */
   sendMessage(text) {
     const message = text || this.textarea.value.trim();
+    
+    // Apply rate limiting
+    const now = Date.now();
+    if (now - this.lastMessageTime < this.minMessageInterval) {
+      console.warn('ChatWidget: Message rate limit exceeded. Please wait before sending another message.');
+      return;
+    }
+    
+    // Apply message length validation
+    if (message.length > this.maxMessageLength) {
+      console.warn(`ChatWidget: Message too long. Maximum length is ${this.maxMessageLength} characters.`);
+      return;
+    }
+    
     if (message) {
+      this.lastMessageTime = now;
       this.addMessage(message, "user");
       
       // Add waiting placeholder message
@@ -482,5 +502,64 @@ export class ChatWidget {
       mode: this.config.themeMode,
       colors: this.config.themeColors,
     };
+  }
+
+  /**
+   * Destroy the widget instance and clean up resources
+   * Prevents memory leaks by removing event listeners and cleaning up references
+   */
+  destroy() {
+    // Remove event listeners
+    if (this.chatButton) {
+      this.chatButton.removeEventListener("click", this.handlers.toggle);
+    }
+    
+    if (this.closeButton) {
+      this.closeButton.removeEventListener("click", this.handlers.close);
+    }
+    
+    if (this.textarea) {
+      this.textarea.removeEventListener("keypress", this.handlers.keypress);
+    }
+    
+    if (this.sendButton) {
+      this.sendButton.removeEventListener("click", this.handlers.send);
+    }
+
+    // Clean up ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+
+    // Clean up WebSocket connection
+    if (this.api && this.api.disconnect) {
+      this.api.disconnect();
+    }
+
+    // Clear message queue
+    if (this.api && this.api.messageQueue) {
+      this.api.messageQueue.length = 0;
+    }
+
+    // Remove DOM elements
+    if (this.chatWindow && this.chatWindow.parentNode) {
+      this.chatWindow.parentNode.removeChild(this.chatWindow);
+    }
+    
+    if (this.chatButton && this.chatButton.parentNode) {
+      this.chatButton.parentNode.removeChild(this.chatButton);
+    }
+
+    // Clear references
+    this.chatWindow = null;
+    this.chatButton = null;
+    this.closeButton = null;
+    this.textarea = null;
+    this.sendButton = null;
+    this.messagesContainer = null;
+    this.api = null;
+    this.config = null;
+    this.handlers = null;
   }
 }

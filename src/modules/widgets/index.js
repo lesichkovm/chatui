@@ -20,6 +20,12 @@ export { ColorPickerWidget } from './color-picker-widget.js';
 export { ConfirmationWidget } from './confirmation-widget.js';
 export { RadioWidget } from './radio-widget.js';
 export { ProgressWidget } from './progress-widget.js';
+
+// New composable widgets
+export { ContainerWidget } from './container-widget.js';
+export { CardWidget } from './card-widget.js';
+export { TextWidget } from './text-widget.js';
+
 export { WidgetFactory } from './widget-factory.js';
 
 /**

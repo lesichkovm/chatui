@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatUI Composable Widgets Demo - Next-Generation Widget System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .widget-card {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .widget-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        .widget-card h3 {
+            color: #8e44ad;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .widget-card p {
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .demo-section {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        .demo-section h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .widget-preview {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .widget-preview pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+        }
+        .demo-button {
+            background: #8e44ad;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        .demo-button:hover {
+            background: #7b3f99;
+            transform: translateY(-2px);
+        }
+        .demo-button.secondary {
+            background: #3498db;
+        }
+        .demo-button.secondary:hover {
+            background: #2980b9;
+        }
+        .widget-container {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 200px;
+        }
+        .widget-text {
+            margin: 10px 0;
+        }
+        .widget-text h2 {
+            color: #2c3e50;
+            margin: 15px 0 10px 0;
+        }
+        .widget-text strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .widget-text em {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .widget-text code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #e74c3c;
+        }
+        .widget-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .widget-container.layout-horizontal {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        .widget-container.layout-horizontal .widget-text {
+            margin: 0 10px;
+        }
+        .widget-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .widget-card.variant-elevated {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .widget-card.variant-outlined {
+            background: transparent;
+            border: 2px solid #8e44ad;
+        }
+        .widget-card.padding-small {
+            padding: 10px;
+        }
+        .widget-card.padding-medium {
+            padding: 20px;
+        }
+        .widget-card.padding-large {
+            padding: 30px;
+        }
+        .gap-small {
+            gap: 10px;
+        }
+        .gap-medium {
+            gap: 15px;
+        }
+        .gap-large {
+            gap: 20px;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-list li::before {
+            content: "🧩";
+            margin-right: 10px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status-new {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .status-enhanced {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .metric {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .metric h4 {
+            margin: 0 0 10px 0;
+            color: #8e44ad;
+            font-size: 2em;
+        }
+        .metric p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .result-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        .result-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .result-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧩 Composable Widgets Demo</h1>
+        <p>Experience the next-generation widget system with recursive composition and flexible layouts</p>
+        <div class="status-badge status-new">🆕 Revolutionary</div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric">
+            <h4>∞</h4>
+            <p>Recursive Nesting</p>
+        </div>
+        <div class="metric">
+            <h4>4</h4>
+            <p>Widget Types</p>
+        </div>
+        <div class="metric">
+            <h4>100%</h4>
+            <p>Backward Compatible</p>
+        </div>
+        <div class="metric">
+            <h4>📝</h4>
+            <p>Markdown Support</p>
+        </div>
+    </div>
+
+    <div class="widget-grid">
+        <div class="widget-card">
+            <h3>📝 Text Widgets</h3>
+            <p>Enhanced text rendering with markdown support and flexible formatting options.</p>
+            <div class="feature-list">
+                <li>Plain text rendering</li>
+                <li>Markdown support</li>
+                <li>HTML escaping</li>
+                <li>Line break handling</li>
+            </div>
+            <span class="status-badge status-enhanced">✅ Enhanced</span>
+        </div>
+
+        <div class="widget-card">
+            <h3>📦 Container Widgets</h3>
+            <p>Flexible layout containers for organizing widgets with various layout options.</p>
+            <div class="feature-list">
+                <li>Vertical layouts</li>
+                <li>Horizontal layouts</li>
+                <li>Configurable gaps</li>
+                <li>Recursive nesting</li>
+            </div>
+            <span class="status-badge status-new">🆕 New</span>
+        </div>
+
+        <div class="widget-card">
+            <h3>🃏 Card Widgets</h3>
+            <p>Styled content cards with variants and padding options for structured content.</p>
+            <div class="feature-list">
+                <li>Multiple variants</li>
+                <li>Flexible padding</li>
+                <li>Child widgets</li>
+                <li>Visual hierarchy</li>
+            </div>
+            <span class="status-badge status-new">🆕 New</span>
+        </div>
+
+        <div class="widget-card">
+            <h3>🔄 Legacy Support</h3>
+            <p>Full backward compatibility with existing widget implementations.</p>
+            <div class="feature-list">
+                <li>Legacy buttons</li>
+                <li>Legacy inputs</li>
+                <li>Migration path</li>
+                <li>Seamless upgrade</li>
+            </div>
+            <span class="status-badge status-enhanced">✅ Compatible</span>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h3>🎨 Interactive Widget Builder</h3>
+        <p>Build and preview composable widgets in real-time:</p>
+        
+        <div class="widget-preview">
+            <pre id="widget-code">{
+  "type": "card",
+  "props": {
+    "variant": "elevated",
+    "padding": "large"
+  },
+  "children": [
+    {
+      "type": "text",
+      "props": {
+        "content": "## Welcome to Composable Widgets!",
+        "format": "markdown"
+      }
+    },
+    {
+      "type": "container",
+      "props": {
+        "layout": "horizontal",
+        "gap": "medium"
+      },
+      "children": [
+        {
+          "type": "text",
+          "props": {
+            "content": "[Start Chat]",
+            "format": "plain"
+          }
+        },
+        {
+          "type": "text",
+          "props": {
+            "content": "[Learn More]",
+            "format": "plain"
+          }
+        }
+      ]
+    }
+  ]
+}</pre>
+        </div>
+        
+        <button class="demo-button" onclick="renderWidget()">Render Widget</button>
+        <button class="demo-button secondary" onclick="clearWidget()">Clear</button>
+        
+        <div id="widget-result" class="result-message"></div>
+        <div id="widget-output" class="widget-container"></div>
+    </div>
+
+    <div class="demo-section">
+        <h3>🎯 Predefined Examples</h3>
+        <p>Explore ready-to-use widget configurations:</p>
+        
+        <button class="demo-button" onclick="loadExample('welcome')">Welcome Message</button>
+        <button class="demo-button" onclick="loadExample('product')">Product Card</button>
+        <button class="demo-button" onclick="loadExample('order')">Order Confirmation</button>
+        <button class="demo-button" onclick="loadExample('survey')">Survey Form</button>
+        <button class="demo-button" onclick="loadExample('complex')">Complex Layout</button>
+        
+        <div id="example-result" class="result-message"></div>
+    </div>
+
+    <div class="demo-section">
+        <h3>🔧 Widget System Architecture</h3>
+        
+        <h4>🧩 Recursive Composition</h4>
+        <p>Widgets can contain other widgets, creating unlimited nesting possibilities:</p>
+        <div class="widget-preview">
+            <pre>Container
+├── Text (Header)
+├── Card
+│   ├── Text (Content)
+│   └── Container (Actions)
+│       ├── Text (Button 1)
+│       └── Text (Button 2)
+└── Text (Footer)</pre>
+        </div>
+
+        <h4>📝 Markdown Rendering</h4>
+        <p>Enhanced text widgets support rich markdown formatting:</p>
+        <div class="widget-preview">
+            <pre>## Header
+**Bold text** and *italic text*
+`Inline code`
+
+Regular text with line breaks</pre>
+        </div>
+
+        <h4>🎨 Layout System</h4>
+        <p>Flexible layout options for organizing content:</p>
+        <div class="widget-preview">
+            <pre>Container Layouts:
+- Vertical (default)
+- Horizontal
+- Gap: small | medium | large
+
+Card Variants:
+- Default
+- Elevated (shadow)
+- Outlined (border)
+
+Card Padding:
+- Small (10px)
+- Medium (20px)
+- Large (30px)</pre>
+        </div>
+    </div>
+
+    <script>
+        // Mock widget system for demo
+        const widgetSystem = {
+            createWidget: function(widgetConfig, widgetId) {
+                if (!widgetConfig || !widgetConfig.type) return null;
+                
+                const element = document.createElement('div');
+                element.className = 'widget-demo-container';
+                
+                if (widgetConfig.type === 'text') {
+                    const textElement = document.createElement('div');
+                    textElement.className = 'widget-text';
+                    
+                    const content = widgetConfig.props?.content || '';
+                    const format = widgetConfig.props?.format || 'plain';
+                    
+                    textElement.classList.add(`format-${format}`);
+                    
+                    if (format === 'markdown') {
+                        textElement.innerHTML = content
+                            .replace(/## (.*)/g, '<h2>$1</h2>')
+                            .replace(/### (.*)/g, '<h3>$1</h3>')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                            .replace(/`(.*?)`/g, '<code>$1</code>')
+                            .replace(/\n/g, '<br>');
+                    } else {
+                        textElement.textContent = content;
+                    }
+                    
+                    element.appendChild(textElement);
+                } else if (widgetConfig.type === 'container') {
+                    const containerElement = document.createElement('div');
+                    containerElement.className = 'widget-container';
+                    
+                    const layout = widgetConfig.props?.layout || 'vertical';
+                    const gap = widgetConfig.props?.gap || 'medium';
+                    
+                    containerElement.classList.add(`layout-${layout}`);
+                    containerElement.classList.add(`gap-${gap}`);
+                    
+                    if (widgetConfig.children) {
+                        widgetConfig.children.forEach(child => {
+                            const childElement = this.createWidget(child, widgetId);
+                            if (childElement) {
+                                containerElement.appendChild(childElement);
+                            }
+                        });
+                    }
+                    
+                    element.appendChild(containerElement);
+                } else if (widgetConfig.type === 'card') {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'widget-card';
+                    
+                    const variant = widgetConfig.props?.variant || 'default';
+                    const padding = widgetConfig.props?.padding || 'medium';
+                    
+                    cardElement.classList.add(`variant-${variant}`);
+                    cardElement.classList.add(`padding-${padding}`);
+                    
+                    if (widgetConfig.children) {
+                        widgetConfig.children.forEach(child => {
+                            const childElement = this.createWidget(child, widgetId);
+                            if (childElement) {
+                                cardElement.appendChild(childElement);
+                            }
+                        });
+                    }
+                    
+                    element.appendChild(cardElement);
+                }
+                
+                return element;
+            },
+            
+            renderMessage: function(message, container) {
+                if (typeof message === 'object' && message.widgets) {
+                    message.widgets.forEach(widgetConfig => {
+                        const widgetElement = this.createWidget(widgetConfig, 'demo');
+                        if (widgetElement) {
+                            container.appendChild(widgetElement);
+                        }
+                    });
+                } else {
+                    const textElement = document.createElement('div');
+                    textElement.textContent = message;
+                    textElement.className = 'demo-message';
+                    textElement.style.background = 'rgba(255,255,255,0.1)';
+                    textElement.style.padding = '10px';
+                    textElement.style.borderRadius = '4px';
+                    textElement.style.margin = '5px 0';
+                    container.appendChild(textElement);
+                }
+            }
+        };
+
+        const examples = {
+            welcome: {
+                type: 'container',
+                props: {
+                    layout: 'vertical',
+                    gap: 'large'
+                },
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## 🎉 Welcome to Composable Widgets!',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'card',
+                        props: {
+                            variant: 'elevated',
+                            padding: 'large'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: 'Experience the future of chat widgets with **recursive composition**, **markdown support**, and **flexible layouts**.',
+                                    format: 'markdown'
+                                }
+                            },
+                            {
+                                type: 'container',
+                                props: {
+                                    layout: 'horizontal',
+                                    gap: 'medium'
+                                },
+                                children: [
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '[Get Started]',
+                                            format: 'plain'
+                                        }
+                                    },
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '[View Docs]',
+                                            format: 'plain'
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            product: {
+                type: 'card',
+                props: {
+                    variant: 'elevated',
+                    padding: 'large'
+                },
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## 🚀 Premium Widget Pro',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'text',
+                        props: {
+                            content: 'Advanced features with enhanced security and performance for enterprise applications.',
+                            format: 'plain'
+                        }
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'vertical',
+                            gap: 'small'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '✨ **Enterprise Ready** - Scalable and reliable',
+                                    format: 'markdown'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '🔒 **Security Hardened** - XSS protection and input validation',
+                                    format: 'markdown'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '📱 **Composable System** - Recursive widgets and flexible layouts',
+                                    format: 'markdown'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'horizontal',
+                            gap: 'medium'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '[Start Free Trial]',
+                                    format: 'plain'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '[View Pricing]',
+                                    format: 'plain'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            order: {
+                type: 'card',
+                props: {
+                    variant: 'elevated',
+                    padding: 'large'
+                },
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## ✅ Order Confirmation',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'text',
+                        props: {
+                            content: 'Thank you for your order! Your purchase has been received and is being processed.',
+                            format: 'plain'
+                        }
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'vertical',
+                            gap: 'small'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '**Order ID:** #ORD-2024-1234',
+                                    format: 'markdown'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '**Estimated Delivery:** 3-5 business days',
+                                    format: 'markdown'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '**Tracking:** Available once shipped',
+                                    format: 'markdown'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'horizontal',
+                            gap: 'medium'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '[Track Order]',
+                                    format: 'plain'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '[Contact Support]',
+                                    format: 'plain'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            survey: {
+                type: 'card',
+                props: {
+                    variant: 'outlined',
+                    padding: 'medium'
+                },
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## 📋 Quick Survey',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'text',
+                        props: {
+                            content: 'Help us improve your experience by answering a few questions:',
+                            format: 'plain'
+                        }
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'vertical',
+                            gap: 'small'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: 'How satisfied are you with our service?',
+                                    format: 'plain'
+                                }
+                            },
+                            {
+                                type: 'container',
+                                props: {
+                                    layout: 'horizontal',
+                                    gap: 'small'
+                                },
+                                children: [
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '[😊 Very Satisfied]',
+                                            format: 'plain'
+                                        }
+                                    },
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '[😐 Neutral]',
+                                            format: 'plain'
+                                        }
+                                    },
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '[😞 Unsatisfied]',
+                                            format: 'plain'
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'horizontal',
+                            gap: 'medium'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '[Submit Survey]',
+                                    format: 'plain'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '[Skip]',
+                                    format: 'plain'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            complex: {
+                type: 'container',
+                props: {
+                    layout: 'vertical',
+                    gap: 'large'
+                },
+                children: [
+                    {
+                        type: 'card',
+                        props: {
+                            variant: 'elevated',
+                            padding: 'large'
+                        },
+                        children: [
+                            {
+                                type: 'text',
+                                props: {
+                                    content: '## 🎯 Complex Layout Example',
+                                    format: 'markdown'
+                                }
+                            },
+                            {
+                                type: 'text',
+                                props: {
+                                    content: 'This demonstrates the power of recursive widget composition with multiple nested levels.',
+                                    format: 'plain'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'horizontal',
+                            gap: 'medium'
+                        },
+                        children: [
+                            {
+                                type: 'card',
+                                props: {
+                                    variant: 'outlined',
+                                    padding: 'medium'
+                                },
+                                children: [
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '### 📊 Analytics',
+                                            format: 'markdown'
+                                        }
+                                    },
+                                    {
+                                        type: 'container',
+                                        props: {
+                                            layout: 'vertical',
+                                            gap: 'small'
+                                        },
+                                        children: [
+                                            {
+                                                type: 'text',
+                                                props: {
+                                                    content: '• **1,234** Active users',
+                                                    format: 'markdown'
+                                                }
+                                            },
+                                            {
+                                                type: 'text',
+                                                props: {
+                                                    content: '• **56** New messages',
+                                                    format: 'markdown'
+                                                }
+                                            },
+                                            {
+                                                type: 'text',
+                                                props: {
+                                                    content: '• **98.5%** Uptime',
+                                                    format: 'markdown'
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                type: 'card',
+                                props: {
+                                    variant: 'outlined',
+                                    padding: 'medium'
+                                },
+                                children: [
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '### 🔧 Settings',
+                                            format: 'markdown'
+                                        }
+                                    },
+                                    {
+                                        type: 'container',
+                                        props: {
+                                            layout: 'vertical',
+                                            gap: 'small'
+                                        },
+                                        children: [
+                                            {
+                                                type: 'text',
+                                                props: {
+                                                    content: '[Enable notifications]',
+                                                    format: 'plain'
+                                                }
+                                            },
+                                            {
+                                                type: 'text',
+                                                props: {
+                                                    content: '[Configure theme]',
+                                                    format: 'plain'
+                                                }
+                                            },
+                                            {
+                                                type: 'text',
+                                                props: {
+                                                    content: '[Manage permissions]',
+                                                    format: 'plain'
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        type: 'card',
+                        props: {
+                            variant: 'default',
+                            padding: 'small'
+                        },
+                        children: [
+                            {
+                                type: 'container',
+                                props: {
+                                    layout: 'horizontal',
+                                    gap: 'medium'
+                                },
+                                children: [
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '[Save Changes]',
+                                            format: 'plain'
+                                        }
+                                    },
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '[Reset to Default]',
+                                            format: 'plain'
+                                        }
+                                    },
+                                    {
+                                        type: 'text',
+                                        props: {
+                                            content: '[Export Data]',
+                                            format: 'plain'
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        function renderWidget() {
+            const code = document.getElementById('widget-code').textContent;
+            const resultDiv = document.getElementById('widget-result');
+            const outputDiv = document.getElementById('widget-output');
+            
+            try {
+                const widgetConfig = JSON.parse(code);
+                outputDiv.innerHTML = '';
+                widgetSystem.renderMessage({ widgets: [widgetConfig] }, outputDiv);
+                
+                resultDiv.className = 'result-message success';
+                resultDiv.innerHTML = '✅ Widget rendered successfully! Check the preview above.';
+            } catch (error) {
+                resultDiv.className = 'result-message error';
+                resultDiv.innerHTML = '❌ Error rendering widget: ' + error.message;
+            }
+        }
+
+        function clearWidget() {
+            document.getElementById('widget-output').innerHTML = '';
+            document.getElementById('widget-result').innerHTML = '';
+        }
+
+        function loadExample(exampleName) {
+            const example = examples[exampleName];
+            const resultDiv = document.getElementById('example-result');
+            const outputDiv = document.getElementById('widget-output');
+            
+            if (!example) {
+                resultDiv.className = 'result-message error';
+                resultDiv.innerHTML = '❌ Example not found: ' + exampleName;
+                return;
+            }
+            
+            // Update the code preview
+            document.getElementById('widget-code').textContent = JSON.stringify(example, null, 2);
+            
+            // Render the example
+            outputDiv.innerHTML = '';
+            widgetSystem.renderMessage({ widgets: [example] }, outputDiv);
+            
+            resultDiv.className = 'result-message success';
+            resultDiv.innerHTML = '✅ Example "' + exampleName + '" loaded successfully!';
+        }
+
+        // Initialize with welcome example
+        window.addEventListener('load', () => {
+            loadExample('welcome');
+        });
+    </script>
+</body>
+</html>

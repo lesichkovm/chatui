@@ -5,7 +5,7 @@ declare global {
   interface Window {
     widgetSystem: {
       createWidget: (widgetData: any, widgetId: string) => HTMLElement | null;
-      addMessage: (text: string, sender: string, widgetData?: any) => void;
+      addMessage: (message: string | { widgets?: any[], text?: string }, sender: string, widgetData?: any) => void;
       simulateBotResponse: (userInput: string) => void;
       sendMessage: (message: string) => void;
     };
@@ -146,17 +146,31 @@ test.describe('Widget System Tests', () => {
           return widgetContainer;
         },
         
-        addMessage: function(text: string, sender: string, widgetData?: any) {
+        addMessage: function(message: string | { widgets?: any[], text?: string }, sender: string, widgetData?: any) {
           const messagesContainer = document.getElementById('messages');
           if (!messagesContainer) return;
           const messageElement = document.createElement('div');
           messageElement.className = sender + '-message';
-          messageElement.innerHTML = text.replace(/\n/g, '<br>');
           
-          if (widgetData && sender === 'bot') {
-            const widgetElement = this.createWidget(widgetData, 'test-widget');
-            if (widgetElement) {
-              messageElement.appendChild(widgetElement);
+          // Handle new composable message format
+          if (typeof message === 'object' && message.widgets) {
+            // New composable widget format
+            message.widgets.forEach((widgetConfig: any) => {
+              const widgetElement = this.createWidget(widgetConfig, 'test-widget');
+              if (widgetElement) {
+                messageElement.appendChild(widgetElement);
+              }
+            });
+          } else {
+            // Legacy format or plain text
+            const messageText = typeof message === 'string' ? message : (message.text || '');
+            messageElement.innerHTML = messageText.replace(/\n/g, '<br>');
+            
+            if (widgetData && sender === 'bot') {
+              const widgetElement = this.createWidget(widgetData, 'test-widget');
+              if (widgetElement) {
+                messageElement.appendChild(widgetElement);
+              }
             }
           }
           

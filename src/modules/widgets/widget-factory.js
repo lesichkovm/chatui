@@ -14,6 +14,12 @@ import { ColorPickerWidget } from './color-picker-widget.js';
 import { ConfirmationWidget } from './confirmation-widget.js';
 import { RadioWidget } from './radio-widget.js';
 import { ProgressWidget } from './progress-widget.js';
+
+// New composable widgets
+import { ContainerWidget } from './container-widget.js';
+import { CardWidget } from './card-widget.js';
+import { TextWidget } from './text-widget.js';
+
 import { WIDGET_TYPES, SERVER_TYPE_MAPPINGS, LEGACY_WIDGET_TYPES } from './widget-types.js';
 
 /**
@@ -28,6 +34,7 @@ export class WidgetFactory {
    * @type {Map<string, BaseWidget>}
    */
   static widgetTypes = new Map([
+    // Legacy widget types
     [WIDGET_TYPES.BUTTONS, ButtonsWidget],
     [WIDGET_TYPES.SELECT, SelectWidget],
     [WIDGET_TYPES.INPUT, InputWidget],
@@ -43,7 +50,17 @@ export class WidgetFactory {
     [LEGACY_WIDGET_TYPES.COLOR, ColorPickerWidget],
     [WIDGET_TYPES.CONFIRMATION, ConfirmationWidget],
     [WIDGET_TYPES.RADIO, RadioWidget],
-    [WIDGET_TYPES.PROGRESS, ProgressWidget]
+    [WIDGET_TYPES.PROGRESS, ProgressWidget],
+    
+    // New composable widget types
+    [WIDGET_TYPES.TEXT, TextWidget],
+    [WIDGET_TYPES.CONTAINER, ContainerWidget],
+    [WIDGET_TYPES.CARD, CardWidget],
+    [WIDGET_TYPES.IMAGE, ContainerWidget], // Placeholder for future image widget
+    [WIDGET_TYPES.ICON, ContainerWidget],   // Placeholder for future icon widget
+    [WIDGET_TYPES.BUTTON, ContainerWidget], // Placeholder for future button widget
+    [WIDGET_TYPES.ROW, ContainerWidget],
+    [WIDGET_TYPES.COLUMN, ContainerWidget]
   ]);
 
   /**
@@ -57,34 +74,52 @@ export class WidgetFactory {
   }
 
   /**
-   * Create a widget instance based on data type
+   * Create a widget instance based on data type with recursive support
    * @static
-   * @param {Object} widgetData - Widget configuration data
-   * @param {string} widgetData.type - Widget type identifier
+   * @param {Object} widgetConfig - Widget configuration data
+   * @param {string} widgetConfig.type - Widget type identifier
+   * @param {Array} [widgetConfig.children] - Nested child widgets
    * @param {string} widgetId - Widget container ID for scoping
-   * @returns {BaseWidget|null} Widget instance or null if type not supported
+   * @returns {HTMLElement|null} Widget DOM element or null if type not supported
    */
-  static createWidget(widgetData, widgetId) {
-    if (!widgetData || !widgetData.type) {
-      console.warn('Invalid widget data:', widgetData);
+  static createWidget(widgetConfig, widgetId) {
+    if (!widgetConfig || !widgetConfig.type) {
+      console.warn('Invalid widget config:', widgetConfig);
       return null;
     }
 
     // Handle server-to-widget type mapping
-    const widgetType = SERVER_TYPE_MAPPINGS[widgetData.type] || widgetData.type;
+    const widgetType = SERVER_TYPE_MAPPINGS[widgetConfig.type] || widgetConfig.type;
     const WidgetClass = this.widgetTypes.get(widgetType);
     
     if (!WidgetClass) {
-      console.warn(`Unsupported widget type: ${widgetData.type} (mapped to: ${widgetType})`);
+      console.warn(`Unsupported widget type: ${widgetConfig.type} (mapped to: ${widgetType})`);
       return null;
     }
 
     try {
       // Create widget with mapped type for internal consistency
-      const mappedWidgetData = { ...widgetData, type: widgetType };
-      return new WidgetClass(mappedWidgetData, widgetId);
+      const mappedWidgetConfig = { ...widgetConfig, type: widgetType };
+      const widgetInstance = new WidgetClass(mappedWidgetConfig, widgetId);
+      const element = widgetInstance.createElement();
+
+      // Recursively process children if present
+      if (widgetConfig.children && Array.isArray(widgetConfig.children)) {
+        const childrenContainer = widgetInstance.getChildrenContainer ? 
+                                  widgetInstance.getChildrenContainer(element) : 
+                                  element;
+        
+        widgetConfig.children.forEach(childConfig => {
+          const childElement = this.createWidget(childConfig, widgetId);
+          if (childElement) {
+            childrenContainer.appendChild(childElement);
+          }
+        });
+      }
+
+      return element;
     } catch (error) {
-      console.error(`Error creating widget of type ${widgetData.type}:`, error);
+      console.error(`Error creating widget of type ${widgetConfig.type}:`, error);
       return null;
     }
   }

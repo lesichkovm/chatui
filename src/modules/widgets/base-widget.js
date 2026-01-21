@@ -22,6 +22,16 @@ export class BaseWidget {
   }
 
   /**
+   * Get the container element for nested children widgets
+   * Override this method in container widgets to specify where children should be placed
+   * @param {HTMLElement} element - The widget's main element
+   * @returns {HTMLElement} Container element for children (defaults to main element)
+   */
+  getChildrenContainer(element) {
+    return element;
+  }
+
+  /**
    * Handle widget interaction and dispatch custom event
    * @param {Object} interaction - Interaction data
    * @param {string} interaction.type - Type of interaction

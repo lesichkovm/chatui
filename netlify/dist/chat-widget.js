@@ -8,36 +8,90 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-18T00:33:24.038Z
+ * Generated on: 2026-01-21T20:31:48.777Z
  */
 
 
 (() => {
   // src/modules/api-legacy.js
-  var ChatAPI = class {
+  var LegacyAPI = class {
     /**
-     * Create a new ChatAPI instance
+     * Create a new LegacyAPI instance
      * @param {Object} config - Configuration object
      * @param {string} config.serverUrl - Base URL for the chat server
      * @param {boolean} [config.debug=false] - Enable debug logging
      */
     constructor(config) {
-      this.serverUrl = config.serverUrl;
+      if (!config || !config.serverUrl) {
+        throw new Error("LegacyAPI: serverUrl is required");
+      }
+      this.serverUrl = config.serverUrl.replace(/\/$/, "");
       this.debug = config.debug || false;
+      this.sessionKey = "";
+      this.connectionTimeout = config.connectionTimeout || 1e4;
     }
     /**
-     * Get the stored session key from localStorage
+     * Validate message input to prevent injection attacks
+     * @param {string} message - Message to validate
+     * @returns {string} Validated and sanitized message
+     */
+    validateMessage(message) {
+      if (typeof message !== "string") {
+        throw new Error("Invalid message type: message must be a string");
+      }
+      if (message.length === 0) {
+        throw new Error("Invalid message: message cannot be empty");
+      }
+      if (message.length > 1e4) {
+        throw new Error("Invalid message: message too long (max 10000 characters)");
+      }
+      const sanitized = message.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").replace(/javascript:/gi, "").replace(/on\w+\s*=/gi, "").trim();
+      if (sanitized.length === 0) {
+        throw new Error("Invalid message: message contains only disallowed content");
+      }
+      return sanitized;
+    }
+    /**
+     * Generate cryptographically random callback name for JSONP
+     * @private
+     * @returns {string} Random callback name
+     */
+    _generateSecureCallbackName() {
+      const randomPart = Math.random().toString(36).substr(2, 16);
+      const timestamp = Date.now();
+      return `chatCallback_${randomPart}_${timestamp}`;
+    }
+    /**
+     * Validate JSONP response structure
+     * @private
+     * @param {Object} response - Response object to validate
+     * @returns {boolean} True if response is valid
+     */
+    _validateJSONPResponse(response) {
+      if (!response || typeof response !== "object") {
+        return false;
+      }
+      if (response.status !== void 0 && typeof response.status !== "string") {
+        return false;
+      }
+      if (response.text !== void 0 && typeof response.text !== "string") {
+        return false;
+      }
+      return true;
+    }
+    /**
+     * Get the stored session key from sessionStorage (more secure than localStorage)
      * @returns {string} The session key or empty string if not found
      */
     getSessionKey() {
-      return localStorage.getItem("chat_session_key") || "";
+      return sessionStorage.getItem("chat_session_key") || "";
     }
     /**
-     * Store a session key in localStorage
+     * Store a session key in sessionStorage (more secure than localStorage)
      * @param {string} key - The session key to store
      */
     setSessionKey(key) {
-      localStorage.setItem("chat_session_key", key);
+      sessionStorage.setItem("chat_session_key", key);
     }
     /**
      * Check if running in test environment (localhost:32000)
@@ -108,12 +162,17 @@
         }, 100);
         return;
       }
+      const validatedMessage = this.validateMessage(message);
       const sessionKey = this.getSessionKey();
-      const callbackName = "chatCallback_" + Date.now();
+      const callbackName = this._generateSecureCallbackName();
       const url = `${this.serverUrl}/api/messages?callback=${callbackName}&message=${encodeURIComponent(
-        message
+        validatedMessage
       )}&type=message&session_key=${encodeURIComponent(sessionKey)}`;
       this._injectScript(url, callbackName, (response) => {
+        if (!this._validateJSONPResponse(response)) {
+          console.error("ChatWidget: Invalid JSONP response format", response);
+          return;
+        }
         if (onResponse) {
           if (response.text !== void 0 && response.text !== null) {
             if (response.widget) {
@@ -164,26 +223,50 @@
      * @param {Object} config - Configuration object
      * @param {string} config.serverUrl - Base URL for the chat server
      * @param {boolean} [config.debug=false] - Enable debug logging
-     * @param {number} [config.timeout=5000] - Request timeout in milliseconds
      */
     constructor(config) {
-      this.serverUrl = config.serverUrl;
+      if (!config || !config.serverUrl) {
+        throw new Error("CorsAPI: serverUrl is required");
+      }
+      this.serverUrl = config.serverUrl.replace(/\/$/, "");
       this.debug = config.debug || false;
-      this.timeout = config.timeout || 5e3;
+      this.sessionKey = "";
+      this.connectionTimeout = config.connectionTimeout || 1e4;
     }
     /**
-     * Get the stored session key from localStorage
+     * Validate message input to prevent injection attacks
+     * @param {string} message - Message to validate
+     * @returns {string} Validated and sanitized message
+     */
+    validateMessage(message) {
+      if (typeof message !== "string") {
+        throw new Error("Invalid message type: message must be a string");
+      }
+      if (message.length === 0) {
+        throw new Error("Invalid message: message cannot be empty");
+      }
+      if (message.length > 1e4) {
+        throw new Error("Invalid message: message too long (max 10000 characters)");
+      }
+      const sanitized = message.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").replace(/javascript:/gi, "").replace(/on\w+\s*=/gi, "").trim();
+      if (sanitized.length === 0) {
+        throw new Error("Invalid message: message contains only disallowed content");
+      }
+      return sanitized;
+    }
+    /**
+     * Get the stored session key from sessionStorage (more secure than localStorage)
      * @returns {string} The session key or empty string if not found
      */
     getSessionKey() {
-      return localStorage.getItem("chat_session_key") || "";
+      return sessionStorage.getItem("chat_session_key") || "";
     }
     /**
-     * Store a session key in localStorage
+     * Store a session key in sessionStorage (more secure than localStorage)
      * @param {string} key - The session key to store
      */
     setSessionKey(key) {
-      localStorage.setItem("chat_session_key", key);
+      sessionStorage.setItem("chat_session_key", key);
     }
     /**
      * Check if running in test environment (localhost:32000)
@@ -322,6 +405,7 @@
         }, 100);
         return;
       }
+      const validatedMessage = this.validateMessage(message);
       const sessionKey = this.getSessionKey();
       const url = `${this.serverUrl}/api/messages`;
       try {
@@ -329,17 +413,21 @@
           method: "POST",
           body: JSON.stringify({
             type: "message",
-            message,
+            message: validatedMessage,
             session_key: sessionKey,
             timestamp: Date.now()
           })
         });
         if (onResponse) {
-          if (response.status === "success" && response.text) {
-            if (response.widget) {
-              onResponse(response.text, "bot", response.widget);
-            } else {
-              onResponse(response.text, "bot");
+          if (response.status === "success") {
+            if (response.widgets && Array.isArray(response.widgets)) {
+              onResponse(response.widgets, "bot");
+            } else if (response.text) {
+              if (response.widget) {
+                onResponse(response.text, "bot", response.widget);
+              } else {
+                onResponse(response.text, "bot");
+              }
             }
           } else if (response.status === "error") {
             throw new Error(response.message || "Server returned error response");
@@ -355,7 +443,7 @@
   };
 
   // src/modules/api.js
-  var HybridChatAPI = class extends ChatAPI {
+  var HybridChatAPI = class extends LegacyAPI {
     /**
      * Create a new HybridChatAPI instance
      * @param {Object} config - Configuration object
@@ -495,10 +583,17 @@
           timestamp: Date.now()
         }));
         this.wsConnection.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === "handshake" && data.status === "success") {
-            this.setSessionKey(data.session_key);
-            if (onSuccess) onSuccess();
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === "handshake" && data.status === "success") {
+              this.setSessionKey(data.session_key);
+              if (onSuccess) onSuccess();
+            }
+          } catch (error) {
+            console.error("ChatWidget: Invalid WebSocket message format:", error);
+            if (this.debug) {
+              console.error("Received data:", event.data);
+            }
           }
         };
       }).catch((error) => {
@@ -560,38 +655,60 @@
           timestamp: Date.now()
         }));
         this.wsConnection.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === "message") {
-            if (onMessage) {
-              if (data.widget) {
-                onMessage(data.text, "bot", data.widget);
-              } else {
-                onMessage(data.text, "bot");
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === "message" || data.status === "success" && (data.widgets || data.text)) {
+              if (onMessage) {
+                if (data.widgets && Array.isArray(data.widgets)) {
+                  onMessage(data.widgets, "bot");
+                } else if (data.text) {
+                  if (data.widget) {
+                    onMessage(data.text, "bot", data.widget);
+                  } else {
+                    onMessage(data.text, "bot");
+                  }
+                }
               }
+            } else if (data.type === "typing") {
+              this.handleTypingIndicator(data);
+            } else if (data.type === "read_receipt") {
+              this.handleReadReceipt(data);
             }
-          } else if (data.type === "typing") {
-            this.handleTypingIndicator(data);
-          } else if (data.type === "read_receipt") {
-            this.handleReadReceipt(data);
+          } catch (error) {
+            console.error("ChatWidget: Invalid WebSocket message format:", error);
+            if (this.debug) {
+              console.error("Received data:", event.data);
+            }
           }
         };
         return;
       }
       this.initWebSocket().then(() => {
         this.wsConnection.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === "message") {
-            if (onMessage) {
-              if (data.widget) {
-                onMessage(data.text, "bot", data.widget);
-              } else {
-                onMessage(data.text, "bot");
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === "message" || data.status === "success" && (data.widgets || data.text)) {
+              if (onMessage) {
+                if (data.widgets && Array.isArray(data.widgets)) {
+                  onMessage(data.widgets, "bot");
+                } else if (data.text) {
+                  if (data.widget) {
+                    onMessage(data.text, "bot", data.widget);
+                  } else {
+                    onMessage(data.text, "bot");
+                  }
+                }
               }
+            } else if (data.type === "typing") {
+              this.handleTypingIndicator(data);
+            } else if (data.type === "read_receipt") {
+              this.handleReadReceipt(data);
             }
-          } else if (data.type === "typing") {
-            this.handleTypingIndicator(data);
-          } else if (data.type === "read_receipt") {
-            this.handleReadReceipt(data);
+          } catch (error) {
+            console.error("ChatWidget: Invalid WebSocket message format:", error);
+            if (this.debug) {
+              console.error("Received data:", event.data);
+            }
           }
         };
       }).catch((error) => {
@@ -658,12 +775,23 @@
         }));
         if (onResponse) {
           this.wsConnection.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === "message" || data.type === "message:stream") {
-              if (data.widget) {
-                onResponse(data.text, "bot", data.widget);
-              } else {
-                onResponse(data.text, "bot");
+            try {
+              const data = JSON.parse(event.data);
+              if (data.type === "message" || data.type === "message:stream" || data.status === "success" && (data.widgets || data.text)) {
+                if (data.widgets && Array.isArray(data.widgets)) {
+                  onResponse(data.widgets, "bot");
+                } else if (data.text) {
+                  if (data.widget) {
+                    onResponse(data.text, "bot", data.widget);
+                  } else {
+                    onResponse(data.text, "bot");
+                  }
+                }
+              }
+            } catch (error) {
+              console.error("ChatWidget: Invalid WebSocket message format:", error);
+              if (this.debug) {
+                console.error("Received data:", event.data);
               }
             }
           };
@@ -805,6 +933,15 @@
       throw new Error("createElement() must be implemented by subclass");
     }
     /**
+     * Get the container element for nested children widgets
+     * Override this method in container widgets to specify where children should be placed
+     * @param {HTMLElement} element - The widget's main element
+     * @returns {HTMLElement} Container element for children (defaults to main element)
+     */
+    getChildrenContainer(element) {
+      return element;
+    }
+    /**
      * Handle widget interaction and dispatch custom event
      * @param {Object} interaction - Interaction data
      * @param {string} interaction.type - Type of interaction
@@ -831,6 +968,7 @@
 
   // src/modules/widgets/widget-types.js
   var WIDGET_TYPES = {
+    // Legacy widget types
     BUTTONS: "buttons",
     SELECT: "select",
     INPUT: "input",
@@ -846,7 +984,16 @@
     COLOR_PICKER: "color_picker",
     CONFIRMATION: "confirmation",
     RADIO: "radio",
-    PROGRESS: "progress"
+    PROGRESS: "progress",
+    // New composable widget types
+    TEXT: "text",
+    CONTAINER: "container",
+    CARD: "card",
+    IMAGE: "image",
+    ICON: "icon",
+    BUTTON: "button",
+    ROW: "row",
+    COLUMN: "column"
   };
   var LEGACY_WIDGET_TYPES = {
     FILE: "file",
@@ -2093,6 +2240,83 @@
     }
   };
 
+  // src/modules/widgets/container-widget.js
+  var ContainerWidget = class extends BaseWidget {
+    /**
+     * Create the DOM element for the container widget
+     * @returns {HTMLElement} The container DOM element
+     */
+    createElement() {
+      const element = document.createElement("div");
+      element.className = "widget-container";
+      const layout = this.widgetData.props?.layout || "vertical";
+      const gap = this.widgetData.props?.gap || "medium";
+      const alignment = this.widgetData.props?.alignment || "start";
+      element.classList.add(`layout-${layout}`);
+      element.classList.add(`gap-${gap}`);
+      element.classList.add(`align-${alignment}`);
+      if (this.widgetData.props?.style) {
+        Object.assign(element.style, this.widgetData.props.style);
+      }
+      return element;
+    }
+  };
+
+  // src/modules/widgets/card-widget.js
+  var CardWidget = class extends BaseWidget {
+    /**
+     * Create the DOM element for the card widget
+     * @returns {HTMLElement} The card DOM element
+     */
+    createElement() {
+      const element = document.createElement("div");
+      element.className = "widget-card";
+      const variant = this.widgetData.props?.variant || "default";
+      const padding = this.widgetData.props?.padding || "medium";
+      element.classList.add(`variant-${variant}`);
+      element.classList.add(`padding-${padding}`);
+      if (this.widgetData.props?.style) {
+        Object.assign(element.style, this.widgetData.props.style);
+      }
+      return element;
+    }
+  };
+
+  // src/modules/widgets/text-widget.js
+  var TextWidget = class extends BaseWidget {
+    /**
+     * Create the DOM element for the text widget
+     * @returns {HTMLElement} The text DOM element
+     */
+    createElement() {
+      const element = document.createElement("div");
+      element.className = "widget-text";
+      const content = this.widgetData.props?.content || "";
+      const format = this.widgetData.props?.format || "plain";
+      element.classList.add(`format-${format}`);
+      if (format === "markdown") {
+        element.innerHTML = this.parseBasicMarkdown(content);
+      } else if (format === "html") {
+        element.innerHTML = content;
+      } else {
+        element.textContent = content;
+      }
+      if (this.widgetData.props?.style) {
+        Object.assign(element.style, this.widgetData.props.style);
+      }
+      return element;
+    }
+    /**
+     * Parse basic markdown syntax
+     * @private
+     * @param {string} text - Markdown text
+     * @returns {string} HTML string
+     */
+    parseBasicMarkdown(text) {
+      return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>").replace(/`(.*?)`/g, "<code>$1</code>").replace(/\n/g, "<br>");
+    }
+  };
+
   // src/modules/widgets/widget-factory.js
   var WidgetFactory2 = class {
     /**
@@ -2101,6 +2325,7 @@
      * @type {Map<string, BaseWidget>}
      */
     static widgetTypes = /* @__PURE__ */ new Map([
+      // Legacy widget types
       [WIDGET_TYPES.BUTTONS, ButtonsWidget],
       [WIDGET_TYPES.SELECT, SelectWidget],
       [WIDGET_TYPES.INPUT, InputWidget],
@@ -2116,7 +2341,19 @@
       [LEGACY_WIDGET_TYPES.COLOR, ColorPickerWidget],
       [WIDGET_TYPES.CONFIRMATION, ConfirmationWidget],
       [WIDGET_TYPES.RADIO, RadioWidget],
-      [WIDGET_TYPES.PROGRESS, ProgressWidget]
+      [WIDGET_TYPES.PROGRESS, ProgressWidget],
+      // New composable widget types
+      [WIDGET_TYPES.TEXT, TextWidget],
+      [WIDGET_TYPES.CONTAINER, ContainerWidget],
+      [WIDGET_TYPES.CARD, CardWidget],
+      [WIDGET_TYPES.IMAGE, ContainerWidget],
+      // Placeholder for future image widget
+      [WIDGET_TYPES.ICON, ContainerWidget],
+      // Placeholder for future icon widget
+      [WIDGET_TYPES.BUTTON, ContainerWidget],
+      // Placeholder for future button widget
+      [WIDGET_TYPES.ROW, ContainerWidget],
+      [WIDGET_TYPES.COLUMN, ContainerWidget]
     ]);
     /**
      * Register a new widget type
@@ -2128,29 +2365,41 @@
       this.widgetTypes.set(type, WidgetClass);
     }
     /**
-     * Create a widget instance based on data type
+     * Create a widget instance based on data type with recursive support
      * @static
-     * @param {Object} widgetData - Widget configuration data
-     * @param {string} widgetData.type - Widget type identifier
+     * @param {Object} widgetConfig - Widget configuration data
+     * @param {string} widgetConfig.type - Widget type identifier
+     * @param {Array} [widgetConfig.children] - Nested child widgets
      * @param {string} widgetId - Widget container ID for scoping
-     * @returns {BaseWidget|null} Widget instance or null if type not supported
+     * @returns {HTMLElement|null} Widget DOM element or null if type not supported
      */
-    static createWidget(widgetData, widgetId) {
-      if (!widgetData || !widgetData.type) {
-        console.warn("Invalid widget data:", widgetData);
+    static createWidget(widgetConfig, widgetId) {
+      if (!widgetConfig || !widgetConfig.type) {
+        console.warn("Invalid widget config:", widgetConfig);
         return null;
       }
-      const widgetType = SERVER_TYPE_MAPPINGS[widgetData.type] || widgetData.type;
+      const widgetType = SERVER_TYPE_MAPPINGS[widgetConfig.type] || widgetConfig.type;
       const WidgetClass = this.widgetTypes.get(widgetType);
       if (!WidgetClass) {
-        console.warn(`Unsupported widget type: ${widgetData.type} (mapped to: ${widgetType})`);
+        console.warn(`Unsupported widget type: ${widgetConfig.type} (mapped to: ${widgetType})`);
         return null;
       }
       try {
-        const mappedWidgetData = { ...widgetData, type: widgetType };
-        return new WidgetClass(mappedWidgetData, widgetId);
+        const mappedWidgetConfig = { ...widgetConfig, type: widgetType };
+        const widgetInstance = new WidgetClass(mappedWidgetConfig, widgetId);
+        const element = widgetInstance.createElement();
+        if (widgetConfig.children && Array.isArray(widgetConfig.children)) {
+          const childrenContainer = widgetInstance.getChildrenContainer ? widgetInstance.getChildrenContainer(element) : element;
+          widgetConfig.children.forEach((childConfig) => {
+            const childElement = this.createWidget(childConfig, widgetId);
+            if (childElement) {
+              childrenContainer.appendChild(childElement);
+            }
+          });
+        }
+        return element;
       } catch (error) {
-        console.error(`Error creating widget of type ${widgetData.type}:`, error);
+        console.error(`Error creating widget of type ${widgetConfig.type}:`, error);
         return null;
       }
     }
@@ -3389,6 +3638,109 @@
         transform: scale(1);
       }
     }
+    
+    /* New Composable Widget Styles */
+    #${widgetId} .widget-container {
+      display: flex;
+      margin: 4px 0;
+    }
+    
+    #${widgetId} .widget-container.layout-vertical {
+      flex-direction: column;
+    }
+    
+    #${widgetId} .widget-container.layout-horizontal {
+      flex-direction: row;
+    }
+    
+    #${widgetId} .widget-container.gap-small {
+      gap: 4px;
+    }
+    
+    #${widgetId} .widget-container.gap-medium {
+      gap: 8px;
+    }
+    
+    #${widgetId} .widget-container.gap-large {
+      gap: 16px;
+    }
+    
+    #${widgetId} .widget-container.align-start {
+      align-items: flex-start;
+    }
+    
+    #${widgetId} .widget-container.align-center {
+      align-items: center;
+    }
+    
+    #${widgetId} .widget-container.align-end {
+      align-items: flex-end;
+    }
+    
+    #${widgetId} .widget-container.align-stretch {
+      align-items: stretch;
+    }
+    
+    #${widgetId} .widget-card {
+      background: var(--chat-surface);
+      border: 1px solid var(--chat-border);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 8px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    #${widgetId} .widget-card.variant-elevated {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    #${widgetId} .widget-card.variant-outlined {
+      background: transparent;
+      border: 2px solid var(--chat-border);
+    }
+    
+    #${widgetId} .widget-card.padding-small {
+      padding: 8px;
+    }
+    
+    #${widgetId} .widget-card.padding-medium {
+      padding: 12px;
+    }
+    
+    #${widgetId} .widget-card.padding-large {
+      padding: 16px;
+    }
+    
+    #${widgetId} .widget-text {
+      margin: 4px 0;
+      color: var(--chat-text);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    
+    #${widgetId} .widget-text.format-plain {
+      white-space: pre-wrap;
+    }
+    
+    #${widgetId} .widget-text.format-markdown strong {
+      font-weight: 600;
+    }
+    
+    #${widgetId} .widget-text.format-markdown em {
+      font-style: italic;
+    }
+    
+    #${widgetId} .widget-text.format-markdown code {
+      background: var(--chat-border);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    
+    #${widgetId} .widget-text.format-html {
+      /* HTML content rendered as-is */
+    }
   `;
     document.head.appendChild(styleElement);
   }
@@ -3449,16 +3801,37 @@
     }
     return { container, chatWindow, chatButton };
   }
-  function appendMessage(container, text, sender, widgetId, widgetData = null) {
+  function sanitizeHTML(text) {
+    if (typeof text !== "string") return "";
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  function createSafeMessageHTML(text) {
+    if (typeof text !== "string") return "";
+    const escapedText = sanitizeHTML(text);
+    return escapedText.replace(/\n/g, "<br>");
+  }
+  function appendMessage(container, message, sender, widgetId, legacyWidgetData = null) {
     const messageElement = document.createElement("div");
     messageElement.className = `message ${sender}-message`;
     messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const messageContent = document.createElement("div");
-    messageContent.innerHTML = text.replace(/\n/g, "<br>");
-    messageElement.appendChild(messageContent);
-    if (widgetData && sender === "bot") {
-      const widgetElement = createWidgetElement(widgetData, widgetId);
-      messageElement.appendChild(widgetElement);
+    if (typeof message === "object" && message.widgets) {
+      message.widgets.forEach((widgetConfig) => {
+        const widgetElement = createWidgetElement(widgetConfig, widgetId);
+        if (widgetElement) {
+          messageElement.appendChild(widgetElement);
+        }
+      });
+    } else {
+      const text = typeof message === "string" ? message : message.text || "";
+      const messageContent = document.createElement("div");
+      messageContent.innerHTML = createSafeMessageHTML(text);
+      messageElement.appendChild(messageContent);
+      if (legacyWidgetData && sender === "bot") {
+        const widgetElement = createWidgetElement(legacyWidgetData, widgetId);
+        messageElement.appendChild(widgetElement);
+      }
     }
     container.appendChild(messageElement);
     container.scrollTop = container.scrollHeight;
@@ -3695,6 +4068,9 @@
       }
       this.scriptElement = scriptElement;
       this.widgetId = config.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
+      this.lastMessageTime = 0;
+      this.minMessageInterval = 1e3;
+      this.maxMessageLength = 1e4;
       const explicitColor = config.primaryColor || config.color;
       this.themeManager = new ThemeManager(this.widgetId, scriptElement);
       const themeConfig = this.themeManager.getThemeConfig();
@@ -3919,7 +4295,17 @@
      */
     sendMessage(text) {
       const message = text || this.textarea.value.trim();
+      const now = Date.now();
+      if (now - this.lastMessageTime < this.minMessageInterval) {
+        console.warn("ChatWidget: Message rate limit exceeded. Please wait before sending another message.");
+        return;
+      }
+      if (message.length > this.maxMessageLength) {
+        console.warn(`ChatWidget: Message too long. Maximum length is ${this.maxMessageLength} characters.`);
+        return;
+      }
       if (message) {
+        this.lastMessageTime = now;
         this.addMessage(message, "user");
         const waitingMessageId = this.addWaitingMessage();
         this.api.sendMessage(message, (text2, sender, widgetData) => {
@@ -4046,6 +4432,49 @@
         mode: this.config.themeMode,
         colors: this.config.themeColors
       };
+    }
+    /**
+     * Destroy the widget instance and clean up resources
+     * Prevents memory leaks by removing event listeners and cleaning up references
+     */
+    destroy() {
+      if (this.chatButton) {
+        this.chatButton.removeEventListener("click", this.handlers.toggle);
+      }
+      if (this.closeButton) {
+        this.closeButton.removeEventListener("click", this.handlers.close);
+      }
+      if (this.textarea) {
+        this.textarea.removeEventListener("keypress", this.handlers.keypress);
+      }
+      if (this.sendButton) {
+        this.sendButton.removeEventListener("click", this.handlers.send);
+      }
+      if (this.resizeObserver) {
+        this.resizeObserver.disconnect();
+        this.resizeObserver = null;
+      }
+      if (this.api && this.api.disconnect) {
+        this.api.disconnect();
+      }
+      if (this.api && this.api.messageQueue) {
+        this.api.messageQueue.length = 0;
+      }
+      if (this.chatWindow && this.chatWindow.parentNode) {
+        this.chatWindow.parentNode.removeChild(this.chatWindow);
+      }
+      if (this.chatButton && this.chatButton.parentNode) {
+        this.chatButton.parentNode.removeChild(this.chatButton);
+      }
+      this.chatWindow = null;
+      this.chatButton = null;
+      this.closeButton = null;
+      this.textarea = null;
+      this.sendButton = null;
+      this.messagesContainer = null;
+      this.api = null;
+      this.config = null;
+      this.handlers = null;
     }
   };
 
