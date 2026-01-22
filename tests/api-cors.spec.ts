@@ -71,6 +71,7 @@ test.describe('CorsAPI', () => {
     };
 
     mockLocalStorage = {};
+    delete (global as any).window;
   });
 
   test.describe('Initialization', () => {
@@ -147,6 +148,7 @@ test.describe('CorsAPI', () => {
   test.describe('HTTP Requests', () => {
     test.beforeEach(async () => {
       api = new CorsAPI({ serverUrl: 'https://example.com' });
+      api.isTestEnvironment = () => false;
       
       // Mock successful fetch
       mockFetch = () => Promise.resolve(
