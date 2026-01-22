@@ -5,23 +5,26 @@ summary: Complete codebase summary optimized for LLM consumption and understandi
 tags: [llm, context, summary, codebase]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.3.0
+version: 1.4.0
 ---
 
 # LLM Context: ChatUI
 
 ## Project Summary
 
-ChatUI is a professional, ultra-lightweight (~12KB) chat UI widget built with pure Vanilla JavaScript. It provides a modern conversational interface without framework dependencies or technical complexity, designed for easy integration into any web application with support for multiple transport protocols (WebSocket, CORS, JSONP), advanced widget composition system, cross-environment storage fallback, and 26+ interactive widget components.
+ChatUI is a professional, ultra-lightweight (~12KB) chat UI widget built with pure Vanilla JavaScript. It provides a modern conversational interface without framework dependencies or technical complexity, designed for easy integration into any web application with support for multiple transport protocols (WebSocket, CORS, JSONP), advanced widget composition system, cross-environment storage fallback, interactive menu system, enhanced security with HTML sanitization, TypeScript type annotations, and 26+ interactive widget components.
 
 ## Key Technologies
 
 - **Pure Vanilla JavaScript** - No framework dependencies
 - **ES6 Classes** - Modern class-based architecture
+- **TypeScript Support** - Type annotations for enhanced development
 - **CSS Custom Properties** - Dynamic theming system
 - **WebSocket API** - Real-time bidirectional communication
 - **Fetch API** - Modern HTTP requests with CORS support
 - **JSONP** - Legacy fallback for older servers
+- **HTML Sanitization** - XSS prevention with tag whitelist
+- **X-Session-Key Headers** - Enhanced session management
 - **Docsify** - Documentation generation
 - **Playwright** - End-to-end testing
 - **ESBuild** - Fast bundling and compilation
@@ -65,19 +68,30 @@ A flexible component system for interactive elements:
 - **BaseWidget** abstract class defining common interface
 - **WidgetFactory** for dynamic widget creation and management
 - **Event-driven communication** between widgets and main system
-- **25+ specialized widgets** (rating, date picker, file upload, conditional, list, etc.)
+- **26+ specialized widgets** (rating, date picker, file upload, conditional, list, etc.)
+- **Interactive Menu System** with color picker, position selector, and sound toggle
 - **Container widgets** for grouping and layout management
 - **Card widgets** for structured content display
+- **Enhanced security** with HTML sanitization and XSS prevention
 - Event-driven communication between widgets and main system
 
-### 3. Theme System
+### 3. Interactive Menu System
+Advanced user configuration interface:
+- **Color Picker** with palette and hex input for theme customization
+- **Position Selector** for dynamic widget positioning
+- **Sound Toggle** for notification preferences
+- **Live Preview** with instant visual feedback
+- **Persistent Settings** with localStorage integration
+- **Accessibility Support** with ARIA compliance and keyboard navigation
+
+### 4. Theme System
 Dynamic theming with CSS custom properties:
 - **Light/Dark modes** with automatic detection
 - **Custom color schemes** and CSS variable management
 - **Responsive design** with mobile-first approach
 - **Accessibility support** with high contrast and reduced motion
 
-### 4. Event-Driven Architecture
+### 5. Event-Driven Architecture
 Comprehensive event system for component communication:
 - **Widget lifecycle events** (created, mounted, destroyed)
 - **User interaction events** (focus, blur, change, submit)
@@ -542,9 +556,15 @@ window.addEventListener('chatwidget:widget:submitted', (e) => {
 - **Color Picker Widget**: Advanced color selection with palette and hex input
 - **Form Widget**: Advanced form container with validation and grouping
 - **Widget Types System**: Comprehensive type registry and management
+- **Interactive Menu System**: Advanced configuration interface with live controls
 
 ### Enhanced Features
 - **Widget Composition**: Nested widget support and complex form building
+- **Interactive Menu System**: Real-time color picker, position selector, and sound toggle
+- **Enhanced Security**: HTML sanitization with tag whitelist and XSS prevention
+- **TypeScript Support**: Type annotations for better development experience
+- **Session Management**: X-Session-Key CORS header support
+- **BETA Ribbon**: Corner banner for demo pages
 - **Improved Validation**: Better error handling and user feedback
 - **Enhanced Styling**: More variants, sizes, and customization options
 - **Better Accessibility**: Improved keyboard navigation and screen reader support

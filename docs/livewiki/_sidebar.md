@@ -23,6 +23,9 @@
 
 ## Widget Components
 
+### Interactive Controls
+* [Interactive Menu System](modules/interactive-menu.md)
+
 ### Input Widgets
 * [Input Widget](modules/input-widget.md)
 * [Textarea Widget](modules/textarea-widget.md)

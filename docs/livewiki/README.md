@@ -5,7 +5,7 @@ summary: Default entry point for LiveWiki documentation, copied from overview fo
 tags: [overview, introduction, entry-point]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.3.0
+version: 1.4.0
 ---
 
 # ChatUI Widget Overview
@@ -26,8 +26,12 @@ ChatUI delivers interactive chat capabilities with minimal performance overhead,
 - **Dual Modes**: Popup and fullpage embedding
 - **26+ Interactive Widgets**: Comprehensive UI component library
 - **Widget Composition**: Advanced Phase 2 composable widget system
+- **Interactive Menu System**: Color picker, position selector, and sound toggle
+- **Enhanced Security**: HTML sanitization with tag whitelist and XSS prevention
+- **Session Management**: X-Session-Key CORS header support
 - **Cross-Environment Storage**: Fallback support for various environments
 - **API Configuration Validation**: Enhanced error handling and validation
+- **TypeScript Support**: Type annotations for better development experience
 - **Accessible**: ARIA-compliant focus management
 - **Secure**: XSS prevention and scoped CSS
 
@@ -154,6 +158,7 @@ const ratingWidget = {
 - [Configuration](configuration.md) - All configuration options
 
 ## Changelog
+- **v1.4.0** (2026-01-22): Added interactive widget menu system with color picker and position selector, enhanced security with HTML sanitization, TypeScript type annotations, X-Session-Key CORS header support, and BETA ribbon banner for demos
 - **v1.3.0** (2026-01-22): Added comprehensive widget validation with HTML sanitization, enhanced security features, and widget composition migration tools
 - **v1.2.0** (2026-01-22): Enhanced widget system with 26+ components, composition capabilities, cross-environment storage, and API validation improvements
 - **v1.1.0** (2026-01-22): Initial documentation with 15+ widget components
@@ -161,7 +166,7 @@ const ratingWidget = {
 
 ---
 
-**Version**: 1.3.0  
+**Version**: 1.4.0  
 **Last Updated**: 2026-01-22  
 **License**: MIT  
 **Repository**: [GitHub](https://github.com/lesichkovm/chatui)

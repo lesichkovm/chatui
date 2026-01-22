@@ -5,7 +5,7 @@ summary: Master index of all LiveWiki documentation pages with descriptions and 
 tags: [contents, index, navigation, overview]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.2.0
+version: 1.3.0
 ---
 
 # Table of Contents
@@ -43,6 +43,9 @@ Complete index of all ChatUI LiveWiki documentation pages with descriptions and 
 - **[Base Widget](modules/base-widget.md)** - Abstract base class for all widget components
 
 ### Widget Components
+
+#### Interactive Controls
+- **[Interactive Menu System](modules/interactive-menu.md)** - Advanced menu system with color picker, position selector, and sound toggle
 
 #### Input Widgets
 - **[Input Widget](modules/input-widget.md)** - Interactive input with validation and submit functionality

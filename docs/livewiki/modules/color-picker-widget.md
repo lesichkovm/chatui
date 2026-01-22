@@ -5,7 +5,7 @@ summary: Color selection widget with palette, hex input, and preset colors.
 tags: [widget, color, picker, selection, input]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Color Picker Widget
@@ -219,3 +219,7 @@ window.addEventListener('chatwidget:color-picker:change', (e) => {
 - [Input Widget](input-widget.md) - Text input component
 - [Slider Widget](slider-widget.md) - Numeric range slider
 - [Button Widget](button-widget.md) - Interactive button component
+
+## Changelog
+- **v1.1.0** (2026-01-22): Enhanced with interactive menu system integration and position selector support
+- **v1.0.0** (2026-01-22): Initial color picker widget implementation
