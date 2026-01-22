@@ -28,6 +28,7 @@ export class SliderWidget extends BaseWidget {
     const step = props.step || 1;
     const defaultValue = props.defaultValue || Math.floor((min + max) / 2);
     const showValue = props.showValue !== false;
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     // Create label
     const labelElement = document.createElement('label');
@@ -69,16 +70,19 @@ export class SliderWidget extends BaseWidget {
       valueDisplay.classList.add(`size-${size}`);
     }
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-slider-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-slider-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-slider-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-slider-disabled');
+      }
     }
     
     // Update value display
@@ -92,15 +96,17 @@ export class SliderWidget extends BaseWidget {
     
     // Handle submission
     const handleSubmit = () => {
-      if (!slider.disabled && !submitButton.disabled) {
+      if (!slider.disabled && (!submitButton || !submitButton.disabled)) {
         const value = parseFloat(slider.value);
         
         // Disable slider and submit button if specified
         if (props.disableOnSubmit !== false) {
           slider.disabled = true;
           slider.classList.add('widget-slider-disabled');
-          submitButton.disabled = true;
-          submitButton.classList.add('widget-slider-disabled');
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add('widget-slider-disabled');
+          }
         }
         
         this.handleInteraction({
@@ -114,14 +120,16 @@ export class SliderWidget extends BaseWidget {
     };
     
     // Add event listener
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     // Apply custom styles if provided
     if (props.sliderStyle) {
       Object.assign(slider.style, props.sliderStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -136,7 +144,9 @@ export class SliderWidget extends BaseWidget {
       sliderWrapper.appendChild(valueDisplay);
     }
     container.appendChild(sliderWrapper);
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -148,5 +158,36 @@ export class SliderWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'slider';
+  }
+
+  /**
+   * Get the current value of the slider widget
+   * @returns {number} Current slider value
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const slider = container.querySelector('.widget-slider');
+      return slider ? parseFloat(slider.value) : 0;
+    }
+    return 0;
+  }
+
+  /**
+   * Set the value of the slider widget
+   * @param {number} value - Value to set
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const slider = container.querySelector('.widget-slider');
+      const valueDisplay = container.querySelector('.widget-slider-value');
+      if (slider) {
+        slider.value = value;
+        if (valueDisplay) {
+          valueDisplay.textContent = value;
+        }
+      }
+    }
   }
 }

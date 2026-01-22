@@ -1,4 +1,5 @@
 import { BaseWidget } from './base-widget.js';
+import { applyMigrationConfig } from '../../config/widget-defaults.js';
 
 /**
  * Password Widget (Composable)
@@ -24,6 +25,9 @@ export class PasswordWidget extends BaseWidget {
     const variant = props.variant || 'primary';
     const size = props.size || 'medium';
     const autocomplete = props.autocomplete || 'current-password';
+    
+    // Breaking Change: Default to no submit button (Phase 3)
+    const showSubmitButton = props.showSubmitButton === true; // Only show if explicitly set to true
     
     // Create input wrapper
     const inputWrapper = document.createElement('div');
@@ -60,16 +64,19 @@ export class PasswordWidget extends BaseWidget {
       toggleButton.classList.add('widget-password-disabled');
     }
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-password-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-password-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-password-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-password-disabled');
+      }
     }
     
     // Toggle password visibility
@@ -89,7 +96,7 @@ export class PasswordWidget extends BaseWidget {
     
     // Handle submission
     const handleSubmit = () => {
-      if (!input.disabled && !submitButton.disabled) {
+      if (!input.disabled && (!submitButton || !submitButton.disabled)) {
         const value = input.value.trim();
         
         // Validate if required
@@ -105,8 +112,10 @@ export class PasswordWidget extends BaseWidget {
             input.classList.add('widget-password-disabled');
             toggleButton.disabled = true;
             toggleButton.classList.add('widget-password-disabled');
-            submitButton.disabled = true;
-            submitButton.classList.add('widget-password-disabled');
+            if (submitButton) {
+              submitButton.disabled = true;
+              submitButton.classList.add('widget-password-disabled');
+            }
           }
           
           // Clear the password field for security
@@ -124,7 +133,9 @@ export class PasswordWidget extends BaseWidget {
     
     // Add event listeners
     toggleButton.addEventListener('click', toggleVisibility);
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -146,7 +157,7 @@ export class PasswordWidget extends BaseWidget {
       Object.assign(toggleButton.style, props.toggleStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -158,7 +169,9 @@ export class PasswordWidget extends BaseWidget {
     inputWrapper.appendChild(input);
     inputWrapper.appendChild(toggleButton);
     container.appendChild(inputWrapper);
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -170,5 +183,32 @@ export class PasswordWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'password';
+  }
+
+  /**
+   * Get the current value of the password widget
+   * @returns {string} Current password value
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const input = container.querySelector('.widget-password-input');
+      return input ? input.value : '';
+    }
+    return '';
+  }
+
+  /**
+   * Set the value of the password widget
+   * @param {string} value - Value to set
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const input = container.querySelector('.widget-password-input');
+      if (input) {
+        input.value = value;
+      }
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { BaseWidget } from './base-widget.js';
+import { applyMigrationConfig, getMigrationWarning } from '../../config/widget-defaults.js';
 
 /**
  * Textarea Widget (Composable)
@@ -15,10 +16,19 @@ export class TextareaWidget extends BaseWidget {
       return document.createComment('Invalid textarea widget data');
     }
 
+    // Apply migration configuration
+    const widgetData = applyMigrationConfig(this.widgetData);
+    
+    // Check for migration warnings
+    const warning = getMigrationWarning(widgetData);
+    if (warning) {
+      console.warn(warning);
+    }
+
     const container = document.createElement('div');
     container.className = 'widget-textarea-container';
     
-    const props = this.widgetData.props || {};
+    const props = widgetData.props || {};
     const placeholder = props.placeholder || 'Enter your response...';
     const buttonText = props.buttonText || 'Submit';
     const variant = props.variant || 'primary';
@@ -26,6 +36,9 @@ export class TextareaWidget extends BaseWidget {
     const rows = props.rows || 4;
     const maxLength = props.maxLength;
     const resize = props.resize || 'vertical';
+    
+    // Breaking Change: Default to no submit button (Phase 3)
+    const showSubmitButton = props.showSubmitButton === true; // Only show if explicitly set to true
     
     // Create textarea element
     const textarea = document.createElement('textarea');
@@ -63,21 +76,24 @@ export class TextareaWidget extends BaseWidget {
       counterElement.style.marginTop = '4px';
     }
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-textarea-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-textarea-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-textarea-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-textarea-disabled');
+      }
     }
     
     // Handle submission
     const handleSubmit = () => {
-      if (!textarea.disabled && !submitButton.disabled) {
+      if (!textarea.disabled && (!submitButton || !submitButton.disabled)) {
         const value = textarea.value.trim();
         
         // Validate if required
@@ -91,8 +107,10 @@ export class TextareaWidget extends BaseWidget {
           if (props.disableOnSubmit !== false) {
             textarea.disabled = true;
             textarea.classList.add('widget-textarea-disabled');
-            submitButton.disabled = true;
-            submitButton.classList.add('widget-textarea-disabled');
+            if (submitButton) {
+              submitButton.disabled = true;
+              submitButton.classList.add('widget-textarea-disabled');
+            }
           }
           
           this.handleInteraction({
@@ -113,7 +131,9 @@ export class TextareaWidget extends BaseWidget {
     };
     
     // Add event listeners
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     textarea.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && e.ctrlKey) {
@@ -142,9 +162,10 @@ export class TextareaWidget extends BaseWidget {
       });
     }
     
-    // Clear error state on input
+    // Clear error state on input and emit value change
     textarea.addEventListener('input', () => {
       textarea.classList.remove('widget-textarea-error');
+      this.emitValueChange(textarea.value);
     });
     
     // Apply custom styles if provided
@@ -152,7 +173,7 @@ export class TextareaWidget extends BaseWidget {
       Object.assign(textarea.style, props.textareaStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -165,7 +186,9 @@ export class TextareaWidget extends BaseWidget {
     if (counterElement) {
       container.appendChild(counterElement);
     }
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -177,5 +200,32 @@ export class TextareaWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'textarea';
+  }
+
+  /**
+   * Get the current value of the textarea widget
+   * @returns {string} Current textarea value
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const textarea = container.querySelector('.widget-textarea');
+      return textarea ? textarea.value : '';
+    }
+    return '';
+  }
+
+  /**
+   * Set the value of the textarea widget
+   * @param {string} value - Value to set
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const textarea = container.querySelector('.widget-textarea');
+      if (textarea) {
+        textarea.value = value;
+      }
+    }
   }
 }

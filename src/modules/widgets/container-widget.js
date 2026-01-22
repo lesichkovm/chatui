@@ -4,8 +4,15 @@ import { BaseWidget } from './base-widget.js';
  * Container Widget
  * A generic container widget that can hold other widgets in various layouts
  * Supports flex, grid, and custom layout systems
+ * Can optionally operate in form mode for coordinating multi-widget submissions
  */
 export class ContainerWidget extends BaseWidget {
+  constructor(widgetData, widgetId) {
+    super(widgetData, widgetId);
+    this.formMode = false;
+    this.childWidgets = new Map();
+    this.setupFormListeners();
+  }
   /**
    * Create the DOM element for the container widget
    * @returns {HTMLElement} The container DOM element
@@ -13,11 +20,18 @@ export class ContainerWidget extends BaseWidget {
   createElement() {
     const element = document.createElement('div');
     element.className = 'widget-container';
+    element.setAttribute('data-widget-id', this.widgetId);
     
     const props = this.widgetData.props || {};
     const layout = props.layout || 'vertical';
     const gap = props.gap || 'medium';
     const alignment = props.alignment || 'start';
+    
+    // Enable form mode if specified
+    if (props.formMode) {
+      this.enableFormMode();
+      element.classList.add('widget-form-mode');
+    }
     
     // Apply layout system
     if (layout === 'flex' || layout === 'horizontal' || layout === 'vertical') {
@@ -35,6 +49,9 @@ export class ContainerWidget extends BaseWidget {
     if (props.style) {
       Object.assign(element.style, props.style);
     }
+    
+    // Store reference for later use
+    this.element = element;
     
     return element;
   }
@@ -156,6 +173,217 @@ export class ContainerWidget extends BaseWidget {
   }
 
   /**
+   * Enable form mode for container
+   */
+  enableFormMode() {
+    this.formMode = true;
+  }
+
+  /**
+   * Setup form listeners for child widget interactions
+   * @private
+   */
+  setupFormListeners() {
+    // Listen for widget interactions from child widgets
+    document.addEventListener('widgetInteraction', (event) => {
+      const { widgetId, widgetType } = event.detail;
+      
+      // Check if this is a child widget and if it's a button/action widget
+      if (this.isChildWidget(widgetId) && this.isActionWidget(widgetType)) {
+        this.handleFormAction(event.detail);
+      }
+    });
+  }
+
+  /**
+   * Check if a widget is a child of this container
+   * @private
+   * @param {string} widgetId - Widget ID to check
+   * @returns {boolean} True if the widget is a child
+   */
+  isChildWidget(widgetId) {
+    if (this.element) {
+      const childElement = this.element.querySelector(`[data-widget-id="${widgetId}"]`);
+      return childElement !== null;
+    }
+    return false;
+  }
+
+  /**
+   * Check if a widget type is an action widget
+   * @private
+   * @param {string} widgetType - Widget type to check
+   * @returns {boolean} True if the widget is an action widget
+   */
+  isActionWidget(widgetType) {
+    return widgetType === 'buttons' || widgetType === 'button';
+  }
+
+  /**
+   * Handle form action from child button widget
+   * @private
+   * @param {Object} actionData - Action data from the button widget
+   */
+  handleFormAction(actionData) {
+    if (!this.formMode) return;
+    
+    const formData = this.collectFormValues();
+    
+    this.handleInteraction({
+      action: actionData.optionId || actionData.action,
+      actionData: actionData,
+      formData: formData,
+      widgetType: 'container-form'
+    });
+  }
+
+  /**
+   * Collect values from all child input widgets
+   * @returns {Object} Form data object with widget values
+   */
+  collectFormValues() {
+    const formData = {};
+    
+    if (this.element) {
+      // Find all input-type child widgets
+      const inputWidgets = this.element.querySelectorAll('[data-widget-id]');
+      
+      inputWidgets.forEach(widgetElement => {
+        const widgetId = widgetElement.getAttribute('data-widget-id');
+        
+        // Try to get value using standard widget interface
+        const value = this.getWidgetValue(widgetElement);
+        if (value !== undefined) {
+          formData[widgetId] = value;
+        }
+      });
+    }
+    
+    return formData;
+  }
+
+  /**
+   * Get value from a widget element
+   * @private
+   * @param {HTMLElement} widgetElement - Widget DOM element
+   * @returns {*} Widget value or undefined if not found
+   */
+  getWidgetValue(widgetElement) {
+    // Try different widget types and their value extraction methods
+    
+    // Input widgets
+    const inputElement = widgetElement.querySelector('.widget-input-element');
+    if (inputElement) return inputElement.value;
+    
+    // Textarea widgets
+    const textareaElement = widgetElement.querySelector('.widget-textarea');
+    if (textareaElement) return textareaElement.value;
+    
+    // Password widgets
+    const passwordElement = widgetElement.querySelector('.widget-password-input');
+    if (passwordElement) return passwordElement.value;
+    
+    // Date widgets
+    const dateElement = widgetElement.querySelector('.widget-date-input');
+    if (dateElement) return dateElement.value;
+    
+    // Select widgets
+    const selectElement = widgetElement.querySelector('.widget-select');
+    if (selectElement) return selectElement.value;
+    
+    // Checkbox widgets (multiple values)
+    const checkedBoxes = widgetElement.querySelectorAll('.widget-checkbox:checked');
+    if (checkedBoxes.length > 0) {
+      const values = [];
+      checkedBoxes.forEach(checkbox => values.push(checkbox.value));
+      return values;
+    }
+    
+    // Radio widgets (single value)
+    const checkedRadio = widgetElement.querySelector('.widget-radio:checked');
+    if (checkedRadio) return checkedRadio.value;
+    
+    // Slider widgets
+    const sliderElement = widgetElement.querySelector('.widget-slider');
+    if (sliderElement) return parseFloat(sliderElement.value);
+    
+    // Color picker widgets
+    const colorInput = widgetElement.querySelector('.widget-color-input');
+    if (colorInput) return colorInput.value;
+    
+    // Rating widgets
+    const activeStars = widgetElement.querySelectorAll('.widget-rating-star.active');
+    if (activeStars.length > 0) return activeStars.length;
+    
+    // Toggle widgets
+    const toggleInput = widgetElement.querySelector('.widget-toggle-input');
+    if (toggleInput) return toggleInput.checked;
+    
+    // Tags widgets
+    const tagElements = widgetElement.querySelectorAll('.widget-tag');
+    if (tagElements.length > 0) {
+      const tags = [];
+      tagElements.forEach(tagElement => {
+        const text = tagElement.textContent.replace('×', '').trim();
+        if (text) tags.push(text);
+      });
+      return tags;
+    }
+    
+    return undefined;
+  }
+
+  /**
+   * Get all form values (when in form mode)
+   * @returns {Object} Current form values
+   */
+  getValues() {
+    if (this.formMode) {
+      return this.collectFormValues();
+    }
+    return {};
+  }
+
+  /**
+   * Reset all form values (when in form mode)
+   */
+  reset() {
+    if (!this.formMode || !this.element) return;
+    
+    // Reset input widgets
+    const inputs = this.element.querySelectorAll('.widget-input-element, .widget-password-input, .widget-textarea, .widget-date-input');
+    inputs.forEach(input => {
+      input.value = '';
+      input.classList.remove('widget-input-error', 'widget-password-error', 'widget-textarea-error', 'widget-date-error');
+    });
+    
+    // Reset select widgets
+    const selects = this.element.querySelectorAll('.widget-select');
+    selects.forEach(select => {
+      select.selectedIndex = 0;
+      select.classList.remove('widget-select-error');
+    });
+    
+    // Reset checkbox widgets
+    const checkboxes = this.element.querySelectorAll('.widget-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+      checkbox.disabled = false;
+      checkbox.classList.remove('widget-checkbox-disabled');
+    });
+    
+    // Reset radio widgets
+    const radios = this.element.querySelectorAll('.widget-radio');
+    radios.forEach(radio => {
+      radio.checked = false;
+      radio.disabled = false;
+      radio.classList.remove('widget-radio-disabled');
+    });
+    
+    // Reset other widgets as needed...
+  }
+
+  /**
    * Convert gap size to CSS value
    * @private
    * @param {string} gap - Gap size identifier
@@ -180,6 +408,6 @@ export class ContainerWidget extends BaseWidget {
    * @returns {HTMLElement} The element that should contain child widgets
    */
   getChildrenContainer(element) {
-    return element;
+    return element || this.element;
   }
 }

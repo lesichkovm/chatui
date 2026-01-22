@@ -1,4 +1,5 @@
 import { BaseWidget } from './base-widget.js';
+import { sanitizeHTML, sanitizeStyleProps } from '../../utils/security.js';
 
 /**
  * Text Widget (v2)
@@ -21,10 +22,11 @@ export class TextWidget extends BaseWidget {
     
     // Set content based on format
     if (format === 'markdown') {
-      // Basic markdown support (can be enhanced later)
-      element.innerHTML = this.parseBasicMarkdown(content);
+      // Basic markdown support with sanitization
+      element.innerHTML = sanitizeHTML(this.parseBasicMarkdown(content));
     } else if (format === 'html') {
-      element.innerHTML = content;
+      // HTML content with sanitization
+      element.innerHTML = sanitizeHTML(content);
     } else {
       // Plain text
       element.textContent = content;
@@ -32,7 +34,8 @@ export class TextWidget extends BaseWidget {
     
     // Apply custom styles if provided
     if (this.widgetData.props?.style) {
-      Object.assign(element.style, this.widgetData.props.style);
+      const sanitizedStyle = sanitizeStyleProps(this.widgetData.props.style);
+      Object.assign(element.style, sanitizedStyle);
     }
     
     return element;

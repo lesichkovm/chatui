@@ -1,4 +1,53 @@
 (function() {
+  // Import centralized security utilities
+  // Note: In a real module system, this would be an import
+  // For the legacy standalone version, we'll include the essential functions
+  
+  // Sanitization function for HTML content
+  function sanitizeHTML(text) {
+    if (typeof text !== 'string') return '';
+    
+    // Create a temporary div to escape HTML
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Sanitize CSS style properties to prevent CSS injection
+  function sanitizeStyleProps(style) {
+    if (!style || typeof style !== 'object') return {};
+    
+    // List of commonly used and safe CSS properties
+    const allowedProps = [
+      'display', 'position', 'top', 'right', 'bottom', 'left', 'zIndex',
+      'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight',
+      'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+      'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+      'border', 'borderTop', 'borderRight', 'borderBottom', 'borderLeft',
+      'borderWidth', 'borderStyle', 'borderColor', 'borderRadius',
+      'color', 'backgroundColor', 'opacity', 'visibility',
+      'font', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight',
+      'textAlign', 'textDecoration', 'transform', 'transition'
+    ];
+    
+    const sanitized = {};
+    
+    for (const [key, value] of Object.entries(style)) {
+      // Convert to camelCase if needed
+      const camelCaseKey = key.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+      
+      // Only allow known safe properties
+      if (allowedProps.includes(camelCaseKey) && value !== null && value !== undefined) {
+        // Basic validation for dangerous patterns
+        if (typeof value === 'string' && !/(javascript|data|vbscript):/i.test(value)) {
+          sanitized[camelCaseKey] = value;
+        }
+      }
+    }
+    
+    return sanitized;
+  }
+
   // Check if the widget system is already initialized
   if (window.createChatWidget) {
     // If script is loaded again (e.g. multiple widgets), just initialize the current instance
@@ -358,7 +407,8 @@
       const messageElement = document.createElement("div");
       messageElement.className = `message ${sender}-message`;
       messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      messageElement.innerHTML = text.replace(/\n/g, "<br>");
+      // Use sanitization for message content
+      messageElement.innerHTML = sanitizeHTML(text).replace(/\n/g, "<br>");
       messagesContainer.appendChild(messageElement);
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }

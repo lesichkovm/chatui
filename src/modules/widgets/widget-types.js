@@ -34,7 +34,10 @@ export const WIDGET_TYPES = {
   
   // Advanced composition widget types
   CONDITIONAL: 'conditional',
-  LIST: 'list'
+  LIST: 'list',
+  
+  // Form coordination widget types
+  FORM: 'form'
 };
 
 // Legacy type mappings for backward compatibility

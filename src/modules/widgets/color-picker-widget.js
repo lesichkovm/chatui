@@ -27,6 +27,7 @@ export class ColorPickerWidget extends BaseWidget {
     const presetColors = props.presetColors || [];
     const showHex = props.showHex !== false;
     const showPresets = props.showPresets !== false && presetColors.length > 0;
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     // Create label
     const labelElement = document.createElement('label');
@@ -113,29 +114,34 @@ export class ColorPickerWidget extends BaseWidget {
       }
     });
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-color-picker-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-color-picker-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-color-picker-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-color-picker-disabled');
+      }
     }
     
     // Handle submission
     const handleSubmit = () => {
-      if (!submitButton.disabled && !colorInput.disabled) {
+      if ((!submitButton || !submitButton.disabled) && !colorInput.disabled) {
         const color = colorInput.value;
         
         // Disable color input and submit button if specified
         if (props.disableOnSubmit !== false) {
           colorInput.disabled = true;
           colorInput.classList.add('widget-color-picker-disabled');
-          submitButton.disabled = true;
-          submitButton.classList.add('widget-color-picker-disabled');
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add('widget-color-picker-disabled');
+          }
         }
         
         this.handleInteraction({
@@ -148,7 +154,9 @@ export class ColorPickerWidget extends BaseWidget {
       }
     };
     
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     // Add keyboard support
     colorInput.addEventListener('keypress', (e) => {
@@ -171,7 +179,7 @@ export class ColorPickerWidget extends BaseWidget {
       Object.assign(presetContainer.style, props.presetStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -190,7 +198,9 @@ export class ColorPickerWidget extends BaseWidget {
       container.appendChild(presetContainer);
     }
     
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -216,5 +226,37 @@ export class ColorPickerWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'color';
+  }
+
+  /**
+   * Get the current value of the color picker widget
+   * @returns {string} Current color value
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const colorInput = container.querySelector('.widget-color-input');
+      return colorInput ? colorInput.value : '#000000';
+    }
+    return '#000000';
+  }
+
+  /**
+   * Set the value of the color picker widget
+   * @param {string} value - Color value to set
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const colorInput = container.querySelector('.widget-color-input');
+      const colorDisplay = container.querySelector('.widget-color-display');
+      if (colorInput) {
+        colorInput.value = value;
+        if (colorDisplay) {
+          colorDisplay.style.backgroundColor = value;
+          colorDisplay.textContent = value.toUpperCase();
+        }
+      }
+    }
   }
 }

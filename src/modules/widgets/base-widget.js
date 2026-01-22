@@ -50,6 +50,38 @@ export class BaseWidget {
   }
 
   /**
+   * Emit value change event for form coordination
+   * @param {*} value - New value
+   */
+  emitValueChange(value) {
+    const event = new CustomEvent("widgetValueChanged", {
+      detail: {
+        widgetId: this.widgetId,
+        value: value,
+        widgetType: this.widgetData.type
+      }
+    });
+    document.dispatchEvent(event);
+  }
+
+  /**
+   * Get the current value of the widget
+   * @returns {*} Current widget value
+   */
+  getValue() {
+    // Should be implemented by subclasses
+    return undefined;
+  }
+
+  /**
+   * Set the value of the widget
+   * @param {*} value - Value to set
+   */
+  setValue(value) {
+    // Optional: can be implemented by subclasses
+  }
+
+  /**
    * Validate widget data structure
    * @returns {boolean} True if data contains required type property
    */

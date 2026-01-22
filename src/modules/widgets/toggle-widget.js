@@ -25,6 +25,7 @@ export class ToggleWidget extends BaseWidget {
     const size = props.size || 'medium';
     const defaultValue = props.defaultValue || false;
     let currentValue = defaultValue;
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     // Create label
     const labelElement = document.createElement('label');
@@ -86,27 +87,32 @@ export class ToggleWidget extends BaseWidget {
       valueDisplay.classList.add(`size-${size}`);
     }
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-toggle-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-toggle-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-toggle-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-toggle-disabled');
+      }
     }
     
     // Handle submission
     const handleSubmit = () => {
-      if (!submitButton.disabled) {
+      if (!submitButton || !submitButton.disabled) {
         // Disable toggle and submit button if specified
         if (props.disableOnSubmit !== false) {
           toggleInput.disabled = true;
           toggleSlider.classList.add('widget-toggle-disabled');
-          submitButton.disabled = true;
-          submitButton.classList.add('widget-toggle-disabled');
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add('widget-toggle-disabled');
+          }
         }
         
         this.handleInteraction({
@@ -118,7 +124,9 @@ export class ToggleWidget extends BaseWidget {
     };
     
     // Add event listener
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     // Set initial state
     if (currentValue) {
@@ -130,7 +138,7 @@ export class ToggleWidget extends BaseWidget {
       Object.assign(toggleSlider.style, props.toggleStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -147,7 +155,9 @@ export class ToggleWidget extends BaseWidget {
     if (valueDisplay) {
       container.appendChild(valueDisplay);
     }
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -159,5 +169,41 @@ export class ToggleWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'toggle';
+  }
+
+  /**
+   * Get the current value of the toggle widget
+   * @returns {boolean} Current toggle state
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const toggleInput = container.querySelector('.widget-toggle-input');
+      return toggleInput ? toggleInput.checked : false;
+    }
+    return false;
+  }
+
+  /**
+   * Set the value of the toggle widget
+   * @param {boolean} value - Toggle state to set
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const toggleInput = container.querySelector('.widget-toggle-input');
+      const toggleSlider = container.querySelector('.widget-toggle-slider');
+      const valueDisplay = container.querySelector('.widget-toggle-value');
+      
+      if (toggleInput) {
+        toggleInput.checked = value;
+        if (toggleSlider) {
+          toggleSlider.classList.toggle('active', value);
+        }
+        if (valueDisplay) {
+          valueDisplay.textContent = value ? 'ON' : 'OFF';
+        }
+      }
+    }
   }
 }

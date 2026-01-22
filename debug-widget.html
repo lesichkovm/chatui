@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Widget</title>
+</head>
+<body>
+    <h1>Debug Widget Creation</h1>
+    <div id="widget-container"></div>
+    
+    <script>
+        // Test widget creation directly
+        const widgetData = {
+            type: "input",
+            props: {
+                type: "email",
+                placeholder: "Enter your email...",
+                buttonText: "Submit",
+                showSubmitButton: true
+            }
+        };
+        
+        console.log("Widget data:", widgetData);
+        
+        // Try to create widget using the same logic as the chat widget
+        if (window.WidgetFactory) {
+            console.log("WidgetFactory found");
+            const widget = window.WidgetFactory.createWidget(widgetData, 'debug-widget');
+            if (widget) {
+                console.log("Widget created:", widget);
+                document.getElementById('widget-container').appendChild(widget);
+            } else {
+                console.error("Widget creation failed");
+            }
+        } else {
+            console.error("WidgetFactory not found");
+        }
+    </script>
+    
+    <!-- Load the chat widget -->
+    <script id="chat-widget-debug" src="./dist/chat-widget.js"></script>
+</body>
+</html>

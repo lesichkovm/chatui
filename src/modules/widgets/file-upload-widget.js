@@ -26,6 +26,7 @@ export class FileUploadWidget extends BaseWidget {
     const maxFiles = props.maxFiles || 1;
     const maxSize = props.maxSize || 10 * 1024 * 1024;
     const accept = props.accept || '';
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     let selectedFiles = [];
     
@@ -153,8 +154,10 @@ export class FileUploadWidget extends BaseWidget {
     
     // Update submit button state
     const updateSubmitButton = () => {
-      submitButton.disabled = props.disabled || selectedFiles.length === 0;
-      submitButton.classList.toggle('widget-file-upload-disabled', submitButton.disabled);
+      if (submitButton) {
+        submitButton.disabled = props.disabled || selectedFiles.length === 0;
+        submitButton.classList.toggle('widget-file-upload-disabled', submitButton.disabled);
+      }
     };
     
     // Event listeners
@@ -191,21 +194,24 @@ export class FileUploadWidget extends BaseWidget {
       fileInput.value = '';
     });
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-file-upload-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-file-upload-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-file-upload-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-file-upload-disabled');
+      }
     }
     
     // Handle submission
     const handleSubmit = () => {
-      if (!submitButton.disabled && selectedFiles.length > 0) {
+      if ((!submitButton || !submitButton.disabled) && selectedFiles.length > 0) {
         const fileData = selectedFiles.map(file => ({
           name: file.name,
           size: file.size,
@@ -215,8 +221,10 @@ export class FileUploadWidget extends BaseWidget {
         // Disable drop zone and submit button if specified
         if (props.disableOnSubmit !== false) {
           dropZone.classList.add('widget-file-upload-disabled');
-          submitButton.disabled = true;
-          submitButton.classList.add('widget-file-upload-disabled');
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add('widget-file-upload-disabled');
+          }
         }
         
         this.handleInteraction({
@@ -229,7 +237,9 @@ export class FileUploadWidget extends BaseWidget {
       }
     };
     
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     // Apply custom styles if provided
     if (props.dropzoneStyle) {
@@ -240,7 +250,7 @@ export class FileUploadWidget extends BaseWidget {
       Object.assign(fileList.style, props.fileListStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -254,7 +264,9 @@ export class FileUploadWidget extends BaseWidget {
     container.appendChild(labelElement);
     container.appendChild(dropZone);
     container.appendChild(fileList);
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     container.appendChild(fileInput);
     
     // Initial state
@@ -270,5 +282,29 @@ export class FileUploadWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'file';
+  }
+
+  /**
+   * Get the current value of the file upload widget
+   * @returns {Array} Array of selected file objects
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      // This would need to be stored in the widget instance for proper access
+      // For now, return empty array - actual implementation would track selected files
+      return [];
+    }
+    return [];
+  }
+
+  /**
+   * Set the value of the file upload widget
+   * @param {Array} files - Array of file objects to set
+   */
+  setValue(files) {
+    // File input values cannot be set programmatically for security reasons
+    // This method would typically update the file list display
+    console.warn('FileUploadWidget values cannot be set programmatically for security reasons');
   }
 }

@@ -1,4 +1,5 @@
 import { BaseWidget } from './base-widget.js';
+import { sanitizeHTML, sanitizeStyleProps } from '../../utils/security.js';
 
 /**
  * List Widget
@@ -86,11 +87,13 @@ export class ListWidget extends BaseWidget {
     
     // Apply custom styles
     if (props.style) {
-      Object.assign(container.style, props.style);
+      const sanitizedStyle = sanitizeStyleProps(props.style);
+      Object.assign(container.style, sanitizedStyle);
     }
     
     if (props.contentStyle) {
-      Object.assign(listContent.style, props.contentStyle);
+      const sanitizedContentStyle = sanitizeStyleProps(props.contentStyle);
+      Object.assign(listContent.style, sanitizedContentStyle);
     }
     
     // Assemble the widget
@@ -257,7 +260,8 @@ export class ListWidget extends BaseWidget {
       if (customContent instanceof HTMLElement) {
         content.appendChild(customContent);
       } else {
-        content.innerHTML = customContent;
+        // Sanitize custom HTML content
+        content.innerHTML = sanitizeHTML(customContent);
       }
     }
     

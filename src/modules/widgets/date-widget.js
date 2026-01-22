@@ -24,6 +24,7 @@ export class DateWidget extends BaseWidget {
     const variant = props.variant || 'primary';
     const size = props.size || 'medium';
     const inputType = props.inputType || 'date';
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     // Create label
     const labelElement = document.createElement('label');
@@ -78,21 +79,24 @@ export class DateWidget extends BaseWidget {
       updateDateDisplay(); // Initial display
     }
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-date-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-date-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-date-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-date-disabled');
+      }
     }
     
     // Handle submission
     const handleSubmit = () => {
-      if (!dateInput.disabled && !submitButton.disabled) {
+      if (!dateInput.disabled && (!submitButton || !submitButton.disabled)) {
         const value = dateInput.value;
         
         // Validate if required
@@ -106,8 +110,10 @@ export class DateWidget extends BaseWidget {
           if (props.disableOnSubmit !== false) {
             dateInput.disabled = true;
             dateInput.classList.add('widget-date-disabled');
-            submitButton.disabled = true;
-            submitButton.classList.add('widget-date-disabled');
+            if (submitButton) {
+              submitButton.disabled = true;
+              submitButton.classList.add('widget-date-disabled');
+            }
           }
           
           // Format date for interaction
@@ -128,7 +134,9 @@ export class DateWidget extends BaseWidget {
     };
     
     // Add event listeners
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     dateInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -146,7 +154,7 @@ export class DateWidget extends BaseWidget {
       Object.assign(dateInput.style, props.inputStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -160,7 +168,9 @@ export class DateWidget extends BaseWidget {
     if (dateDisplay) {
       container.appendChild(dateDisplay);
     }
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -172,5 +182,32 @@ export class DateWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'date';
+  }
+
+  /**
+   * Get the current value of the date widget
+   * @returns {string} Current date value
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const dateInput = container.querySelector('.widget-date-input');
+      return dateInput ? dateInput.value : '';
+    }
+    return '';
+  }
+
+  /**
+   * Set the value of the date widget
+   * @param {string} value - Value to set
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const dateInput = container.querySelector('.widget-date-input');
+      if (dateInput) {
+        dateInput.value = value;
+      }
+    }
   }
 }

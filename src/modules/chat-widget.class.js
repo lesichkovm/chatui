@@ -1,7 +1,7 @@
-import { HybridChatAPI } from './api.js';
-import { injectStyles, createWidgetDOM, appendMessage } from './ui.js';
-import { ThemeManager } from './theme.js';
-import { adjustColor } from './utils.js';
+import { HybridChatAPI } from "./api.js";
+import { injectStyles, createWidgetDOM, appendMessage } from "./ui.js";
+import { ThemeManager } from "./theme.js";
+import { adjustColor } from "./utils.js";
 
 /**
  * Main ChatWidget class that orchestrates the entire chat interface
@@ -55,6 +55,13 @@ export class ChatWidget {
     this.minMessageInterval = 1000; // 1 second between messages
     this.maxMessageLength = 10000; // Maximum message length
 
+    // Error handling configuration
+    this.maxRetries = 3; // Maximum retry attempts
+    this.retryDelay = 2000; // Base retry delay in milliseconds
+    this.retryCount = 0; // Current retry count
+    this.messageQueue = []; // Queue for failed messages
+    this.currentErrorElement = null; // Current error message element
+
     // Capture explicit color from config (programmatic)
     const explicitColor = config.primaryColor || config.color;
 
@@ -99,7 +106,7 @@ export class ChatWidget {
     injectStyles(this.widgetId, this.config);
     const { container, chatWindow, chatButton } = createWidgetDOM(
       this.widgetId,
-      this.config
+      this.config,
     );
 
     this.container = container;
@@ -107,8 +114,8 @@ export class ChatWidget {
     this.chatButton = chatButton;
 
     // Set theme data attributes
-    this.container.setAttribute('data-theme', this.config.theme);
-    this.container.setAttribute('data-mode', this.config.themeMode);
+    this.container.setAttribute("data-theme", this.config.theme);
+    this.container.setAttribute("data-mode", this.config.themeMode);
 
     // Apply custom colors from data attributes if present
     this.applyCustomColors();
@@ -120,8 +127,33 @@ export class ChatWidget {
     this.closeButton = this.chatWindow.querySelector(".close");
 
     this.bindEvents();
-    this.api.performHandshake();
-    this.api.connect((text, sender, widgetData) => this.addMessage(text, sender, widgetData));
+
+    // Perform handshake with error handling
+    this.api.performHandshake(
+      // Success callback
+      () => {
+        console.log("ChatWidget: Handshake successful");
+        this.clearError();
+      },
+      // Error callback
+      (error) => {
+        console.error("ChatWidget: Handshake failed", error);
+        this.showError(
+          "Failed to connect to chat server. Some features may not work.",
+        );
+      },
+    );
+
+    // Connect with error handling
+    this.api.connect(
+      // Message callback
+      (text, sender, widgetData) => this.addMessage(text, sender, widgetData),
+      // Error callback
+      (error) => {
+        console.error("ChatWidget: Connection failed", error);
+        this.showError("Connection to server lost. Attempting to reconnect...");
+      },
+    );
 
     // Listen for widget interactions
     document.addEventListener("widgetInteraction", (event) => {
@@ -142,23 +174,23 @@ export class ChatWidget {
   applyCustomColors() {
     if (this.scriptElement) {
       const mode = this.config.themeMode;
-      const suffix = mode === 'light' ? '-light' : '-dark';
+      const suffix = mode === "light" ? "-light" : "-dark";
 
       const colorMap = {
-        [`data-color${suffix}`]: '--chat-primary',
-        [`data-bg-color${suffix}`]: '--chat-bg',
-        [`data-surface-color${suffix}`]: '--chat-surface',
-        [`data-text-color${suffix}`]: '--chat-text',
-        [`data-border-color${suffix}`]: '--chat-border',
+        [`data-color${suffix}`]: "--chat-primary",
+        [`data-bg-color${suffix}`]: "--chat-bg",
+        [`data-surface-color${suffix}`]: "--chat-surface",
+        [`data-text-color${suffix}`]: "--chat-text",
+        [`data-border-color${suffix}`]: "--chat-border",
       };
 
       // Also check for generic attributes without mode suffix (fallback)
       const genericColorMap = {
-        'data-color': '--chat-primary',
-        'data-bg-color': '--chat-bg',
-        'data-surface-color': '--chat-surface',
-        'data-text-color': '--chat-text',
-        'data-border-color': '--chat-border',
+        "data-color": "--chat-primary",
+        "data-bg-color": "--chat-bg",
+        "data-surface-color": "--chat-surface",
+        "data-text-color": "--chat-text",
+        "data-border-color": "--chat-border",
       };
 
       // First check mode-specific attributes
@@ -168,8 +200,11 @@ export class ChatWidget {
           this.container.style.setProperty(cssVar, value);
 
           // Also set --chat-primary-dark if primary color is customized
-          if (cssVar === '--chat-primary') {
-            this.container.style.setProperty('--chat-primary-dark', adjustColor(value, -20));
+          if (cssVar === "--chat-primary") {
+            this.container.style.setProperty(
+              "--chat-primary-dark",
+              adjustColor(value, -20),
+            );
           }
         }
       }
@@ -181,17 +216,29 @@ export class ChatWidget {
           this.container.style.setProperty(cssVar, value);
 
           // Also set --chat-primary-dark if primary color is customized
-          if (cssVar === '--chat-primary') {
-            this.container.style.setProperty('--chat-primary-dark', adjustColor(value, -20));
+          if (cssVar === "--chat-primary") {
+            this.container.style.setProperty(
+              "--chat-primary-dark",
+              adjustColor(value, -20),
+            );
           }
         }
       }
     }
 
     // Apply explicitColor from config if it was provided programmatically (not from theme default)
-    if (this.config.explicitColor && !this.container.style.getPropertyValue('--chat-primary')) {
-      this.container.style.setProperty('--chat-primary', this.config.explicitColor);
-      this.container.style.setProperty('--chat-primary-dark', adjustColor(this.config.explicitColor, -20));
+    if (
+      this.config.explicitColor &&
+      !this.container.style.getPropertyValue("--chat-primary")
+    ) {
+      this.container.style.setProperty(
+        "--chat-primary",
+        this.config.explicitColor,
+      );
+      this.container.style.setProperty(
+        "--chat-primary-dark",
+        adjustColor(this.config.explicitColor, -20),
+      );
     }
   }
 
@@ -329,46 +376,67 @@ export class ChatWidget {
   }
 
   /**
-   * Send a message to the chat server
+   * Send a message to the chat server with comprehensive error handling
    * @param {string} [text] - Optional message text (uses textarea value if not provided)
    */
   sendMessage(text) {
     const message = text || this.textarea.value.trim();
-    
+
+    // Check for empty message first
+    if (!message) {
+      console.log("ChatWidget: Empty message rejected");
+      return;
+    }
+
     // Apply rate limiting
     const now = Date.now();
     if (now - this.lastMessageTime < this.minMessageInterval) {
-      console.warn('ChatWidget: Message rate limit exceeded. Please wait before sending another message.');
+      this.showError("Please wait before sending another message.");
       return;
     }
-    
+
     // Apply message length validation
     if (message.length > this.maxMessageLength) {
-      console.warn(`ChatWidget: Message too long. Maximum length is ${this.maxMessageLength} characters.`);
+      this.showError(
+        `Message too long. Maximum length is ${this.maxMessageLength} characters.`,
+      );
       return;
     }
-    
-    if (message) {
-      this.lastMessageTime = now;
-      this.addMessage(message, "user");
-      
-      // Add waiting placeholder message
-      const waitingMessageId = this.addWaitingMessage();
-      
-      this.api.sendMessage(message, (text2, sender, widgetData) => {
+
+    this.lastMessageTime = now;
+    this.addMessage(message, "user");
+
+    // Add waiting placeholder message
+    const waitingMessageId = this.addWaitingMessage();
+
+    // Send message with error handling
+    this.api.sendMessage(
+      message,
+      // Success callback
+      (text2, sender, widgetData) => {
         // Remove waiting message and add real response
         this.removeWaitingMessage(waitingMessageId);
         this.addMessage(text2, sender, widgetData);
-      });
-      if (!text) {
-        this.textarea.value = "";
-        this.textarea.style.height = "auto";
-      }
+        this.clearError();
+      },
+      // Error callback
+      (error) => {
+        // Remove waiting message
+        this.removeWaitingMessage(waitingMessageId);
+
+        // Handle different types of errors
+        this.handleMessageError(error, message);
+      },
+    );
+
+    if (!text) {
+      this.textarea.value = "";
+      this.textarea.style.height = "auto";
     }
   }
 
   /**
-   * Handle widget interaction events
+   * Handle widget interaction events with error handling
    * @private
    * @param {Object} interaction - Interaction data from widget
    */
@@ -380,12 +448,233 @@ export class ChatWidget {
     // Add waiting placeholder message
     const waitingMessageId = this.addWaitingMessage();
 
-    // Send the option value to the API
-    this.api.sendMessage(interaction.optionValue, (text, sender, widgetData) => {
-      // Remove waiting message and add real response
-      this.removeWaitingMessage(waitingMessageId);
-      this.addMessage(text, sender, widgetData);
+    // Send the option value to the API with error handling
+    this.api.sendMessage(
+      interaction.optionValue,
+      // Success callback
+      (text, sender, widgetData) => {
+        // Remove waiting message and add real response
+        this.removeWaitingMessage(waitingMessageId);
+        this.addMessage(text, sender, widgetData);
+        this.clearError();
+      },
+      // Error callback
+      (error) => {
+        // Remove waiting message
+        this.removeWaitingMessage(waitingMessageId);
+
+        // Handle different types of errors
+        this.handleMessageError(error, interaction.optionValue);
+      },
+    );
+  }
+
+  /**
+   * Handle message sending errors with user-friendly feedback
+   * @private
+   * @param {Error} error - The error that occurred
+   * @param {string} originalMessage - The original message that failed to send
+   */
+  handleMessageError(error, originalMessage) {
+    console.error("ChatWidget: Message sending failed", error);
+
+    // Categorize error types and provide appropriate user feedback
+    let userMessage = "Failed to send message. Please try again.";
+    let shouldRetry = false;
+
+    if (
+      error.message.includes("CORS_ERROR") ||
+      error.message.includes("Failed to fetch")
+    ) {
+      userMessage =
+        "Network error. Please check your connection and try again.";
+      shouldRetry = true;
+    } else if (error.message.includes("timeout")) {
+      userMessage =
+        "Request timed out. The server may be busy. Please try again.";
+      shouldRetry = true;
+    } else if (error.message.includes("rate limit")) {
+      userMessage =
+        "Too many messages sent. Please wait a moment before trying again.";
+    } else if (error.message.includes("session")) {
+      userMessage = "Session expired. Please refresh the page and try again.";
+    } else if (error.message.includes("handshake")) {
+      userMessage = "Connection to server failed. Please refresh the page.";
+    } else if (
+      error.message.includes("WebSocket") ||
+      error.message.includes("connection")
+    ) {
+      userMessage = "Connection lost. Attempting to reconnect...";
+      shouldRetry = true;
+    }
+
+    // Show error message to user
+    this.showError(userMessage);
+
+    // Add failed message indicator
+    this.addFailedMessageIndicator(originalMessage);
+
+    // Queue message for retry if appropriate
+    if (shouldRetry && this.retryCount < this.maxRetries) {
+      this.queueMessageForRetry(originalMessage);
+    }
+  }
+
+  /**
+   * Show error message to user
+   * @private
+   * @param {string} message - Error message to display
+   */
+  showError(message) {
+    // Remove existing error message
+    this.clearError();
+
+    // Create error message element
+    const errorElement = document.createElement("div");
+    errorElement.className = "chat-error-message";
+    errorElement.textContent = message;
+    errorElement.style.cssText = `
+      background-color: #fee;
+      color: #c33;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 14px;
+      border-left: 4px solid #c33;
+      animation: slideIn 0.3s ease-out;
+    `;
+
+    // Insert error message at the top of messages container
+    if (this.messagesContainer) {
+      this.messagesContainer.insertBefore(
+        errorElement,
+        this.messagesContainer.firstChild,
+      );
+      this.currentErrorElement = errorElement;
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        this.clearError();
+      }, 5000);
+    }
+
+    // Dispatch error event for external handling
+    window.dispatchEvent(
+      new CustomEvent("chatwidget:error", {
+        detail: { message, timestamp: Date.now() },
+      }),
+    );
+  }
+
+  /**
+   * Clear current error message
+   * @private
+   */
+  clearError() {
+    if (this.currentErrorElement && this.currentErrorElement.parentNode) {
+      this.currentErrorElement.parentNode.removeChild(this.currentErrorElement);
+      this.currentErrorElement = null;
+    }
+  }
+
+  /**
+   * Add failed message indicator
+   * @private
+   * @param {string} message - The message that failed
+   */
+  addFailedMessageIndicator(message) {
+    const failedElement = document.createElement("div");
+    failedElement.className = "chat-failed-message";
+    failedElement.innerHTML = `
+      <div style="color: #666; font-style: italic; font-size: 12px; margin: 4px 0;">
+        Failed to send: "${message.substring(0, 50)}${message.length > 50 ? "..." : ""}"
+        <button class="retry-btn" style="margin-left: 8px; padding: 2px 6px; font-size: 11px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; cursor: pointer;">
+          Retry
+        </button>
+      </div>
+    `;
+
+    // Add retry functionality
+    const retryBtn = failedElement.querySelector(".retry-btn");
+    retryBtn.addEventListener("click", () => {
+      this.sendMessage(message);
+      failedElement.remove();
     });
+
+    // Add to messages container
+    if (this.messagesContainer) {
+      this.messagesContainer.appendChild(failedElement);
+      this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+    }
+  }
+
+  /**
+   * Queue message for retry
+   * @private
+   * @param {string} message - Message to queue
+   */
+  queueMessageForRetry(message) {
+    if (!this.messageQueue) {
+      this.messageQueue = [];
+    }
+
+    this.messageQueue.push({
+      message,
+      timestamp: Date.now(),
+      retryCount: 0,
+    });
+
+    // Attempt to retry after delay
+    setTimeout(() => {
+      this.processMessageQueue();
+    }, this.retryDelay);
+  }
+
+  /**
+   * Process queued messages for retry
+   * @private
+   */
+  processMessageQueue() {
+    if (!this.messageQueue || this.messageQueue.length === 0) {
+      return;
+    }
+
+    const queuedMessage = this.messageQueue.shift();
+
+    // Check if we should retry this message
+    if (queuedMessage.retryCount < this.maxRetries) {
+      queuedMessage.retryCount++;
+
+      // Try to send the message again
+      this.api.sendMessage(
+        queuedMessage.message,
+        // Success callback
+        (text, sender, widgetData) => {
+          this.addMessage(text, sender, widgetData);
+          this.clearError();
+          // Continue processing queue
+          if (this.messageQueue.length > 0) {
+            setTimeout(() => this.processMessageQueue(), 1000);
+          }
+        },
+        // Error callback
+        (error) => {
+          console.error("ChatWidget: Retry failed", error);
+          // Re-queue with higher delay
+          setTimeout(
+            () => {
+              this.queueMessageForRetry(queuedMessage.message);
+            },
+            this.retryDelay * Math.pow(2, queuedMessage.retryCount),
+          );
+        },
+      );
+    } else {
+      // Max retries reached, show permanent error
+      this.showError(
+        `Failed to send message after ${this.maxRetries} attempts. Please check your connection.`,
+      );
+    }
   }
 
   /**
@@ -395,9 +684,23 @@ export class ChatWidget {
    * @param {Object} [widgetData] - Optional widget data for bot messages
    */
   addMessage(text, sender, widgetData = null) {
+    // Debug logging
+    console.log("ChatWidget: addMessage called", {
+      text,
+      sender,
+      textLength: text.length,
+      widgetData,
+    });
+
     const messageObj = { text, sender, timestamp: Date.now(), widgetData };
     this.state.messages.push(messageObj);
-    appendMessage(this.messagesContainer, text, sender, this.widgetId, widgetData);
+    appendMessage(
+      this.messagesContainer,
+      text,
+      sender,
+      this.widgetId,
+      widgetData,
+    );
   }
 
   /**
@@ -410,7 +713,7 @@ export class ChatWidget {
     const waitingElement = document.createElement("div");
     waitingElement.className = "message bot-message waiting-message";
     waitingElement.id = waitingMessageId;
-    
+
     // Create animated dots indicator
     const dotsContainer = document.createElement("div");
     dotsContainer.className = "waiting-dots";
@@ -419,11 +722,11 @@ export class ChatWidget {
       <span class="dot"></span>
       <span class="dot"></span>
     `;
-    
+
     waitingElement.appendChild(dotsContainer);
     this.messagesContainer.appendChild(waitingElement);
     this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-    
+
     return waitingMessageId;
   }
 
@@ -463,7 +766,7 @@ export class ChatWidget {
    */
   setTheme(theme) {
     this.themeManager.setTheme(theme);
-    this.container.setAttribute('data-theme', theme);
+    this.container.setAttribute("data-theme", theme);
     this.config.theme = theme;
   }
 
@@ -473,7 +776,7 @@ export class ChatWidget {
    */
   setThemeMode(mode) {
     this.themeManager.setMode(mode);
-    this.container.setAttribute('data-mode', mode);
+    this.container.setAttribute("data-mode", mode);
     this.config.themeMode = mode;
     // Reapply custom colors for the new mode
     this.applyCustomColors();
@@ -485,7 +788,7 @@ export class ChatWidget {
    */
   toggleThemeMode() {
     const newMode = this.themeManager.toggleMode();
-    this.container.setAttribute('data-mode', newMode);
+    this.container.setAttribute("data-mode", newMode);
     this.config.themeMode = newMode;
     // Reapply custom colors for the new mode
     this.applyCustomColors();
@@ -513,15 +816,15 @@ export class ChatWidget {
     if (this.chatButton) {
       this.chatButton.removeEventListener("click", this.handlers.toggle);
     }
-    
+
     if (this.closeButton) {
       this.closeButton.removeEventListener("click", this.handlers.close);
     }
-    
+
     if (this.textarea) {
       this.textarea.removeEventListener("keypress", this.handlers.keypress);
     }
-    
+
     if (this.sendButton) {
       this.sendButton.removeEventListener("click", this.handlers.send);
     }
@@ -546,7 +849,7 @@ export class ChatWidget {
     if (this.chatWindow && this.chatWindow.parentNode) {
       this.chatWindow.parentNode.removeChild(this.chatWindow);
     }
-    
+
     if (this.chatButton && this.chatButton.parentNode) {
       this.chatButton.parentNode.removeChild(this.chatButton);
     }

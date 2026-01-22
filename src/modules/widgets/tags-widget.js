@@ -27,6 +27,7 @@ export class TagsWidget extends BaseWidget {
     const maxTags = props.maxTags || 10;
     const suggestions = props.suggestions || [];
     let tags = [...(props.initialTags || [])];
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     // Create label
     const labelElement = document.createElement('label');
@@ -66,8 +67,10 @@ export class TagsWidget extends BaseWidget {
     
     // Update submit button state
     const updateSubmitButton = () => {
-      submitButton.disabled = props.disabled || tags.length === 0;
-      submitButton.classList.toggle('widget-tags-disabled', submitButton.disabled);
+      if (submitButton) {
+        submitButton.disabled = props.disabled || tags.length === 0;
+        submitButton.classList.toggle('widget-tags-disabled', submitButton.disabled);
+      }
     };
     
     // Render tags function with submit button update
@@ -173,27 +176,32 @@ export class TagsWidget extends BaseWidget {
       }
     });
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-tags-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled || tags.length === 0) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-tags-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-tags-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled || tags.length === 0) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-tags-disabled');
+      }
     }
     
     // Handle submission
     const handleSubmit = () => {
-      if (!submitButton.disabled && tags.length > 0) {
+      if ((!submitButton || !submitButton.disabled) && tags.length > 0) {
         // Disable input and submit button if specified
         if (props.disableOnSubmit !== false) {
           input.disabled = true;
           input.classList.add('widget-tags-disabled');
-          submitButton.disabled = true;
-          submitButton.classList.add('widget-tags-disabled');
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add('widget-tags-disabled');
+          }
         }
         
         this.handleInteraction({
@@ -206,7 +214,9 @@ export class TagsWidget extends BaseWidget {
     };
     
     // Add event listener
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     // Apply custom styles if provided
     if (props.inputStyle) {
@@ -217,7 +227,7 @@ export class TagsWidget extends BaseWidget {
       Object.assign(tagsDisplay.style, props.tagsStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -232,7 +242,9 @@ export class TagsWidget extends BaseWidget {
     
     container.appendChild(labelElement);
     container.appendChild(inputWrapper);
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     // Initial render
     renderTags();
@@ -247,5 +259,36 @@ export class TagsWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'tags';
+  }
+
+  /**
+   * Get the current value of the tags widget
+   * @returns {Array} Array of tag strings
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const tagElements = container.querySelectorAll('.widget-tag');
+      const tags = [];
+      tagElements.forEach(tagElement => {
+        // Get text content excluding the remove button
+        const text = tagElement.textContent.replace('×', '').trim();
+        if (text) {
+          tags.push(text);
+        }
+      });
+      return tags;
+    }
+    return [];
+  }
+
+  /**
+   * Set the value of the tags widget
+   * @param {Array} value - Array of tag strings to set
+   */
+  setValue(value) {
+    // This would require re-implementing the tag rendering logic
+    // For now, just log a warning as this is complex to implement without full context
+    console.warn('TagsWidget.setValue() requires full re-rendering implementation');
   }
 }

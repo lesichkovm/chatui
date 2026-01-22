@@ -24,6 +24,7 @@ export class CheckboxWidget extends BaseWidget {
     const size = props.size || 'medium';
     const layout = props.layout || 'vertical';
     const allowEmpty = props.allowEmpty !== false;
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     // Create checkbox container
     const checkboxContainer = document.createElement('div');
@@ -72,21 +73,24 @@ export class CheckboxWidget extends BaseWidget {
       checkboxContainer.appendChild(checkboxWrapper);
     });
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-checkbox-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-checkbox-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-checkbox-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-checkbox-disabled');
+      }
     }
     
     // Handle submission
     const handleSubmit = () => {
-      if (!submitButton.disabled) {
+      if (!submitButton || !submitButton.disabled) {
         const checkboxes = checkboxContainer.querySelectorAll('.widget-checkbox');
         const selectedOptions = [];
         
@@ -111,8 +115,10 @@ export class CheckboxWidget extends BaseWidget {
               cb.disabled = true;
               cb.classList.add('widget-checkbox-disabled');
             });
-            submitButton.disabled = true;
-            submitButton.classList.add('widget-checkbox-disabled');
+            if (submitButton) {
+              submitButton.disabled = true;
+              submitButton.classList.add('widget-checkbox-disabled');
+            }
           }
           
           this.handleInteraction({
@@ -124,14 +130,16 @@ export class CheckboxWidget extends BaseWidget {
     };
     
     // Add event listener
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     // Apply custom styles if provided
     if (props.optionsStyle) {
       Object.assign(checkboxContainer.style, props.optionsStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -141,7 +149,9 @@ export class CheckboxWidget extends BaseWidget {
     
     // Assemble the widget
     container.appendChild(checkboxContainer);
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -156,5 +166,36 @@ export class CheckboxWidget extends BaseWidget {
            this.widgetData.props &&
            Array.isArray(this.widgetData.props.options) &&
            this.widgetData.props.options.length > 0;
+  }
+
+  /**
+   * Get the current value of the checkbox widget
+   * @returns {Array} Array of selected option values
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const checkboxes = container.querySelectorAll('.widget-checkbox:checked');
+      const selectedValues = [];
+      checkboxes.forEach(checkbox => {
+        selectedValues.push(checkbox.value);
+      });
+      return selectedValues;
+    }
+    return [];
+  }
+
+  /**
+   * Set the value of the checkbox widget
+   * @param {Array} values - Array of values to select
+   */
+  setValue(values) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const checkboxes = container.querySelectorAll('.widget-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = values.includes(checkbox.value);
+      });
+    }
   }
 }

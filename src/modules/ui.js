@@ -1,5 +1,6 @@
 import { adjustColor } from './utils.js';
-import { WidgetFactory } from './widgets/index.js';
+import { WidgetFactory } from './widgets/widget-factory.js';
+import { sanitizeHTML, createSafeMessageHTML } from '../utils/security.js';
 
 /**
  * Inject CSS styles for the chat widget
@@ -1430,42 +1431,19 @@ export function createWidgetDOM(widgetId, config) {
  * @param {string} widgetId - Widget ID for generating unique message IDs
  * @param {Object} [legacyWidgetData] - Optional legacy widget data for backward compatibility
  */
-/**
- * Sanitize HTML content to prevent XSS attacks
- * @param {string} text - Text content to sanitize
- * @returns {string} Sanitized text with safe HTML only
- */
-function sanitizeHTML(text) {
-  if (typeof text !== 'string') return '';
-  
-  // Create a temporary div to escape HTML
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-/**
- * Create safe HTML content with line breaks
- * @param {string} text - Text content to process
- * @returns {string} Safe HTML with line breaks
- */
-function createSafeMessageHTML(text) {
-  if (typeof text !== 'string') return '';
-  
-  // Escape HTML and then add safe line breaks
-  const escapedText = sanitizeHTML(text);
-  return escapedText.replace(/\n/g, '<br>');
-}
-
 export function appendMessage(container, message, sender, widgetId, legacyWidgetData = null) {
+  // Debug logging
+  console.log('UI: appendMessage called', { message, sender, messageLength: message.length, widgetId });
+  
   const messageElement = document.createElement("div");
   messageElement.className = `message ${sender}-message`;
   messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   // Handle new widget-based message format
-  if (typeof message === 'object' && message.widgets) {
+  if (Array.isArray(message) || (typeof message === 'object' && message.widgets)) {
     // New composable widget format
-    message.widgets.forEach(widgetConfig => {
+    const widgets = Array.isArray(message) ? message : message.widgets;
+    widgets.forEach(widgetConfig => {
       const widgetElement = createWidgetElement(widgetConfig, widgetId);
       if (widgetElement) {
         messageElement.appendChild(widgetElement);

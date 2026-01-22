@@ -21,8 +21,10 @@ import { FileUploadWidget } from './file-upload-widget.js';
 import { ColorPickerWidget } from './color-picker-widget.js';
 import { ConditionalWidget } from './conditional-widget.js';
 import { ListWidget } from './list-widget.js';
+import { FormWidget } from './form-widget.js';
 
 import { WIDGET_TYPES, SERVER_TYPE_MAPPINGS, LEGACY_WIDGET_TYPES } from './widget-types.js';
+import { sanitizeWidgetData } from '../../utils/security.js';
 
 /**
  * Widget Factory
@@ -66,7 +68,10 @@ export class WidgetFactory {
     
     // Advanced composition widgets
     [WIDGET_TYPES.CONDITIONAL, ConditionalWidget],
-    [WIDGET_TYPES.LIST, ListWidget]
+    [WIDGET_TYPES.LIST, ListWidget],
+    
+    // Form coordination widgets
+    [WIDGET_TYPES.FORM, FormWidget]
   ]);
 
   /**
@@ -94,28 +99,31 @@ export class WidgetFactory {
       return null;
     }
 
+    // Sanitize widget configuration data
+    const sanitizedConfig = sanitizeWidgetData(widgetConfig);
+
     // Handle server-to-widget type mapping
-    const widgetType = SERVER_TYPE_MAPPINGS[widgetConfig.type] || widgetConfig.type;
+    const widgetType = SERVER_TYPE_MAPPINGS[sanitizedConfig.type] || sanitizedConfig.type;
     const WidgetClass = this.widgetTypes.get(widgetType);
     
     if (!WidgetClass) {
-      console.warn(`Unsupported widget type: ${widgetConfig.type} (mapped to: ${widgetType})`);
+      console.warn(`Unsupported widget type: ${sanitizedConfig.type} (mapped to: ${widgetType})`);
       return null;
     }
 
     try {
-      // Create widget with mapped type for internal consistency
-      const mappedWidgetConfig = { ...widgetConfig, type: widgetType };
+      // Create widget with sanitized and mapped type for internal consistency
+      const mappedWidgetConfig = { ...sanitizedConfig, type: widgetType };
       const widgetInstance = new WidgetClass(mappedWidgetConfig, widgetId);
       const element = widgetInstance.createElement();
 
       // Recursively process children if present
-      if (widgetConfig.children && Array.isArray(widgetConfig.children)) {
+      if (sanitizedConfig.children && Array.isArray(sanitizedConfig.children)) {
         const childrenContainer = widgetInstance.getChildrenContainer ? 
                                   widgetInstance.getChildrenContainer(element) : 
                                   element;
         
-        widgetConfig.children.forEach(childConfig => {
+        sanitizedConfig.children.forEach(childConfig => {
           const childElement = this.createWidget(childConfig, widgetId);
           if (childElement) {
             childrenContainer.appendChild(childElement);
@@ -125,7 +133,7 @@ export class WidgetFactory {
 
       return element;
     } catch (error) {
-      console.error(`Error creating widget of type ${widgetConfig.type}:`, error);
+      console.error(`Error creating widget of type ${sanitizedConfig.type}:`, error);
       return null;
     }
   }

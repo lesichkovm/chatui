@@ -11,17 +11,19 @@ export class LegacyAPI {
    */
   constructor(config) {
     if (!config) {
-      throw new Error('LegacyAPI: config is required');
+      throw new Error("LegacyAPI: config is required");
     }
-    
+
     // Allow empty serverUrl for tests, but handle it gracefully
     if (config.serverUrl === null || config.serverUrl === undefined) {
-      throw new Error('LegacyAPI: serverUrl is required');
+      throw new Error("LegacyAPI: serverUrl is required");
     }
-    
-    this.serverUrl = config.serverUrl ? config.serverUrl.replace(/\/$/, '') : ''; // Remove trailing slash or keep empty
+
+    this.serverUrl = config.serverUrl
+      ? config.serverUrl.replace(/\/$/, "")
+      : ""; // Remove trailing slash or keep empty
     this.debug = config.debug || false;
-    this.sessionKey = '';
+    this.sessionKey = "";
     this.connectionTimeout = config.connectionTimeout || 10000;
   }
 
@@ -31,29 +33,33 @@ export class LegacyAPI {
    * @returns {string} Validated and sanitized message
    */
   validateMessage(message) {
-    if (typeof message !== 'string') {
-      throw new Error('Invalid message type: message must be a string');
+    if (typeof message !== "string") {
+      throw new Error("Invalid message type: message must be a string");
     }
-    
+
     if (message.length === 0) {
-      throw new Error('Invalid message: message cannot be empty');
+      throw new Error("Invalid message: message cannot be empty");
     }
-    
+
     if (message.length > 10000) {
-      throw new Error('Invalid message: message too long (max 10000 characters)');
+      throw new Error(
+        "Invalid message: message too long (max 10000 characters)",
+      );
     }
-    
+
     // Remove potential script content and excessive whitespace
     const sanitized = message
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags
-      .replace(/javascript:/gi, '') // Remove javascript: protocol
-      .replace(/on\w+\s*=/gi, '') // Remove event handlers
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") // Remove script tags
+      .replace(/javascript:/gi, "") // Remove javascript: protocol
+      .replace(/on\w+\s*=/gi, "") // Remove event handlers
       .trim();
-    
+
     if (sanitized.length === 0) {
-      throw new Error('Invalid message: message contains only disallowed content');
+      throw new Error(
+        "Invalid message: message contains only disallowed content",
+      );
     }
-    
+
     return sanitized;
   }
 
@@ -76,19 +82,19 @@ export class LegacyAPI {
    * @returns {boolean} True if response is valid
    */
   _validateJSONPResponse(response) {
-    if (!response || typeof response !== 'object') {
+    if (!response || typeof response !== "object") {
       return false;
     }
-    
+
     // Check for required fields based on expected response structure
-    if (response.status !== undefined && typeof response.status !== 'string') {
+    if (response.status !== undefined && typeof response.status !== "string") {
       return false;
     }
-    
-    if (response.text !== undefined && typeof response.text !== 'string') {
+
+    if (response.text !== undefined && typeof response.text !== "string") {
       return false;
     }
-    
+
     // Additional validation can be added here as needed
     return true;
   }
@@ -98,20 +104,24 @@ export class LegacyAPI {
    * @returns {string} The stored session key or empty string
    */
   getSessionKey() {
-    if (typeof sessionStorage !== 'undefined') {
+    if (typeof sessionStorage !== "undefined") {
       return sessionStorage.getItem("chat_session_key") || "";
     }
-    
+
     // Fallback for test environment - use localStorage mock if available
-    if (typeof localStorage !== 'undefined') {
+    if (typeof localStorage !== "undefined") {
       return localStorage.getItem("chat_session_key") || "";
     }
-    
+
     // Fallback for test environment using global mock
-    if (this.isTestEnvironment() && typeof global !== 'undefined' && global.localStorage) {
+    if (
+      this.isTestEnvironment() &&
+      typeof global !== "undefined" &&
+      global.localStorage
+    ) {
       return global.localStorage.getItem("chat_session_key") || "";
     }
-    
+
     return "";
   }
 
@@ -120,11 +130,15 @@ export class LegacyAPI {
    * @param {string} key - The session key to store
    */
   setSessionKey(key) {
-    if (typeof sessionStorage !== 'undefined') {
+    if (typeof sessionStorage !== "undefined") {
       sessionStorage.setItem("chat_session_key", key);
-    } else if (typeof localStorage !== 'undefined') {
+    } else if (typeof localStorage !== "undefined") {
       localStorage.setItem("chat_session_key", key);
-    } else if (this.isTestEnvironment() && typeof global !== 'undefined' && global.localStorage) {
+    } else if (
+      this.isTestEnvironment() &&
+      typeof global !== "undefined" &&
+      global.localStorage
+    ) {
       // Fallback for test environment using global mock
       global.localStorage.setItem("chat_session_key", key);
     }
@@ -138,9 +152,9 @@ export class LegacyAPI {
     return (
       (typeof window !== "undefined" && window.__CHAT_WIDGET_TEST_MODE__) ||
       (typeof window !== "undefined" &&
-      window.location &&
-      window.location.hostname === "localhost" &&
-      window.location.port === "32000")
+        window.location &&
+        window.location.hostname === "localhost" &&
+        window.location.port === "32000")
     );
   }
 
@@ -181,7 +195,7 @@ export class LegacyAPI {
     const sessionKey = this.getSessionKey();
     const callbackName = "connectCallback_" + Date.now();
     const url = `${this.serverUrl}/api/messages?callback=${callbackName}&type=connect&session_key=${encodeURIComponent(
-      sessionKey
+      sessionKey,
     )}`;
 
     this._injectScript(url, callbackName, (response) => {
@@ -204,13 +218,13 @@ export class LegacyAPI {
    * @param {string} onResponse.sender - Response sender ('bot')
    * @param {Object} [onResponse.widget] - Optional widget data
    */
-  sendMessage(message, onResponse) {
+  sendMessage(message, onSuccess, onError) {
     if (this.isTestEnvironment()) {
       // Simulate a delayed response in test environment
       setTimeout(() => {
-        if (onResponse) {
+        if (onSuccess) {
           // Simple test response
-          onResponse(`Test response to: ${message}`, "bot");
+          onSuccess(`Test response to: ${message}`, "bot");
         }
       }, 100);
       return;
@@ -218,31 +232,40 @@ export class LegacyAPI {
 
     // Validate and sanitize the message
     const validatedMessage = this.validateMessage(message);
-    
+
     const sessionKey = this.getSessionKey();
     const callbackName = this._generateSecureCallbackName();
     const url = `${this.serverUrl}/api/messages?callback=${callbackName}&message=${encodeURIComponent(
-      validatedMessage
+      validatedMessage,
     )}&type=message&session_key=${encodeURIComponent(sessionKey)}`;
 
     this._injectScript(url, callbackName, (response) => {
       // Validate response structure before processing
       if (!this._validateJSONPResponse(response)) {
-        console.error('ChatWidget: Invalid JSONP response format', response);
+        console.error("ChatWidget: Invalid JSONP response format", response);
+        if (onError) {
+          onError(new Error("Invalid JSONP response format"));
+        }
         return;
       }
-      
-      if (onResponse) {
+
+      if (onSuccess) {
         // Check if response has text field to prevent undefined errors
         if (response.text !== undefined && response.text !== null) {
           // Check if response contains widget data
           if (response.widget) {
-            onResponse(response.text, "bot", response.widget);
+            onSuccess(response.text, "bot", response.widget);
           } else {
-            onResponse(response.text, "bot");
+            onSuccess(response.text, "bot");
           }
         } else {
-          console.error('ChatWidget: Legacy API received response without text field', response);
+          console.error(
+            "ChatWidget: Legacy API received response without text field",
+            response,
+          );
+          if (onError) {
+            onError(new Error("Response without text field"));
+          }
         }
       }
     });
@@ -258,11 +281,11 @@ export class LegacyAPI {
   _injectScript(url, callbackName, handler) {
     const script = document.createElement("script");
     script.src = url;
-    
+
     script.onerror = () => {
       console.error(`ChatWidget: Failed to load ${url}`);
       if (window[callbackName]) {
-          delete window[callbackName];
+        delete window[callbackName];
       }
       if (document.body.contains(script)) {
         document.body.removeChild(script);

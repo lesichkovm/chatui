@@ -1,4 +1,5 @@
 import { BaseWidget } from './base-widget.js';
+import { applyMigrationConfig, getMigrationWarning } from '../../config/widget-defaults.js';
 
 /**
  * Select Widget (Composable)
@@ -15,6 +16,15 @@ export class SelectWidget extends BaseWidget {
       return document.createComment('Invalid select widget data');
     }
 
+    // Apply migration configuration
+    const widgetData = applyMigrationConfig(this.widgetData);
+    
+    // Check for migration warnings
+    const warning = getMigrationWarning(widgetData);
+    if (warning) {
+      console.warn(warning);
+    }
+
     const container = document.createElement('div');
     container.className = 'widget-select-container';
     
@@ -22,24 +32,25 @@ export class SelectWidget extends BaseWidget {
     select.className = 'widget-select';
     
     // Apply variant styling
-    const variant = this.widgetData.props?.variant || 'default';
-    const size = this.widgetData.props?.size || 'medium';
+    const variant = widgetData.props?.variant || 'default';
+    const size = widgetData.props?.size || 'medium';
+    const disableOnSelect = widgetData.props?.disableOnSelect || false; // Allow deferring auto-submission
     
     select.classList.add(`variant-${variant}`);
     select.classList.add(`size-${size}`);
     
     // Add placeholder option if specified
-    if (this.widgetData.props?.placeholder) {
+    if (widgetData.props?.placeholder) {
       const placeholderOption = document.createElement('option');
       placeholderOption.value = '';
-      placeholderOption.textContent = this.widgetData.props.placeholder;
+      placeholderOption.textContent = widgetData.props.placeholder;
       placeholderOption.disabled = true;
       placeholderOption.selected = true;
       select.appendChild(placeholderOption);
     }
     
     // Add options
-    const options = this.widgetData.props?.options || [];
+    const options = widgetData.props?.options || [];
     options.forEach(option => {
       const optionElement = document.createElement('option');
       optionElement.value = option.value || option.id;
@@ -65,19 +76,25 @@ export class SelectWidget extends BaseWidget {
         const selectedOption = select.options[select.selectedIndex];
         const optionData = options.find(opt => opt.id === selectedOption.getAttribute('data-option-id'));
         
+        // Emit value change event
+        this.emitValueChange(optionData?.value || optionData?.id || '');
+        
         if (optionData) {
           // Disable the select element after selection if specified
-          if (this.widgetData.props?.disableOnSelect !== false) {
+          if (this.widgetData.props?.disableOnSelect !== false && !disableOnSelect) {
             select.disabled = true;
             select.classList.add('widget-select-disabled');
           }
           
-          this.handleInteraction({
-            optionId: optionData.id,
-            optionValue: optionData.value || optionData.id,
-            optionText: optionData.text || optionData.label,
-            widgetType: 'select'
-          });
+          // Only handle interaction if not deferring
+          if (!disableOnSelect) {
+            this.handleInteraction({
+              optionId: optionData.id,
+              optionValue: optionData.value || optionData.id,
+              optionText: optionData.text || optionData.label,
+              widgetType: 'select'
+            });
+          }
         }
       }
     });
@@ -101,5 +118,56 @@ export class SelectWidget extends BaseWidget {
            this.widgetData.props &&
            Array.isArray(this.widgetData.props.options) &&
            this.widgetData.props.options.length > 0;
+  }
+
+  /**
+   * Get the current value of the select widget
+   * @returns {string|null} Selected option value or null if none selected
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const select = container.querySelector('.widget-select');
+      return select ? select.value : null;
+    }
+    return null;
+  }
+
+  /**
+   * Set the value of the select widget
+   * @param {string} value - Value to select
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const select = container.querySelector('.widget-select');
+      if (select) {
+        select.value = value;
+      }
+    }
+  }
+
+  /**
+   * Trigger interaction manually (useful when disableOnSelect is true)
+   */
+  submit() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const select = container.querySelector('.widget-select');
+      if (select && select.value) {
+        const selectedOption = select.options[select.selectedIndex];
+        const options = this.widgetData.props?.options || [];
+        const optionData = options.find(opt => opt.id === selectedOption.getAttribute('data-option-id'));
+        
+        if (optionData) {
+          this.handleInteraction({
+            optionId: optionData.id,
+            optionValue: optionData.value || optionData.id,
+            optionText: optionData.text || optionData.label,
+            widgetType: 'select'
+          });
+        }
+      }
+    }
   }
 }

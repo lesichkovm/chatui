@@ -24,6 +24,7 @@ export class RadioWidget extends BaseWidget {
     const size = props.size || 'medium';
     const layout = props.layout || 'vertical';
     const radioName = `radio-${this.widgetId}`;
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     // Create radio options container
     const radioContainer = document.createElement('div');
@@ -73,21 +74,24 @@ export class RadioWidget extends BaseWidget {
       radioContainer.appendChild(radioWrapper);
     });
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-radio-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-radio-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-radio-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-radio-disabled');
+      }
     }
     
     // Handle submission
     const handleSubmit = () => {
-      if (!submitButton.disabled) {
+      if (!submitButton || !submitButton.disabled) {
         const selectedRadio = radioContainer.querySelector('.widget-radio:checked');
         
         if (selectedRadio) {
@@ -102,8 +106,10 @@ export class RadioWidget extends BaseWidget {
                 radio.disabled = true;
                 radio.classList.add('widget-radio-disabled');
               });
-              submitButton.disabled = true;
-              submitButton.classList.add('widget-radio-disabled');
+              if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.add('widget-radio-disabled');
+              }
             }
             
             this.handleInteraction({
@@ -120,14 +126,16 @@ export class RadioWidget extends BaseWidget {
     };
     
     // Add event listener
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     // Apply custom styles if provided
     if (props.optionsStyle) {
       Object.assign(radioContainer.style, props.optionsStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -137,7 +145,9 @@ export class RadioWidget extends BaseWidget {
     
     // Assemble the widget
     container.appendChild(radioContainer);
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -152,5 +162,32 @@ export class RadioWidget extends BaseWidget {
            this.widgetData.props &&
            Array.isArray(this.widgetData.props.options) &&
            this.widgetData.props.options.length > 0;
+  }
+
+  /**
+   * Get the current value of the radio widget
+   * @returns {string|null} Selected option value or null if none selected
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const selectedRadio = container.querySelector('.widget-radio:checked');
+      return selectedRadio ? selectedRadio.value : null;
+    }
+    return null;
+  }
+
+  /**
+   * Set the value of the radio widget
+   * @param {string} value - Value to select
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const radios = container.querySelectorAll('.widget-radio');
+      radios.forEach(radio => {
+        radio.checked = radio.value === value;
+      });
+    }
   }
 }

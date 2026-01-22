@@ -26,6 +26,7 @@ export class RatingWidget extends BaseWidget {
     const maxRating = props.maxRating || 5;
     const iconType = props.iconType || 'stars';
     let selectedRating = props.defaultValue || 0;
+    const showSubmitButton = props.showSubmitButton !== false; // Default to true for backward compatibility
     
     // Create label
     const labelElement = document.createElement('div');
@@ -97,16 +98,19 @@ export class RatingWidget extends BaseWidget {
       ratingDisplay.classList.add(`size-${size}`);
     }
     
-    // Create submit button
-    const submitButton = document.createElement('button');
-    submitButton.className = 'widget-rating-submit';
-    submitButton.textContent = buttonText;
-    submitButton.classList.add(`variant-${variant}`);
-    submitButton.classList.add(`size-${size}`);
-    
-    if (props.disabled) {
-      submitButton.disabled = true;
-      submitButton.classList.add('widget-rating-disabled');
+    // Create submit button conditionally
+    let submitButton = null;
+    if (showSubmitButton) {
+      submitButton = document.createElement('button');
+      submitButton.className = 'widget-rating-submit';
+      submitButton.textContent = buttonText;
+      submitButton.classList.add(`variant-${variant}`);
+      submitButton.classList.add(`size-${size}`);
+      
+      if (props.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('widget-rating-disabled');
+      }
     }
     
     // Highlight stars helper
@@ -127,15 +131,17 @@ export class RatingWidget extends BaseWidget {
     
     // Handle submission
     const handleSubmit = () => {
-      if (!submitButton.disabled && selectedRating > 0) {
+      if ((!submitButton || !submitButton.disabled) && selectedRating > 0) {
         // Disable all stars and submit button if specified
         if (props.disableOnSubmit !== false) {
           stars.forEach(star => {
             star.disabled = true;
             star.classList.add('widget-rating-disabled');
           });
-          submitButton.disabled = true;
-          submitButton.classList.add('widget-rating-disabled');
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add('widget-rating-disabled');
+          }
         }
         
         this.handleInteraction({
@@ -148,7 +154,9 @@ export class RatingWidget extends BaseWidget {
     };
     
     // Add event listener
-    submitButton.addEventListener('click', handleSubmit);
+    if (submitButton) {
+      submitButton.addEventListener('click', handleSubmit);
+    }
     
     // Set initial rating
     if (selectedRating > 0) {
@@ -160,7 +168,7 @@ export class RatingWidget extends BaseWidget {
       Object.assign(starsContainer.style, props.starsStyle);
     }
     
-    if (props.buttonStyle) {
+    if (props.buttonStyle && submitButton) {
       Object.assign(submitButton.style, props.buttonStyle);
     }
     
@@ -174,7 +182,9 @@ export class RatingWidget extends BaseWidget {
     if (ratingDisplay) {
       container.appendChild(ratingDisplay);
     }
-    container.appendChild(submitButton);
+    if (submitButton) {
+      container.appendChild(submitButton);
+    }
     
     return container;
   }
@@ -199,5 +209,45 @@ export class RatingWidget extends BaseWidget {
   validate() {
     return super.validate() && 
            this.widgetData.type === 'rating';
+  }
+
+  /**
+   * Get the current value of the rating widget
+   * @returns {number} Current rating value
+   */
+  getValue() {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const activeStars = container.querySelectorAll('.widget-rating-star.active');
+      return activeStars.length;
+    }
+    return 0;
+  }
+
+  /**
+   * Set the value of the rating widget
+   * @param {number} value - Rating value to set
+   */
+  setValue(value) {
+    const container = this.element || document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+    if (container) {
+      const stars = container.querySelectorAll('.widget-rating-star');
+      const ratingDisplay = container.querySelector('.widget-rating-display');
+      const maxRating = stars.length;
+      
+      // Highlight stars based on value
+      stars.forEach((star, index) => {
+        if (index < value) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+      
+      // Update rating display
+      if (ratingDisplay) {
+        ratingDisplay.textContent = `Rating: ${value}/${maxRating}`;
+      }
+    }
   }
 }

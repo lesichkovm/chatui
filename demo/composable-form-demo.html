@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Composable Widget Form Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .demo-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .widget-form-container {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        
+        .widget-input-element, .widget-textarea, .widget-select, .widget-date-input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .widget-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        .variant-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .variant-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .widget-checkbox-item, .widget-radio-item {
+            margin: 5px 0;
+        }
+        
+        .widget-checkbox-label, .widget-radio-label {
+            margin-left: 5px;
+        }
+        
+        .output {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Composable Widget Form Demo</h1>
+    
+    <div class="demo-section">
+        <div class="demo-title">Traditional Standalone Widgets (with embedded buttons)</div>
+        <div id="traditional-widgets"></div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">Composable Form (widgets without buttons + separate action buttons)</div>
+        <div id="composable-form"></div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">Event Output</div>
+        <div id="output" class="output">Events will appear here...</div>
+    </div>
+
+    <script type="module">
+        // Import the widget factory and types
+        import { WidgetFactory } from '../src/modules/widgets/widget-factory.js';
+        import { WIDGET_TYPES } from '../src/modules/widgets/widget-types.js';
+
+        // Output container for events
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            output.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+        }
+
+        // Listen for widget interactions
+        document.addEventListener('widgetInteraction', (event) => {
+            const { widgetId, widgetType, action, formData, value, optionId } = event.detail;
+            
+            if (widgetType === 'form') {
+                log(`FORM SUBMISSION: Action=${action}, Data=${JSON.stringify(formData, null, 2)}`);
+            } else if (widgetType === 'buttons') {
+                log(`BUTTON CLICK: Widget=${widgetId}, Action=${optionId || action}`);
+            } else {
+                log(`WIDGET INTERACTION: Type=${widgetType}, Value=${value || JSON.stringify(event.detail)}`);
+            }
+        });
+
+        // Create traditional standalone widgets
+        function createTraditionalWidgets() {
+            const container = document.getElementById('traditional-widgets');
+            
+            const widgets = [
+                {
+                    type: 'input',
+                    props: {
+                        placeholder: 'Enter your name (standalone)',
+                        buttonText: 'Submit Name'
+                    }
+                },
+                {
+                    type: 'textarea',
+                    props: {
+                        placeholder: 'Enter your message (standalone)',
+                        buttonText: 'Submit Message'
+                    }
+                },
+                {
+                    type: 'select',
+                    props: {
+                        placeholder: 'Choose an option',
+                        options: [
+                            { id: 'opt1', text: 'Option 1', value: 'option1' },
+                            { id: 'opt2', text: 'Option 2', value: 'option2' },
+                            { id: 'opt3', text: 'Option 3', value: 'option3' }
+                        ]
+                    }
+                }
+            ];
+
+            widgets.forEach((widgetConfig, index) => {
+                const widgetElement = WidgetFactory.createWidget(widgetConfig, `traditional-${index}`);
+                if (widgetElement) {
+                    widgetElement.style.margin = '10px 0';
+                    container.appendChild(widgetElement);
+                }
+            });
+        }
+
+        // Create composable form
+        function createComposableForm() {
+            const container = document.getElementById('composable-form');
+            
+            const formConfig = {
+                type: 'form',
+                props: {
+                    layout: 'vertical',
+                    gap: 'medium'
+                },
+                children: [
+                    {
+                        type: 'input',
+                        props: {
+                            placeholder: 'Enter your name',
+                            showSubmitButton: false  // No embedded button
+                        }
+                    },
+                    {
+                        type: 'textarea',
+                        props: {
+                            placeholder: 'Enter your message',
+                            showSubmitButton: false  // No embedded button
+                        }
+                    },
+                    {
+                        type: 'select',
+                        props: {
+                            placeholder: 'Choose an option',
+                            disableOnSelect: true,  // Don't auto-submit
+                            options: [
+                                { id: 'opt1', text: 'Option 1', value: 'option1' },
+                                { id: 'opt2', text: 'Option 2', value: 'option2' },
+                                { id: 'opt3', text: 'Option 3', value: 'option3' }
+                            ]
+                        }
+                    },
+                    {
+                        type: 'checkbox',
+                        props: {
+                            showSubmitButton: false,  // No embedded button
+                            options: [
+                                { id: 'cb1', text: 'Newsletter', value: 'newsletter' },
+                                { id: 'cb2', text: 'Updates', value: 'updates' }
+                            ]
+                        }
+                    },
+                    {
+                        type: 'buttons',
+                        props: {
+                            options: [
+                                { id: 'submit', text: 'Submit Form', variant: 'primary' },
+                                { id: 'cancel', text: 'Cancel', variant: 'secondary' }
+                            ]
+                        }
+                    }
+                ]
+            };
+
+            const formElement = WidgetFactory.createWidget(formConfig, 'composable-form');
+            if (formElement) {
+                container.appendChild(formElement);
+            }
+        }
+
+        // Initialize the demo
+        createTraditionalWidgets();
+        createComposableForm();
+        
+        log('Demo initialized. Try interacting with the widgets above!');
+    </script>
+</body>
+</html>
