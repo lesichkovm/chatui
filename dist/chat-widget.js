@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-22T17:40:23.199Z
+ * Generated on: 2026-01-22T19:13:06.453Z
  */
 
 
@@ -101,7 +101,7 @@
          * @returns {boolean} True if data contains required type property
          */
         validate() {
-          return this.widgetData && this.widgetData.type;
+          return !!(this.widgetData && this.widgetData.type);
         }
       };
     }
@@ -451,8 +451,56 @@
   // src/utils/security.js
   function sanitizeHTML(text) {
     if (typeof text !== "string") return "";
+    const template = document.createElement("template");
+    template.innerHTML = text;
+    const fragment = template.content;
+    const allowedTags = [
+      "strong",
+      "em",
+      "code",
+      "br",
+      "b",
+      "i",
+      "u",
+      "p",
+      "span",
+      "div",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "ul",
+      "ol",
+      "li",
+      "blockquote"
+    ];
+    const allowedAttrs = ["class", "style"];
+    const sanitizeNode = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) return;
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const tagName = node.tagName.toLowerCase();
+        if (!allowedTags.includes(tagName)) {
+          const textNode = document.createTextNode(node.textContent);
+          node.parentNode.replaceChild(textNode, node);
+          return;
+        }
+        const attrs = node.attributes;
+        for (let i = attrs.length - 1; i >= 0; i--) {
+          const attrName = attrs[i].name.toLowerCase();
+          if (!allowedAttrs.includes(attrName)) {
+            node.removeAttribute(attrName);
+          } else if (attrName === "style") {
+          }
+        }
+        const children = Array.from(node.childNodes);
+        children.forEach(sanitizeNode);
+      }
+    };
+    Array.from(fragment.childNodes).forEach(sanitizeNode);
     const div = document.createElement("div");
-    div.textContent = text;
+    div.appendChild(fragment);
     return div.innerHTML;
   }
   function sanitizeStyleProps(style) {
@@ -1200,7 +1248,7 @@
          * @returns {boolean} True if data contains required properties for buttons widget
          */
         validate() {
-          return super.validate() && this.widgetData.type === "buttons" && this.widgetData.props && Array.isArray(this.widgetData.props.options) && this.widgetData.props.options.length > 0;
+          return !!(super.validate() && this.widgetData.type === "buttons" && this.widgetData.props && Array.isArray(this.widgetData.props.options) && this.widgetData.props.options.length > 0);
         }
       };
     }
@@ -3193,7 +3241,7 @@
          * @returns {boolean} True if data contains required properties for progress widget
          */
         validate() {
-          return super.validate() && this.widgetData.type === "progress" && this.widgetData.props && typeof this.widgetData.props.value === "number" && typeof this.widgetData.props.max === "number" && this.widgetData.props.max > 0;
+          return !!(super.validate() && this.widgetData.type === "progress" && this.widgetData.props && typeof this.widgetData.props.value === "number" && typeof this.widgetData.props.max === "number" && this.widgetData.props.max > 0);
         }
       };
     }
@@ -3915,7 +3963,7 @@
               button.classList.add(`variant-${action.variant || "primary"}`);
               button.classList.add(`size-${action.size || size}`);
               button.addEventListener("click", () => {
-                this.handleAction(action, Array.from(this.selectedItems));
+                this.handleAction(action, this.getSelectedItems());
               });
               actionsContainer.appendChild(button);
             });

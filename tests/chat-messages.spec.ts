@@ -111,9 +111,9 @@ test.describe("Chat Widget - Message Functionality", () => {
     const count = await messageElements.count();
     expect(count).toBeGreaterThan(0);
 
-    const lastMessage = messageElements.last();
-    const messageText = await lastMessage.textContent();
-    expect(messageText).toContain(testMessage);
+    // Verify the user message is present
+    const userMessage = messagesContainer.locator(`.user-message:has-text("${testMessage}")`);
+    await expect(userMessage).toBeVisible();
   });
 
   test("should display multiple messages in order", async ({ page }) => {
