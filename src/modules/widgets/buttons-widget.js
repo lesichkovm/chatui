@@ -152,10 +152,10 @@ export class ButtonsWidget extends BaseWidget {
    * @returns {boolean} True if data contains required properties for buttons widget
    */
   validate() {
-    return super.validate() && 
+    return !!(super.validate() && 
            this.widgetData.type === 'buttons' && 
            this.widgetData.props &&
            Array.isArray(this.widgetData.props.options) &&
-           this.widgetData.props.options.length > 0;
+           this.widgetData.props.options.length > 0);
   }
 }

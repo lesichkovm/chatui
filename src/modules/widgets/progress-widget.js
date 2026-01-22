@@ -143,11 +143,11 @@ export class ProgressWidget extends BaseWidget {
    * @returns {boolean} True if data contains required properties for progress widget
    */
   validate() {
-    return super.validate() && 
+    return !!(super.validate() && 
            this.widgetData.type === 'progress' &&
            this.widgetData.props &&
            typeof this.widgetData.props.value === 'number' &&
            typeof this.widgetData.props.max === 'number' &&
-           this.widgetData.props.max > 0;
+           this.widgetData.props.max > 0);
   }
 }

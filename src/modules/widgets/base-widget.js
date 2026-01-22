@@ -86,6 +86,6 @@ export class BaseWidget {
    * @returns {boolean} True if data contains required type property
    */
   validate() {
-    return this.widgetData && this.widgetData.type;
+    return !!(this.widgetData && this.widgetData.type);
   }
 }

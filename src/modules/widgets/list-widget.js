@@ -78,7 +78,7 @@ export class ListWidget extends BaseWidget {
         button.classList.add(`size-${action.size || size}`);
         
         button.addEventListener('click', () => {
-          this.handleAction(action, Array.from(this.selectedItems));
+          this.handleAction(action, this.getSelectedItems());
         });
         
         actionsContainer.appendChild(button);

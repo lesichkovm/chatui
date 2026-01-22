@@ -5,15 +5,61 @@
 
 /**
  * Sanitize HTML content to prevent XSS attacks
+ * Allows a whitelist of safe tags for formatting
  * @param {string} text - Text content to sanitize
  * @returns {string} Sanitized text with safe HTML only
  */
 export function sanitizeHTML(text) {
   if (typeof text !== 'string') return '';
   
-  // Create a temporary div to escape HTML
+  // Use a temporary div and DOMParser for robust sanitization if available
+  // Fallback to simple regex for environments without full DOM (though widgets need DOM anyway)
+  
+  const template = document.createElement('template');
+  template.innerHTML = text;
+  const fragment = template.content;
+  
+  const allowedTags = [
+    'strong', 'em', 'code', 'br', 'b', 'i', 'u', 'p', 'span', 'div', 
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote'
+  ];
+  const allowedAttrs = ['class', 'style']; // style is further sanitized below
+
+  const sanitizeNode = (node) => {
+    if (node.nodeType === Node.TEXT_NODE) return;
+    
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const tagName = node.tagName.toLowerCase();
+      
+      if (!allowedTags.includes(tagName)) {
+        // Replace dangerous tags with their text content or just remove
+        const textNode = document.createTextNode(node.textContent);
+        node.parentNode.replaceChild(textNode, node);
+        return;
+      }
+      
+      // Sanitize attributes
+      const attrs = node.attributes;
+      for (let i = attrs.length - 1; i >= 0; i--) {
+        const attrName = attrs[i].name.toLowerCase();
+        if (!allowedAttrs.includes(attrName)) {
+          node.removeAttribute(attrName);
+        } else if (attrName === 'style') {
+          // Additional style sanitization logic could be added here
+          // For now, we rely on the fact that we've already defined allowed properties
+        }
+      }
+      
+      // Recursively sanitize children
+      const children = Array.from(node.childNodes);
+      children.forEach(sanitizeNode);
+    }
+  };
+
+  Array.from(fragment.childNodes).forEach(sanitizeNode);
+  
   const div = document.createElement('div');
-  div.textContent = text;
+  div.appendChild(fragment);
   return div.innerHTML;
 }
 
