@@ -5,7 +5,7 @@ summary: Complete codebase summary optimized for LLM consumption and understandi
 tags: [llm, context, summary, codebase]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.2.0
+version: 1.3.0
 ---
 
 # LLM Context: ChatUI

@@ -5,7 +5,7 @@ summary: Default entry point for LiveWiki documentation, copied from overview fo
 tags: [overview, introduction, entry-point]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.2.0
+version: 1.3.0
 ---
 
 # ChatUI Widget Overview
@@ -154,13 +154,14 @@ const ratingWidget = {
 - [Configuration](configuration.md) - All configuration options
 
 ## Changelog
+- **v1.3.0** (2026-01-22): Added comprehensive widget validation with HTML sanitization, enhanced security features, and widget composition migration tools
 - **v1.2.0** (2026-01-22): Enhanced widget system with 26+ components, composition capabilities, cross-environment storage, and API validation improvements
 - **v1.1.0** (2026-01-22): Initial documentation with 15+ widget components
 - **v1.0.0** (2026-01-22): Base overview creation
 
 ---
 
-**Version**: 1.2.0  
+**Version**: 1.3.0  
 **Last Updated**: 2026-01-22  
 **License**: MIT  
 **Repository**: [GitHub](https://github.com/lesichkovm/chatui)
