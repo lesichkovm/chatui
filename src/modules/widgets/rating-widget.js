@@ -1,118 +1,203 @@
 import { BaseWidget } from './base-widget.js';
 
 /**
- * Rating Widget
- * Renders a star or emoji-based rating system
- * Extends BaseWidget to provide rating-based interaction
+ * Rating Widget (Composable)
+ * A standalone rating widget with stars or emojis
+ * Can be used in containers or standalone
  */
 export class RatingWidget extends BaseWidget {
   /**
    * Create the DOM element for the rating widget
-   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   * @returns {HTMLElement|Comment} Rating container element or comment for invalid data
    */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid rating widget data');
     }
 
-    const widgetContainer = document.createElement("div");
-    widgetContainer.className = "widget";
+    const container = document.createElement('div');
+    container.className = 'widget-rating-container';
     
-    if (this.widgetData.type === 'rating') {
-      const ratingContainer = document.createElement("div");
-      ratingContainer.className = "widget-rating";
+    const props = this.widgetData.props || {};
+    const label = props.label || 'Rate this';
+    const buttonText = props.buttonText || 'Submit';
+    const variant = props.variant || 'primary';
+    const size = props.size || 'medium';
+    const maxRating = props.maxRating || 5;
+    const iconType = props.iconType || 'stars';
+    let selectedRating = props.defaultValue || 0;
+    
+    // Create label
+    const labelElement = document.createElement('div');
+    labelElement.className = 'widget-rating-label';
+    labelElement.textContent = label;
+    labelElement.classList.add(`variant-${variant}`);
+    labelElement.classList.add(`size-${size}`);
+    
+    // Create stars container
+    const starsContainer = document.createElement('div');
+    starsContainer.className = 'widget-rating-stars';
+    
+    // Create rating buttons
+    const stars = [];
+    for (let i = 1; i <= maxRating; i++) {
+      const star = document.createElement('button');
+      star.className = 'widget-rating-star';
+      star.setAttribute('data-rating', i);
+      star.classList.add(`variant-${variant}`);
+      star.classList.add(`size-${size}`);
       
-      const label = document.createElement("div");
-      label.className = "widget-rating-label";
-      label.textContent = this.widgetData.label || 'Rate this';
-      
-      const starsContainer = document.createElement("div");
-      starsContainer.className = "widget-rating-stars";
-      
-      const maxRating = this.widgetData.maxRating || 5;
-      const iconType = this.widgetData.iconType || 'stars';
-      
-      for (let i = 1; i <= maxRating; i++) {
-        const star = document.createElement("button");
-        star.className = "widget-rating-star";
-        star.setAttribute("data-rating", i);
-        star.setAttribute("data-widget-id", this.widgetId);
-        
-        if (iconType === 'emojis') {
-          star.textContent = '⭐';
-        } else {
-          star.innerHTML = '★';
-        }
-        
-        star.addEventListener("mouseenter", () => {
-          this.highlightStars(starsContainer, i);
-        });
-        
-        star.addEventListener("mouseleave", () => {
-          this.resetStars(starsContainer);
-        });
-        
-        star.addEventListener("click", () => {
-          this.selectRating(starsContainer, i);
-          
-          const allStars = starsContainer.querySelectorAll('.widget-rating-star');
-          allStars.forEach(s => {
-            s.disabled = true;
-            s.classList.add('widget-rating-disabled');
-          });
-          
-          this.handleInteraction({
-            optionId: 'rating-submit',
-            optionValue: i,
-            optionText: `${i} star${i > 1 ? 's' : ''}`,
-            widgetType: 'rating'
-          });
-        });
-        
-        starsContainer.appendChild(star);
+      // Set icon content
+      if (iconType === 'emojis') {
+        star.textContent = this.getEmojiForRating(i, maxRating);
+      } else if (iconType === 'hearts') {
+        star.textContent = '♥';
+      } else {
+        star.textContent = '★';
       }
       
-      ratingContainer.appendChild(label);
-      ratingContainer.appendChild(starsContainer);
-      widgetContainer.appendChild(ratingContainer);
+      // Set disabled state
+      if (props.disabled) {
+        star.disabled = true;
+        star.classList.add('widget-rating-disabled');
+      }
+      
+      // Add hover effect
+      star.addEventListener('mouseenter', () => {
+        if (!props.disabled) {
+          this.highlightStars(stars, i);
+        }
+      });
+      
+      star.addEventListener('mouseleave', () => {
+        if (!props.disabled) {
+          this.highlightStars(stars, selectedRating);
+        }
+      });
+      
+      // Handle click
+      star.addEventListener('click', () => {
+        if (!props.disabled) {
+          selectedRating = i;
+          this.highlightStars(stars, selectedRating);
+        }
+      });
+      
+      stars.push(star);
+      starsContainer.appendChild(star);
     }
     
-    return widgetContainer;
-  }
-
-  highlightStars(container, rating) {
-    const stars = container.querySelectorAll('.widget-rating-star');
-    stars.forEach((star, index) => {
-      if (index < rating) {
-        star.classList.add('widget-rating-star-hover');
-      } else {
-        star.classList.remove('widget-rating-star-hover');
+    // Create current rating display
+    let ratingDisplay = null;
+    if (props.showRating !== false) {
+      ratingDisplay = document.createElement('div');
+      ratingDisplay.className = 'widget-rating-display';
+      ratingDisplay.textContent = `Rating: ${selectedRating}/${maxRating}`;
+      ratingDisplay.classList.add(`variant-${variant}`);
+      ratingDisplay.classList.add(`size-${size}`);
+    }
+    
+    // Create submit button
+    const submitButton = document.createElement('button');
+    submitButton.className = 'widget-rating-submit';
+    submitButton.textContent = buttonText;
+    submitButton.classList.add(`variant-${variant}`);
+    submitButton.classList.add(`size-${size}`);
+    
+    if (props.disabled) {
+      submitButton.disabled = true;
+      submitButton.classList.add('widget-rating-disabled');
+    }
+    
+    // Highlight stars helper
+    this.highlightStars = (stars, rating) => {
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+      
+      // Update rating display
+      if (ratingDisplay) {
+        ratingDisplay.textContent = `Rating: ${rating}/${maxRating}`;
       }
-    });
-  }
-
-  resetStars(container) {
-    const stars = container.querySelectorAll('.widget-rating-star');
-    stars.forEach(star => {
-      star.classList.remove('widget-rating-star-hover');
-    });
-  }
-
-  selectRating(container, rating) {
-    const stars = container.querySelectorAll('.widget-rating-star');
-    stars.forEach((star, index) => {
-      if (index < rating) {
-        star.classList.add('widget-rating-star-selected');
-      } else {
-        star.classList.remove('widget-rating-star-selected');
+    };
+    
+    // Handle submission
+    const handleSubmit = () => {
+      if (!submitButton.disabled && selectedRating > 0) {
+        // Disable all stars and submit button if specified
+        if (props.disableOnSubmit !== false) {
+          stars.forEach(star => {
+            star.disabled = true;
+            star.classList.add('widget-rating-disabled');
+          });
+          submitButton.disabled = true;
+          submitButton.classList.add('widget-rating-disabled');
+        }
+        
+        this.handleInteraction({
+          rating: selectedRating,
+          maxRating: maxRating,
+          iconType: iconType,
+          widgetType: 'rating'
+        });
       }
-    });
+    };
+    
+    // Add event listener
+    submitButton.addEventListener('click', handleSubmit);
+    
+    // Set initial rating
+    if (selectedRating > 0) {
+      this.highlightStars(stars, selectedRating);
+    }
+    
+    // Apply custom styles if provided
+    if (props.starsStyle) {
+      Object.assign(starsContainer.style, props.starsStyle);
+    }
+    
+    if (props.buttonStyle) {
+      Object.assign(submitButton.style, props.buttonStyle);
+    }
+    
+    if (props.style) {
+      Object.assign(container.style, props.style);
+    }
+    
+    // Assemble the widget
+    container.appendChild(labelElement);
+    container.appendChild(starsContainer);
+    if (ratingDisplay) {
+      container.appendChild(ratingDisplay);
+    }
+    container.appendChild(submitButton);
+    
+    return container;
   }
 
+  /**
+   * Get emoji for rating based on position
+   * @private
+   * @param {number} rating - Current rating position
+   * @param {number} maxRating - Maximum rating
+   * @returns {string} Emoji character
+   */
+  getEmojiForRating(rating, maxRating) {
+    const emojis = ['😢', '😕', '😐', '🙂', '😊'];
+    const index = Math.floor((rating - 1) / maxRating * (emojis.length - 1));
+    return emojis[Math.min(index, emojis.length - 1)];
+  }
+
+  /**
+   * Validate rating widget data structure
+   * @returns {boolean} True if data contains required properties for rating widget
+   */
   validate() {
     return super.validate() && 
-           this.widgetData.type === 'rating' &&
-           typeof this.widgetData.maxRating === 'number' &&
-           this.widgetData.maxRating > 0;
+           this.widgetData.type === 'rating';
   }
 }

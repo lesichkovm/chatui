@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 2: Composable Widget Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .demo-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .widget-demo {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fafafa;
+        }
+        
+        /* Button widget styles */
+        .widget-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .widget-button.variant-primary {
+            background: #007bff;
+            color: white;
+        }
+        .widget-button.variant-primary:hover {
+            background: #0056b3;
+        }
+        .widget-button.variant-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .widget-button.variant-secondary:hover {
+            background: #545b62;
+        }
+        .widget-button.variant-outline {
+            background: transparent;
+            border: 1px solid #007bff;
+            color: #007bff;
+        }
+        .widget-button.variant-outline:hover {
+            background: #007bff;
+            color: white;
+        }
+        .widget-button.size-small {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .widget-button.size-large {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        .widget-button:disabled,
+        .widget-button.widget-button-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Select widget styles */
+        .widget-select-container {
+            margin: 5px 0;
+        }
+        .widget-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            min-width: 200px;
+        }
+        .widget-select.variant-outline {
+            border: 2px solid #007bff;
+        }
+        .widget-select:disabled,
+        .widget-select.widget-select-disabled {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        /* Container widget styles */
+        .widget-container {
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        
+        /* Card widget styles */
+        .widget-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Text widget styles */
+        .widget-text {
+            margin: 5px 0;
+        }
+        .widget-text.format-markdown strong {
+            font-weight: 600;
+        }
+        .widget-text.format-markdown em {
+            font-style: italic;
+        }
+        .widget-text.format-markdown code {
+            background: #f1f3f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Phase 2: Composable Widget System Demo</h1>
+    
+    <div class="demo-section">
+        <div class="demo-title">1. Standalone Button Widget</div>
+        <div class="widget-demo" id="button-demo"></div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">2. Standalone Select Widget</div>
+        <div class="widget-demo" id="select-demo"></div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">3. Buttons Widget with Horizontal Layout</div>
+        <div class="widget-demo" id="buttons-horizontal-demo"></div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">4. Container with Flex Layout</div>
+        <div class="widget-demo" id="container-flex-demo"></div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">5. Container with Grid Layout</div>
+        <div class="widget-demo" id="container-grid-demo"></div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">6. Card with Nested Widgets</div>
+        <div class="widget-demo" id="card-nested-demo"></div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">7. Complex Composition Example</div>
+        <div class="widget-demo" id="complex-demo"></div>
+    </div>
+
+    <script type="module">
+        // Import the widget factory
+        import { WidgetFactory } from '../src/modules/widgets/widget-factory.js';
+        
+        // Mock BaseWidget interaction handler for demo
+        const mockHandleInteraction = (data) => {
+            console.log('Widget interaction:', data);
+            alert(`Widget interaction: ${JSON.stringify(data, null, 2)}`);
+        };
+        
+        // Temporary override for demo
+        window.mockHandleInteraction = mockHandleInteraction;
+        
+        // Demo configurations
+        const demos = [
+            {
+                id: 'button-demo',
+                config: {
+                    type: 'button',
+                    props: {
+                        label: 'Click Me!',
+                        variant: 'primary',
+                        value: 'button-clicked'
+                    }
+                }
+            },
+            {
+                id: 'select-demo',
+                config: {
+                    type: 'select',
+                    props: {
+                        placeholder: 'Choose an option...',
+                        variant: 'outline',
+                        options: [
+                            { id: 'opt1', text: 'Option 1', value: 'value1' },
+                            { id: 'opt2', text: 'Option 2', value: 'value2' },
+                            { id: 'opt3', text: 'Option 3', value: 'value3' }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'buttons-horizontal-demo',
+                config: {
+                    type: 'buttons',
+                    props: {
+                        layout: 'horizontal',
+                        gap: 'small',
+                        alignment: 'center',
+                        options: [
+                            { id: 'yes', text: 'Yes', variant: 'primary', value: 'yes' },
+                            { id: 'no', text: 'No', variant: 'secondary', value: 'no' },
+                            { id: 'maybe', text: 'Maybe', variant: 'outline', value: 'maybe' }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'container-flex-demo',
+                config: {
+                    type: 'container',
+                    props: {
+                        layout: 'flex',
+                        gap: 'medium',
+                        alignment: 'space-between',
+                        children: [
+                            {
+                                type: 'text',
+                                props: { content: 'Left side text', format: 'plain' }
+                            },
+                            {
+                                type: 'button',
+                                props: { label: 'Action', variant: 'primary' }
+                            },
+                            {
+                                type: 'text',
+                                props: { content: 'Right side text', format: 'plain' }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'container-grid-demo',
+                config: {
+                    type: 'container',
+                    props: {
+                        layout: 'grid',
+                        columns: 2,
+                        gap: 'large',
+                        children: [
+                            {
+                                type: 'button',
+                                props: { label: 'Button 1', variant: 'primary' }
+                            },
+                            {
+                                type: 'button',
+                                props: { label: 'Button 2', variant: 'secondary' }
+                            },
+                            {
+                                type: 'text',
+                                props: { content: 'Grid item 3', format: 'plain' }
+                            },
+                            {
+                                type: 'select',
+                                props: {
+                                    placeholder: 'Select...',
+                                    options: [
+                                        { id: 'a', text: 'Choice A', value: 'a' },
+                                        { id: 'b', text: 'Choice B', value: 'b' }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'card-nested-demo',
+                config: {
+                    type: 'card',
+                    props: {
+                        variant: 'default',
+                        padding: 'medium',
+                        children: [
+                            {
+                                type: 'text',
+                                props: { 
+                                    content: '## Card Title\nThis is a card with nested widgets.', 
+                                    format: 'markdown' 
+                                }
+                            },
+                            {
+                                type: 'container',
+                                props: {
+                                    layout: 'horizontal',
+                                    gap: 'small',
+                                    children: [
+                                        {
+                                            type: 'button',
+                                            props: { label: 'Accept', variant: 'primary' }
+                                        },
+                                        {
+                                            type: 'button',
+                                            props: { label: 'Decline', variant: 'secondary' }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'complex-demo',
+                config: {
+                    type: 'container',
+                    props: {
+                        layout: 'vertical',
+                        gap: 'large',
+                        children: [
+                            {
+                                type: 'card',
+                                props: {
+                                    variant: 'default',
+                                    children: [
+                                        {
+                                            type: 'text',
+                                            props: { 
+                                                content: '**Order Confirmation**\nPlease confirm your order details.', 
+                                                format: 'markdown' 
+                                            }
+                                        },
+                                        {
+                                            type: 'container',
+                                            props: {
+                                                layout: 'grid',
+                                                columns: 2,
+                                                gap: 'medium',
+                                                children: [
+                                                    {
+                                                        type: 'text',
+                                                        props: { content: 'Product: Widget X', format: 'plain' }
+                                                    },
+                                                    {
+                                                        type: 'text',
+                                                        props: { content: 'Price: $29.99', format: 'plain' }
+                                                    },
+                                                    {
+                                                        type: 'text',
+                                                        props: { content: 'Quantity: 2', format: 'plain' }
+                                                    },
+                                                    {
+                                                        type: 'text',
+                                                        props: { content: 'Total: $59.98', format: 'plain' }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                type: 'container',
+                                props: {
+                                    layout: 'horizontal',
+                                    gap: 'medium',
+                                    alignment: 'center',
+                                    children: [
+                                        {
+                                            type: 'button',
+                                            props: { label: 'Confirm Order', variant: 'primary', size: 'large' }
+                                        },
+                                        {
+                                            type: 'button',
+                                            props: { label: 'Cancel', variant: 'outline' }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ];
+        
+        // Render all demos
+        demos.forEach(demo => {
+            const container = document.getElementById(demo.id);
+            if (container) {
+                try {
+                    const widget = WidgetFactory.createWidget(demo.config, 'demo-widget');
+                    if (widget) {
+                        container.appendChild(widget);
+                    } else {
+                        container.textContent = 'Failed to create widget';
+                    }
+                } catch (error) {
+                    console.error(`Error creating demo ${demo.id}:`, error);
+                    container.textContent = `Error: ${error.message}`;
+                }
+            }
+        });
+        
+        // Add interaction handler mock to widgets
+        setTimeout(() => {
+            document.querySelectorAll('.widget-button, .widget-select').forEach(element => {
+                // This is a simplified mock - in real implementation, 
+                // widgets would have proper event handlers
+                if (element.tagName === 'BUTTON') {
+                    element.addEventListener('click', () => {
+                        mockHandleInteraction({
+                            widgetType: 'button',
+                            value: element.getAttribute('data-value') || element.textContent,
+                            label: element.textContent
+                        });
+                    });
+                }
+            });
+        }, 100);
+    </script>
+</body>
+</html>

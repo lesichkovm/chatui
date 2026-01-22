@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 3 Advanced Composition Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .demo-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 8px;
+        }
+        .widget-demo {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fafafa;
+        }
+        
+        /* Base widget styles */
+        .widget-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .widget-button.variant-primary {
+            background: #007bff;
+            color: white;
+        }
+        .widget-button.variant-primary:hover {
+            background: #0056b3;
+        }
+        .widget-button.variant-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .widget-button.variant-secondary:hover {
+            background: #545b62;
+        }
+        .widget-button.size-small {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .widget-button.size-large {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        
+        /* Conditional widget styles */
+        .widget-conditional-container {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+        .widget-conditional-container.conditional-visible {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        .widget-conditional-container.conditional-hidden {
+            border-color: #dc3545;
+            background: #fff8f8;
+        }
+        .widget-conditional-fallback {
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        /* List widget styles */
+        .widget-list-container {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+        .widget-list-header {
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .widget-list-content.layout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .widget-list-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px;
+            background: white;
+            transition: all 0.2s;
+        }
+        .widget-list-item.selectable {
+            cursor: pointer;
+        }
+        .widget-list-item.selectable:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+        }
+        .widget-list-item.selected {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+        .widget-list-item-card {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .widget-list-item-title {
+            font-weight: 600;
+            color: #333;
+        }
+        .widget-list-item-subtitle {
+            color: #666;
+            font-size: 12px;
+        }
+        .widget-list-item-description {
+            color: #888;
+            font-size: 13px;
+        }
+        .widget-list-item-checkbox {
+            margin-right: 8px;
+        }
+        .widget-list-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+        .widget-list-action {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        /* Input widget styles */
+        .widget-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .widget-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .widget-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        .widget-input-submit {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .widget-input-submit:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Phase 3: Advanced Composition Demo</h1>
+    <p>This demo showcases the new Conditional and List widgets with advanced composition capabilities.</p>
+    
+    <!-- Conditional Widget Demo -->
+    <div class="demo-section">
+        <div class="demo-title">Conditional Widget Demo</div>
+        <div class="widget-demo" id="conditional-demo"></div>
+    </div>
+    
+    <!-- List Widget Demo -->
+    <div class="demo-section">
+        <div class="demo-title">List Widget Demo</div>
+        <div class="widget-demo" id="list-demo"></div>
+    </div>
+    
+    <!-- Advanced Composition Demo -->
+    <div class="demo-section">
+        <div class="demo-title">Advanced Composition Demo</div>
+        <div class="widget-demo" id="advanced-demo"></div>
+    </div>
+
+    <script type="module">
+        // Import the widget factory
+        import { WidgetFactory } from '../src/modules/widgets/widget-factory.js';
+        
+        // Mock interaction handler
+        const mockHandleInteraction = (data) => {
+            console.log('Widget interaction:', data);
+            
+            // Update conditional state based on interactions
+            if (data.widgetType === 'input' && data.action === 'submit') {
+                const conditionalWidget = document.querySelector('[data-widget-id="conditional-demo"] .widget-conditional-container');
+                if (conditionalWidget && conditionalWidget.conditionalWidget) {
+                    conditionalWidget.conditionalWidget.setState('showAdvanced', data.value === 'advanced');
+                }
+            }
+        };
+        
+        // Set up global interaction listener
+        document.addEventListener('widgetInteraction', (event) => {
+            mockHandleInteraction(event.detail);
+        });
+        
+        // Conditional Widget Demo
+        const conditionalDemo = {
+            type: 'conditional',
+            props: {
+                condition: 'showAdvanced',
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '**Advanced Options**\n\nThese options are only visible when you type "advanced" in the input field above.',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'container',
+                        props: {
+                            layout: 'vertical',
+                            gap: 'small',
+                            children: [
+                                {
+                                    type: 'input',
+                                    props: {
+                                        type: 'text',
+                                        placeholder: 'Enter advanced setting...',
+                                        buttonText: 'Save',
+                                        variant: 'secondary'
+                                    }
+                                },
+                                {
+                                    type: 'toggle',
+                                    props: {
+                                        label: 'Enable experimental features',
+                                        buttonText: 'Apply',
+                                        defaultValue: false
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ],
+                fallback: {
+                    type: 'text',
+                    props: {
+                        content: '_Type "advanced" to see additional options_',
+                        format: 'markdown'
+                    }
+                }
+            }
+        };
+        
+        // List Widget Demo
+        const listDemo = {
+            type: 'list',
+            props: {
+                header: 'User List',
+                layout: 'grid',
+                selectable: true,
+                multiSelect: true,
+                items: [
+                    { id: 1, name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin' },
+                    { id: 2, name: 'Bob Smith', email: 'bob@example.com', role: 'User' },
+                    { id: 3, name: 'Carol Davis', email: 'carol@example.com', role: 'Editor' },
+                    { id: 4, name: 'David Wilson', email: 'david@example.com', role: 'User' },
+                    { id: 5, name: 'Eva Brown', email: 'eva@example.com', role: 'Moderator' }
+                ],
+                itemTemplate: {
+                    type: 'card',
+                    title: '{{name}}',
+                    subtitle: '{{role}}',
+                    description: '{{email}}'
+                },
+                actions: [
+                    {
+                        text: 'Delete Selected',
+                        variant: 'secondary',
+                        action: 'delete'
+                    },
+                    {
+                        text: 'Export Selected',
+                        variant: 'primary',
+                        action: 'export'
+                    }
+                ]
+            }
+        };
+        
+        // Advanced Composition Demo
+        const advancedDemo = {
+            type: 'container',
+            props: {
+                layout: 'vertical',
+                gap: 'medium',
+                children: [
+                    {
+                        type: 'text',
+                        props: {
+                            content: '## Dynamic Form with Conditional Logic\n\nThis form shows different fields based on your selections.',
+                            format: 'markdown'
+                        }
+                    },
+                    {
+                        type: 'input',
+                        props: {
+                            type: 'text',
+                            placeholder: 'Enter your name...',
+                            buttonText: 'Continue',
+                            variant: 'primary'
+                        }
+                    },
+                    {
+                        type: 'conditional',
+                        props: {
+                            condition: {
+                                operator: 'contains',
+                                key: 'value',
+                                value: '@'
+                            },
+                            children: [
+                                {
+                                    type: 'list',
+                                    props: {
+                                        header: 'Select Your Interests',
+                                        layout: 'horizontal',
+                                        selectable: true,
+                                        multiSelect: true,
+                                        items: [
+                                            { id: 'tech', name: 'Technology', category: 'Professional' },
+                                            { id: 'art', name: 'Art & Design', category: 'Creative' },
+                                            { id: 'music', name: 'Music', category: 'Entertainment' },
+                                            { id: 'sports', name: 'Sports', category: 'Fitness' },
+                                            { id: 'travel', name: 'Travel', category: 'Lifestyle' }
+                                        ],
+                                        itemTemplate: {
+                                            type: 'text',
+                                            text: '{{name}}'
+                                        }
+                                    }
+                                }
+                            ],
+                            fallback: {
+                                type: 'text',
+                                props: {
+                                    content: '_Please enter a valid email address to see interests_',
+                                    format: 'markdown'
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        };
+        
+        // Render all demos
+        const demos = [
+            { id: 'conditional-demo', config: conditionalDemo },
+            { id: 'list-demo', config: listDemo },
+            { id: 'advanced-demo', config: advancedDemo }
+        ];
+        
+        demos.forEach(demo => {
+            const container = document.getElementById(demo.id);
+            if (container) {
+                try {
+                    const widget = WidgetFactory.createWidget(demo.config, demo.id);
+                    if (widget) {
+                        container.appendChild(widget);
+                        
+                        // Store widget reference for conditional demo
+                        if (demo.id === 'conditional-demo') {
+                            const conditionalContainer = container.querySelector('.widget-conditional-container');
+                            if (conditionalContainer) {
+                                // Find the ConditionalWidget instance
+                                const conditionalWidget = Array.from(container.querySelectorAll('*'))
+                                    .find(el => el.classList.contains('widget-conditional-container'));
+                                if (conditionalWidget) {
+                                    // This would need to be properly connected to the widget instance
+                                    conditionalWidget.conditionalWidget = widget;
+                                }
+                            }
+                        }
+                    } else {
+                        container.textContent = 'Failed to create widget';
+                    }
+                } catch (error) {
+                    console.error(`Error creating demo ${demo.id}:`, error);
+                    container.textContent = `Error: ${error.message}`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

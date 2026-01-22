@@ -1,156 +1,249 @@
 import { BaseWidget } from './base-widget.js';
 
 /**
- * Tags Widget
- * Renders a tag input with autocomplete for multiple keywords
- * Extends BaseWidget to provide tag-based interaction
+ * Tags Widget (Composable)
+ * A standalone tag input widget with autocomplete and suggestions
+ * Can be used in containers or standalone
  */
 export class TagsWidget extends BaseWidget {
   /**
    * Create the DOM element for the tags widget
-   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   * @returns {HTMLElement|Comment} Tags container element or comment for invalid data
    */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid tags widget data');
     }
 
-    const widgetContainer = document.createElement("div");
-    widgetContainer.className = "widget";
+    const container = document.createElement('div');
+    container.className = 'widget-tags-container';
     
-    if (this.widgetData.type === 'tags') {
-      const tagsContainer = document.createElement("div");
-      tagsContainer.className = "widget-tags";
-      
-      const label = document.createElement("label");
-      label.className = "widget-tags-label";
-      label.textContent = this.widgetData.label || 'Add tags';
-      
-      const inputWrapper = document.createElement("div");
-      inputWrapper.className = "widget-tags-input-wrapper";
-      
-      const tagsDisplay = document.createElement("div");
-      tagsDisplay.className = "widget-tags-display";
-      
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "widget-tags-input";
-      input.placeholder = this.widgetData.placeholder || 'Type and press Enter to add tag';
-      input.setAttribute("data-widget-id", this.widgetId);
-      
-      const suggestionsList = document.createElement("ul");
-      suggestionsList.className = "widget-tags-suggestions";
-      suggestionsList.style.display = 'none';
-      
-      const maxTags = this.widgetData.maxTags || 10;
-      let tags = [];
-      
-      const renderTags = () => {
-        tagsDisplay.innerHTML = '';
-        tags.forEach((tag, index) => {
-          const tagElement = document.createElement("span");
-          tagElement.className = "widget-tag";
-          tagElement.textContent = tag;
-          
-          const removeButton = document.createElement("button");
-          removeButton.className = "widget-tag-remove";
-          removeButton.textContent = '×';
-          removeButton.addEventListener("click", () => {
+    const props = this.widgetData.props || {};
+    const label = props.label || 'Add tags';
+    const buttonText = props.buttonText || 'Submit';
+    const variant = props.variant || 'primary';
+    const size = props.size || 'medium';
+    const placeholder = props.placeholder || 'Type and press Enter to add tag';
+    const maxTags = props.maxTags || 10;
+    const suggestions = props.suggestions || [];
+    let tags = [...(props.initialTags || [])];
+    
+    // Create label
+    const labelElement = document.createElement('label');
+    labelElement.className = 'widget-tags-label';
+    labelElement.textContent = label;
+    labelElement.classList.add(`variant-${variant}`);
+    labelElement.classList.add(`size-${size}`);
+    
+    // Create input wrapper
+    const inputWrapper = document.createElement('div');
+    inputWrapper.className = 'widget-tags-input-wrapper';
+    
+    // Create tags display
+    const tagsDisplay = document.createElement('div');
+    tagsDisplay.className = 'widget-tags-display';
+    
+    // Create input
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'widget-tags-input';
+    input.placeholder = placeholder;
+    
+    // Apply variant and size classes
+    input.classList.add(`variant-${variant}`);
+    input.classList.add(`size-${size}`);
+    
+    // Set disabled state
+    if (props.disabled) {
+      input.disabled = true;
+      input.classList.add('widget-tags-disabled');
+    }
+    
+    // Create suggestions list
+    const suggestionsList = document.createElement('ul');
+    suggestionsList.className = 'widget-tags-suggestions';
+    suggestionsList.style.display = 'none';
+    
+    // Update submit button state
+    const updateSubmitButton = () => {
+      submitButton.disabled = props.disabled || tags.length === 0;
+      submitButton.classList.toggle('widget-tags-disabled', submitButton.disabled);
+    };
+    
+    // Render tags function with submit button update
+    const renderTags = () => {
+      tagsDisplay.innerHTML = '';
+      tags.forEach((tag, index) => {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'widget-tag';
+        tagElement.classList.add(`variant-${variant}`);
+        tagElement.classList.add(`size-${size}`);
+        tagElement.textContent = tag;
+        
+        const removeButton = document.createElement('button');
+        removeButton.className = 'widget-tag-remove';
+        removeButton.textContent = '×';
+        removeButton.addEventListener('click', () => {
+          if (!props.disabled) {
             tags.splice(index, 1);
             renderTags();
-          });
-          
-          tagElement.appendChild(removeButton);
-          tagsDisplay.appendChild(tagElement);
-        });
-      };
-      
-      const showSuggestions = (query) => {
-        if (!this.widgetData.suggestions || !query) {
-          suggestionsList.style.display = 'none';
-          return;
-        }
-        
-        const filtered = this.widgetData.suggestions.filter(s => 
-          s.toLowerCase().includes(query.toLowerCase()) && !tags.includes(s)
-        );
-        
-        if (filtered.length > 0) {
-          suggestionsList.innerHTML = '';
-          filtered.forEach(suggestion => {
-            const li = document.createElement("li");
-            li.className = "widget-tags-suggestion";
-            li.textContent = suggestion;
-            li.addEventListener("click", () => {
-              if (tags.length < maxTags) {
-                tags.push(suggestion);
-                renderTags();
-                input.value = '';
-                suggestionsList.style.display = 'none';
-              }
-            });
-            suggestionsList.appendChild(li);
-          });
-          suggestionsList.style.display = 'block';
-        } else {
-          suggestionsList.style.display = 'none';
-        }
-      };
-      
-      input.addEventListener("input", () => {
-        showSuggestions(input.value);
-      });
-      
-      input.addEventListener("keydown", (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const value = input.value.trim();
-          if (value && tags.length < maxTags && !tags.includes(value)) {
-            tags.push(value);
-            renderTags();
-            input.value = '';
-            suggestionsList.style.display = 'none';
           }
-        } else if (e.key === 'Backspace' && !input.value && tags.length > 0) {
-          tags.pop();
-          renderTags();
-        }
+        });
+        
+        tagElement.appendChild(removeButton);
+        tagsDisplay.appendChild(tagElement);
       });
       
-      const submitButton = document.createElement("button");
-      submitButton.className = "widget-tags-submit";
-      submitButton.textContent = this.widgetData.buttonText || 'Submit';
+      // Update input placeholder based on remaining capacity
+      if (tags.length >= maxTags) {
+        input.placeholder = 'Maximum tags reached';
+        input.disabled = true;
+      } else if (!props.disabled) {
+        input.disabled = false;
+        input.placeholder = placeholder;
+      }
       
-      const handleSubmit = () => {
-        if (tags.length > 0) {
+      // Update submit button state
+      updateSubmitButton();
+    };
+    
+    // Show suggestions function
+    const showSuggestions = (query) => {
+      if (!suggestions.length || !query || props.disabled) {
+        suggestionsList.style.display = 'none';
+        return;
+      }
+      
+      const filtered = suggestions.filter(s => 
+        s.toLowerCase().includes(query.toLowerCase()) && 
+        !tags.includes(s) &&
+        tags.length < maxTags
+      );
+      
+      if (filtered.length > 0) {
+        suggestionsList.innerHTML = '';
+        filtered.forEach(suggestion => {
+          const li = document.createElement('li');
+          li.className = 'widget-tags-suggestion';
+          li.textContent = suggestion;
+          li.addEventListener('click', () => {
+            if (tags.length < maxTags && !props.disabled) {
+              tags.push(suggestion);
+              renderTags();
+              input.value = '';
+              suggestionsList.style.display = 'none';
+            }
+          });
+          suggestionsList.appendChild(li);
+        });
+        suggestionsList.style.display = 'block';
+      } else {
+        suggestionsList.style.display = 'none';
+      }
+    };
+    
+    // Add event listeners
+    input.addEventListener('input', () => {
+      showSuggestions(input.value);
+    });
+    
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const value = input.value.trim();
+        if (value && tags.length < maxTags && !tags.includes(value) && !props.disabled) {
+          tags.push(value);
+          renderTags();
+          input.value = '';
+          suggestionsList.style.display = 'none';
+        }
+      } else if (e.key === 'Backspace' && !input.value && tags.length > 0 && !props.disabled) {
+        tags.pop();
+        renderTags();
+      } else if (e.key === 'Escape') {
+        suggestionsList.style.display = 'none';
+        input.value = '';
+      }
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!inputWrapper.contains(e.target)) {
+        suggestionsList.style.display = 'none';
+      }
+    });
+    
+    // Create submit button
+    const submitButton = document.createElement('button');
+    submitButton.className = 'widget-tags-submit';
+    submitButton.textContent = buttonText;
+    submitButton.classList.add(`variant-${variant}`);
+    submitButton.classList.add(`size-${size}`);
+    
+    if (props.disabled || tags.length === 0) {
+      submitButton.disabled = true;
+      submitButton.classList.add('widget-tags-disabled');
+    }
+    
+    // Handle submission
+    const handleSubmit = () => {
+      if (!submitButton.disabled && tags.length > 0) {
+        // Disable input and submit button if specified
+        if (props.disableOnSubmit !== false) {
           input.disabled = true;
           input.classList.add('widget-tags-disabled');
           submitButton.disabled = true;
           submitButton.classList.add('widget-tags-disabled');
-          
-          this.handleInteraction({
-            optionId: 'tags-submit',
-            optionValue: tags,
-            optionText: tags.join(', '),
-            widgetType: 'tags'
-          });
         }
-      };
-      
-      submitButton.addEventListener("click", handleSubmit);
-      
-      inputWrapper.appendChild(tagsDisplay);
-      inputWrapper.appendChild(input);
-      inputWrapper.appendChild(suggestionsList);
-      tagsContainer.appendChild(label);
-      tagsContainer.appendChild(inputWrapper);
-      tagsContainer.appendChild(submitButton);
-      widgetContainer.appendChild(tagsContainer);
+        
+        this.handleInteraction({
+          tags: tags,
+          count: tags.length,
+          joinedTags: tags.join(', '),
+          widgetType: 'tags'
+        });
+      }
+    };
+    
+    // Add event listener
+    submitButton.addEventListener('click', handleSubmit);
+    
+    // Apply custom styles if provided
+    if (props.inputStyle) {
+      Object.assign(input.style, props.inputStyle);
     }
     
-    return widgetContainer;
+    if (props.tagsStyle) {
+      Object.assign(tagsDisplay.style, props.tagsStyle);
+    }
+    
+    if (props.buttonStyle) {
+      Object.assign(submitButton.style, props.buttonStyle);
+    }
+    
+    if (props.style) {
+      Object.assign(container.style, props.style);
+    }
+    
+    // Assemble the widget
+    inputWrapper.appendChild(tagsDisplay);
+    inputWrapper.appendChild(input);
+    inputWrapper.appendChild(suggestionsList);
+    
+    container.appendChild(labelElement);
+    container.appendChild(inputWrapper);
+    container.appendChild(submitButton);
+    
+    // Initial render
+    renderTags();
+    
+    return container;
   }
 
+  /**
+   * Validate tags widget data structure
+   * @returns {boolean} True if data contains required properties for tags widget
+   */
   validate() {
     return super.validate() && 
            this.widgetData.type === 'tags';

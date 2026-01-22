@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Widget System Demo - Phase 2 Extended</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .demo-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .widget-demo {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fafafa;
+        }
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        /* Base widget styles */
+        .widget-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .widget-button.variant-primary {
+            background: #007bff;
+            color: white;
+        }
+        .widget-button.variant-primary:hover {
+            background: #0056b3;
+        }
+        .widget-button.variant-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .widget-button.variant-secondary:hover {
+            background: #545b62;
+        }
+        .widget-button.variant-outline {
+            background: transparent;
+            border: 1px solid #007bff;
+            color: #007bff;
+        }
+        .widget-button.variant-outline:hover {
+            background: #007bff;
+            color: white;
+        }
+        .widget-button.size-small {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .widget-button.size-large {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        .widget-button:disabled,
+        .widget-button.widget-button-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Input widgets */
+        .widget-input-container,
+        .widget-password-container,
+        .widget-textarea-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .widget-input,
+        .widget-password-input,
+        .widget-textarea {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .widget-input:focus,
+        .widget-password-input:focus,
+        .widget-textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        .widget-input:disabled,
+        .widget-password-input:disabled,
+        .widget-textarea:disabled {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        .widget-password-wrapper {
+            display: flex;
+            position: relative;
+        }
+        .widget-password-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .widget-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        /* Select widget */
+        .widget-select-container {
+            margin: 5px 0;
+        }
+        .widget-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            min-width: 200px;
+        }
+        .widget-select:disabled {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        /* Checkbox widget */
+        .widget-checkbox-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .widget-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .widget-checkbox-label {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        /* Slider widget */
+        .widget-slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .widget-slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .widget-slider {
+            flex: 1;
+        }
+        .widget-slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        /* Rating widget */
+        .widget-rating-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .widget-rating-stars {
+            display: flex;
+            gap: 4px;
+        }
+        .widget-rating-star {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+        .widget-rating-star:hover,
+        .widget-rating-star.active {
+            color: #ffc107;
+        }
+        
+        /* Toggle widget */
+        .widget-toggle-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .widget-toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .widget-toggle-slider {
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .widget-toggle-slider.active {
+            background: #007bff;
+        }
+        .widget-toggle-slider::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        .widget-toggle-slider.active::after {
+            transform: translateX(26px);
+        }
+        .widget-toggle-input {
+            display: none;
+        }
+        
+        /* Container and Card widgets */
+        .widget-container {
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        .widget-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Text widget */
+        .widget-text {
+            margin: 5px 0;
+        }
+        .widget-text.format-markdown strong {
+            font-weight: 600;
+        }
+        .widget-text.format-markdown em {
+            font-style: italic;
+        }
+        .widget-text.format-markdown code {
+            background: #f1f3f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        /* Error states */
+        .widget-input-error,
+        .widget-password-error,
+        .widget-textarea-error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220,53,69,0.25);
+        }
+    </style>
+</head>
+<body>
+    <h1>Complete Widget System Demo - Phase 2 Extended</h1>
+    <p>This demo shows all ported widgets working in the composable system.</p>
+    
+    <!-- Input Widgets Section -->
+    <div class="demo-section">
+        <div class="demo-title">Input Widgets</div>
+        <div class="widget-grid">
+            <div class="widget-demo" id="input-demo"></div>
+            <div class="widget-demo" id="password-demo"></div>
+            <div class="widget-demo" id="textarea-demo"></div>
+        </div>
+    </div>
+    
+    <!-- Selection Widgets Section -->
+    <div class="demo-section">
+        <div class="demo-title">Selection Widgets</div>
+        <div class="widget-grid">
+            <div class="widget-demo" id="select-demo"></div>
+            <div class="widget-demo" id="checkbox-demo"></div>
+            <div class="widget-demo" id="radio-demo"></div>
+        </div>
+    </div>
+    
+    <!-- Interactive Widgets Section -->
+    <div class="demo-section">
+        <div class="demo-title">Interactive Widgets</div>
+        <div class="widget-grid">
+            <div class="widget-demo" id="slider-demo"></div>
+            <div class="widget-demo" id="rating-demo"></div>
+            <div class="widget-demo" id="toggle-demo"></div>
+        </div>
+    </div>
+    
+    <!-- Button Widgets Section -->
+    <div class="demo-section">
+        <div class="demo-title">Button Widgets</div>
+        <div class="widget-grid">
+            <div class="widget-demo" id="button-demo"></div>
+            <div class="widget-demo" id="buttons-demo"></div>
+        </div>
+    </div>
+    
+    <!-- Composition Examples -->
+    <div class="demo-section">
+        <div class="demo-title">Complex Composition Examples</div>
+        <div class="widget-grid">
+            <div class="widget-demo" id="form-composition"></div>
+            <div class="widget-demo" id="survey-composition"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the widget factory
+        import { WidgetFactory } from '../src/modules/widgets/widget-factory.js';
+        
+        // Mock interaction handler
+        const mockHandleInteraction = (data) => {
+            console.log('Widget interaction:', data);
+            alert(`${data.widgetType} interaction: ${JSON.stringify(data, null, 2)}`);
+        };
+        
+        // Demo configurations for all widgets
+        const demos = [
+            // Input Widgets
+            {
+                id: 'input-demo',
+                config: {
+                    type: 'input',
+                    props: {
+                        type: 'text',
+                        placeholder: 'Enter your name...',
+                        buttonText: 'Submit',
+                        variant: 'primary',
+                        required: true
+                    }
+                }
+            },
+            {
+                id: 'password-demo',
+                config: {
+                    type: 'password',
+                    props: {
+                        placeholder: 'Enter password...',
+                        buttonText: 'Login',
+                        variant: 'primary',
+                        required: true
+                    }
+                }
+            },
+            {
+                id: 'textarea-demo',
+                config: {
+                    type: 'textarea',
+                    props: {
+                        placeholder: 'Enter your feedback...',
+                        buttonText: 'Send',
+                        variant: 'secondary',
+                        rows: 3,
+                        maxLength: 200,
+                        showCounter: true
+                    }
+                }
+            },
+            
+            // Selection Widgets
+            {
+                id: 'select-demo',
+                config: {
+                    type: 'select',
+                    props: {
+                        placeholder: 'Choose a country...',
+                        variant: 'outline',
+                        options: [
+                            { id: 'us', text: 'United States', value: 'us' },
+                            { id: 'uk', text: 'United Kingdom', value: 'uk' },
+                            { id: 'ca', text: 'Canada', value: 'ca' },
+                            { id: 'au', text: 'Australia', value: 'au' }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'checkbox-demo',
+                config: {
+                    type: 'checkbox',
+                    props: {
+                        buttonText: 'Submit Selection',
+                        variant: 'primary',
+                        layout: 'vertical',
+                        options: [
+                            { id: 'red', text: 'Red', value: 'red' },
+                            { id: 'blue', text: 'Blue', value: 'blue' },
+                            { id: 'green', text: 'Green', value: 'green' }
+                        ]
+                    }
+                }
+            },
+            
+            // Interactive Widgets
+            {
+                id: 'slider-demo',
+                config: {
+                    type: 'slider',
+                    props: {
+                        label: 'Rate your satisfaction',
+                        buttonText: 'Submit',
+                        variant: 'primary',
+                        min: 0,
+                        max: 10,
+                        step: 1,
+                        defaultValue: 7,
+                        showValue: true
+                    }
+                }
+            },
+            {
+                id: 'rating-demo',
+                config: {
+                    type: 'rating',
+                    props: {
+                        label: 'Rate this product',
+                        buttonText: 'Submit Rating',
+                        variant: 'primary',
+                        maxRating: 5,
+                        iconType: 'stars',
+                        showRating: true
+                    }
+                }
+            },
+            {
+                id: 'toggle-demo',
+                config: {
+                    type: 'toggle',
+                    props: {
+                        label: 'Enable notifications',
+                        buttonText: 'Save Settings',
+                        variant: 'primary',
+                        defaultValue: false,
+                        showValue: true
+                    }
+                }
+            },
+            
+            // Button Widgets
+            {
+                id: 'button-demo',
+                config: {
+                    type: 'button',
+                    props: {
+                        label: 'Click Me!',
+                        variant: 'primary',
+                        size: 'large',
+                        value: 'button-clicked'
+                    }
+                }
+            },
+            {
+                id: 'buttons-demo',
+                config: {
+                    type: 'buttons',
+                    props: {
+                        layout: 'horizontal',
+                        gap: 'small',
+                        alignment: 'center',
+                        options: [
+                            { id: 'yes', text: 'Yes', variant: 'primary', value: 'yes' },
+                            { id: 'no', text: 'No', variant: 'secondary', value: 'no' },
+                            { id: 'maybe', text: 'Maybe', variant: 'outline', value: 'maybe' }
+                        ]
+                    }
+                }
+            },
+            
+            // Complex Compositions
+            {
+                id: 'form-composition',
+                config: {
+                    type: 'card',
+                    props: {
+                        variant: 'default',
+                        children: [
+                            {
+                                type: 'text',
+                                props: { 
+                                    content: '**User Registration Form**\nPlease fill in your details.', 
+                                    format: 'markdown' 
+                                }
+                            },
+                            {
+                                type: 'container',
+                                props: {
+                                    layout: 'vertical',
+                                    gap: 'medium',
+                                    children: [
+                                        {
+                                            type: 'input',
+                                            props: {
+                                                type: 'text',
+                                                placeholder: 'Full Name',
+                                                buttonText: 'Next',
+                                                variant: 'primary'
+                                            }
+                                        },
+                                        {
+                                            type: 'input',
+                                            props: {
+                                                type: 'email',
+                                                placeholder: 'Email Address',
+                                                buttonText: 'Next',
+                                                variant: 'primary'
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                id: 'survey-composition',
+                config: {
+                    type: 'container',
+                    props: {
+                        layout: 'vertical',
+                        gap: 'large',
+                        children: [
+                            {
+                                type: 'text',
+                                props: { 
+                                    content: '**Customer Satisfaction Survey**\nWe value your feedback!', 
+                                    format: 'markdown' 
+                                }
+                            },
+                            {
+                                type: 'rating',
+                                props: {
+                                    label: 'Overall satisfaction',
+                                    buttonText: 'Continue',
+                                    variant: 'primary',
+                                    maxRating: 5
+                                }
+                            },
+                            {
+                                type: 'textarea',
+                                props: {
+                                    placeholder: 'Additional comments...',
+                                    buttonText: 'Submit Survey',
+                                    variant: 'primary',
+                                    rows: 3
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ];
+        
+        // Render all demos
+        demos.forEach(demo => {
+            const container = document.getElementById(demo.id);
+            if (container) {
+                try {
+                    const widget = WidgetFactory.createWidget(demo.config, 'demo-widget');
+                    if (widget) {
+                        container.appendChild(widget);
+                    } else {
+                        container.textContent = 'Failed to create widget';
+                    }
+                } catch (error) {
+                    console.error(`Error creating demo ${demo.id}:`, error);
+                    container.textContent = `Error: ${error.message}`;
+                }
+            }
+        });
+        
+        // Add interaction handlers to all widgets
+        setTimeout(() => {
+            // This is a simplified mock - in real implementation, 
+            // widgets would have proper event handlers through BaseWidget
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('widget-button') || 
+                    e.target.classList.contains('widget-input-submit') ||
+                    e.target.classList.contains('widget-password-submit') ||
+                    e.target.classList.contains('widget-textarea-submit') ||
+                    e.target.classList.contains('widget-checkbox-submit') ||
+                    e.target.classList.contains('widget-slider-submit') ||
+                    e.target.classList.contains('widget-rating-submit') ||
+                    e.target.classList.contains('widget-toggle-submit')) {
+                    
+                    // Get widget type from closest container
+                    const container = e.target.closest('[class*="widget-"]');
+                    if (container) {
+                        const widgetType = Array.from(container.classList)
+                            .find(cls => cls.startsWith('widget-') && cls.includes('-container'))
+                            ?.replace('widget-', '').replace('-container', '') || 'unknown';
+                        
+                        mockHandleInteraction({
+                            widgetType: widgetType,
+                            action: 'submit',
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                }
+            });
+        }, 100);
+    </script>
+</body>
+</html>

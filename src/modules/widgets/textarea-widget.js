@@ -1,76 +1,179 @@
 import { BaseWidget } from './base-widget.js';
 
 /**
- * Textarea Widget
- * Renders a multi-line text input for longer responses
- * Extends BaseWidget to provide textarea-based interaction
+ * Textarea Widget (Composable)
+ * A standalone textarea widget for multi-line text input
+ * Can be used in containers or standalone
  */
 export class TextareaWidget extends BaseWidget {
   /**
    * Create the DOM element for the textarea widget
-   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   * @returns {HTMLElement|Comment} Textarea container element or comment for invalid data
    */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid textarea widget data');
     }
 
-    const widgetContainer = document.createElement("div");
-    widgetContainer.className = "widget";
+    const container = document.createElement('div');
+    container.className = 'widget-textarea-container';
     
-    if (this.widgetData.type === 'textarea') {
-      const formContainer = document.createElement("div");
-      formContainer.className = "widget-textarea";
-      
-      const textarea = document.createElement("textarea");
-      textarea.className = "widget-textarea-element";
-      textarea.placeholder = this.widgetData.placeholder || 'Enter your response...';
-      textarea.rows = this.widgetData.rows || 4;
-      textarea.setAttribute("data-widget-id", this.widgetId);
-      
-      if (this.widgetData.maxLength) {
-        textarea.maxLength = this.widgetData.maxLength;
-      }
-      
-      const submitButton = document.createElement("button");
-      submitButton.className = "widget-textarea-submit";
-      submitButton.textContent = this.widgetData.buttonText || 'Submit';
-      
-      const handleSubmit = () => {
-        const value = textarea.value.trim();
-        if (value) {
-          textarea.disabled = true;
-          textarea.classList.add('widget-textarea-disabled');
-          submitButton.disabled = true;
-          submitButton.classList.add('widget-textarea-disabled');
-          
-          this.handleInteraction({
-            optionId: 'textarea-submit',
-            optionValue: value,
-            optionText: value,
-            widgetType: 'textarea'
-          });
-          textarea.value = '';
-        }
-      };
-      
-      submitButton.addEventListener("click", handleSubmit);
-      
-      textarea.addEventListener("keydown", (e) => {
-        if (e.key === 'Enter' && e.ctrlKey) {
-          e.preventDefault();
-          handleSubmit();
-        }
-      });
-      
-      formContainer.appendChild(textarea);
-      formContainer.appendChild(submitButton);
-      widgetContainer.appendChild(formContainer);
+    const props = this.widgetData.props || {};
+    const placeholder = props.placeholder || 'Enter your response...';
+    const buttonText = props.buttonText || 'Submit';
+    const variant = props.variant || 'primary';
+    const size = props.size || 'medium';
+    const rows = props.rows || 4;
+    const maxLength = props.maxLength;
+    const resize = props.resize || 'vertical';
+    
+    // Create textarea element
+    const textarea = document.createElement('textarea');
+    textarea.className = 'widget-textarea';
+    textarea.placeholder = placeholder;
+    textarea.rows = rows;
+    
+    // Apply variant and size classes
+    textarea.classList.add(`variant-${variant}`);
+    textarea.classList.add(`size-${size}`);
+    
+    // Set textarea properties
+    if (maxLength) textarea.maxLength = maxLength;
+    if (props.required) textarea.required = props.required;
+    if (props.readonly) textarea.readOnly = props.readonly;
+    
+    // Set resize behavior
+    textarea.style.resize = resize;
+    
+    // Set disabled state
+    if (props.disabled) {
+      textarea.disabled = true;
+      textarea.classList.add('widget-textarea-disabled');
     }
     
-    return widgetContainer;
+    // Create character counter if maxLength is set
+    let counterElement = null;
+    if (maxLength && props.showCounter !== false) {
+      counterElement = document.createElement('div');
+      counterElement.className = 'widget-textarea-counter';
+      counterElement.textContent = `0 / ${maxLength}`;
+      counterElement.style.fontSize = '12px';
+      counterElement.style.color = '#666';
+      counterElement.style.textAlign = 'right';
+      counterElement.style.marginTop = '4px';
+    }
+    
+    // Create submit button
+    const submitButton = document.createElement('button');
+    submitButton.className = 'widget-textarea-submit';
+    submitButton.textContent = buttonText;
+    submitButton.classList.add(`variant-${variant}`);
+    submitButton.classList.add(`size-${size}`);
+    
+    if (props.disabled) {
+      submitButton.disabled = true;
+      submitButton.classList.add('widget-textarea-disabled');
+    }
+    
+    // Handle submission
+    const handleSubmit = () => {
+      if (!textarea.disabled && !submitButton.disabled) {
+        const value = textarea.value.trim();
+        
+        // Validate if required
+        if (props.required && !value) {
+          textarea.classList.add('widget-textarea-error');
+          return;
+        }
+        
+        if (value || !props.required) {
+          // Disable both textarea and submit button after submission if specified
+          if (props.disableOnSubmit !== false) {
+            textarea.disabled = true;
+            textarea.classList.add('widget-textarea-disabled');
+            submitButton.disabled = true;
+            submitButton.classList.add('widget-textarea-disabled');
+          }
+          
+          this.handleInteraction({
+            value: value,
+            length: value.length,
+            widgetType: 'textarea'
+          });
+          
+          // Clear textarea if specified
+          if (props.clearOnSubmit !== false) {
+            textarea.value = '';
+            if (counterElement) {
+              counterElement.textContent = `0 / ${maxLength}`;
+            }
+          }
+        }
+      }
+    };
+    
+    // Add event listeners
+    submitButton.addEventListener('click', handleSubmit);
+    
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        handleSubmit();
+      }
+    });
+    
+    // Update character counter
+    if (counterElement) {
+      textarea.addEventListener('input', () => {
+        const currentLength = textarea.value.length;
+        counterElement.textContent = `${currentLength} / ${maxLength}`;
+        
+        // Update counter color based on length
+        if (currentLength > maxLength * 0.9) {
+          counterElement.style.color = '#dc3545';
+        } else if (currentLength > maxLength * 0.7) {
+          counterElement.style.color = '#ffc107';
+        } else {
+          counterElement.style.color = '#666';
+        }
+        
+        // Clear error state
+        textarea.classList.remove('widget-textarea-error');
+      });
+    }
+    
+    // Clear error state on input
+    textarea.addEventListener('input', () => {
+      textarea.classList.remove('widget-textarea-error');
+    });
+    
+    // Apply custom styles if provided
+    if (props.textareaStyle) {
+      Object.assign(textarea.style, props.textareaStyle);
+    }
+    
+    if (props.buttonStyle) {
+      Object.assign(submitButton.style, props.buttonStyle);
+    }
+    
+    if (props.style) {
+      Object.assign(container.style, props.style);
+    }
+    
+    // Assemble the widget
+    container.appendChild(textarea);
+    if (counterElement) {
+      container.appendChild(counterElement);
+    }
+    container.appendChild(submitButton);
+    
+    return container;
   }
 
+  /**
+   * Validate textarea widget data structure
+   * @returns {boolean} True if data contains required properties for textarea widget
+   */
   validate() {
     return super.validate() && 
            this.widgetData.type === 'textarea';

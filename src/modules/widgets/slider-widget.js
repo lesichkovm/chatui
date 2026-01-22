@@ -1,89 +1,152 @@
 import { BaseWidget } from './base-widget.js';
 
 /**
- * Slider Widget
- * Renders a numeric range slider for selecting values
- * Extends BaseWidget to provide slider-based interaction
+ * Slider Widget (Composable)
+ * A standalone slider widget for numeric range selection
+ * Can be used in containers or standalone
  */
 export class SliderWidget extends BaseWidget {
   /**
    * Create the DOM element for the slider widget
-   * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+   * @returns {HTMLElement|Comment} Slider container element or comment for invalid data
    */
   createElement() {
     if (!this.validate()) {
       return document.createComment('Invalid slider widget data');
     }
 
-    const widgetContainer = document.createElement("div");
-    widgetContainer.className = "widget";
+    const container = document.createElement('div');
+    container.className = 'widget-slider-container';
     
-    if (this.widgetData.type === 'slider') {
-      const sliderContainer = document.createElement("div");
-      sliderContainer.className = "widget-slider";
-      
-      const label = document.createElement("label");
-      label.className = "widget-slider-label";
-      label.textContent = this.widgetData.label || 'Select a value';
-      
-      const sliderWrapper = document.createElement("div");
-      sliderWrapper.className = "widget-slider-wrapper";
-      
-      const slider = document.createElement("input");
-      slider.type = "range";
-      slider.className = "widget-slider-element";
-      slider.min = this.widgetData.min || 0;
-      slider.max = this.widgetData.max || 100;
-      slider.step = this.widgetData.step || 1;
-      slider.value = this.widgetData.defaultValue || Math.floor((slider.min + slider.max) / 2);
-      slider.setAttribute("data-widget-id", this.widgetId);
-      
-      const valueDisplay = document.createElement("div");
-      valueDisplay.className = "widget-slider-value";
-      valueDisplay.textContent = slider.value;
-      
-      const submitButton = document.createElement("button");
-      submitButton.className = "widget-slider-submit";
-      submitButton.textContent = this.widgetData.buttonText || 'Submit';
-      
-      slider.addEventListener("input", () => {
-        valueDisplay.textContent = slider.value;
-      });
-      
-      const handleSubmit = () => {
-        const value = parseFloat(slider.value);
-        
-        slider.disabled = true;
-        slider.classList.add('widget-slider-disabled');
-        submitButton.disabled = true;
-        submitButton.classList.add('widget-slider-disabled');
-        
-        this.handleInteraction({
-          optionId: 'slider-submit',
-          optionValue: value,
-          optionText: value.toString(),
-          widgetType: 'slider'
-        });
-      };
-      
-      submitButton.addEventListener("click", handleSubmit);
-      
-      sliderWrapper.appendChild(slider);
-      sliderWrapper.appendChild(valueDisplay);
-      sliderContainer.appendChild(label);
-      sliderContainer.appendChild(sliderWrapper);
-      sliderContainer.appendChild(submitButton);
-      widgetContainer.appendChild(sliderContainer);
+    const props = this.widgetData.props || {};
+    const label = props.label || 'Select a value';
+    const buttonText = props.buttonText || 'Submit';
+    const variant = props.variant || 'primary';
+    const size = props.size || 'medium';
+    const min = props.min || 0;
+    const max = props.max || 100;
+    const step = props.step || 1;
+    const defaultValue = props.defaultValue || Math.floor((min + max) / 2);
+    const showValue = props.showValue !== false;
+    
+    // Create label
+    const labelElement = document.createElement('label');
+    labelElement.className = 'widget-slider-label';
+    labelElement.textContent = label;
+    labelElement.classList.add(`variant-${variant}`);
+    labelElement.classList.add(`size-${size}`);
+    
+    // Create slider wrapper
+    const sliderWrapper = document.createElement('div');
+    sliderWrapper.className = 'widget-slider-wrapper';
+    
+    // Create slider input
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.className = 'widget-slider';
+    slider.min = min;
+    slider.max = max;
+    slider.step = step;
+    slider.value = defaultValue;
+    
+    // Apply variant and size classes
+    slider.classList.add(`variant-${variant}`);
+    slider.classList.add(`size-${size}`);
+    
+    // Set disabled state
+    if (props.disabled) {
+      slider.disabled = true;
+      slider.classList.add('widget-slider-disabled');
     }
     
-    return widgetContainer;
+    // Create value display
+    let valueDisplay = null;
+    if (showValue) {
+      valueDisplay = document.createElement('div');
+      valueDisplay.className = 'widget-slider-value';
+      valueDisplay.textContent = defaultValue;
+      valueDisplay.classList.add(`variant-${variant}`);
+      valueDisplay.classList.add(`size-${size}`);
+    }
+    
+    // Create submit button
+    const submitButton = document.createElement('button');
+    submitButton.className = 'widget-slider-submit';
+    submitButton.textContent = buttonText;
+    submitButton.classList.add(`variant-${variant}`);
+    submitButton.classList.add(`size-${size}`);
+    
+    if (props.disabled) {
+      submitButton.disabled = true;
+      submitButton.classList.add('widget-slider-disabled');
+    }
+    
+    // Update value display
+    const updateValue = () => {
+      if (valueDisplay) {
+        valueDisplay.textContent = slider.value;
+      }
+    };
+    
+    slider.addEventListener('input', updateValue);
+    
+    // Handle submission
+    const handleSubmit = () => {
+      if (!slider.disabled && !submitButton.disabled) {
+        const value = parseFloat(slider.value);
+        
+        // Disable slider and submit button if specified
+        if (props.disableOnSubmit !== false) {
+          slider.disabled = true;
+          slider.classList.add('widget-slider-disabled');
+          submitButton.disabled = true;
+          submitButton.classList.add('widget-slider-disabled');
+        }
+        
+        this.handleInteraction({
+          value: value,
+          min: min,
+          max: max,
+          step: step,
+          widgetType: 'slider'
+        });
+      }
+    };
+    
+    // Add event listener
+    submitButton.addEventListener('click', handleSubmit);
+    
+    // Apply custom styles if provided
+    if (props.sliderStyle) {
+      Object.assign(slider.style, props.sliderStyle);
+    }
+    
+    if (props.buttonStyle) {
+      Object.assign(submitButton.style, props.buttonStyle);
+    }
+    
+    if (props.style) {
+      Object.assign(container.style, props.style);
+    }
+    
+    // Assemble the widget
+    container.appendChild(labelElement);
+    sliderWrapper.appendChild(slider);
+    if (valueDisplay) {
+      sliderWrapper.appendChild(valueDisplay);
+    }
+    container.appendChild(sliderWrapper);
+    container.appendChild(submitButton);
+    
+    return container;
   }
 
+  /**
+   * Validate slider widget data structure
+   * @returns {boolean} True if data contains required properties for slider widget
+   */
   validate() {
     return super.validate() && 
-           this.widgetData.type === 'slider' &&
-           typeof this.widgetData.min === 'number' &&
-           typeof this.widgetData.max === 'number' &&
-           this.widgetData.max > this.widgetData.min;
+           this.widgetData.type === 'slider';
   }
 }

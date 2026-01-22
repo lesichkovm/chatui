@@ -8,11 +8,3208 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-21T20:31:48.777Z
+ * Generated on: 2026-01-22T06:34:55.788Z
  */
 
 
 (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+
+  // src/modules/widgets/base-widget.js
+  var BaseWidget;
+  var init_base_widget = __esm({
+    "src/modules/widgets/base-widget.js"() {
+      BaseWidget = class {
+        /**
+         * Create a new widget instance
+         * @param {Object} widgetData - Widget configuration data
+         * @param {string} widgetId - Widget ID for scoping
+         */
+        constructor(widgetData, widgetId) {
+          this.widgetData = widgetData;
+          this.widgetId = widgetId;
+        }
+        /**
+         * Create the DOM element for this widget
+         * @returns {HTMLElement} The widget DOM element
+         */
+        createElement() {
+          throw new Error("createElement() must be implemented by subclass");
+        }
+        /**
+         * Get the container element for nested children widgets
+         * Override this method in container widgets to specify where children should be placed
+         * @param {HTMLElement} element - The widget's main element
+         * @returns {HTMLElement} Container element for children (defaults to main element)
+         */
+        getChildrenContainer(element) {
+          return element;
+        }
+        /**
+         * Handle widget interaction and dispatch custom event
+         * @param {Object} interaction - Interaction data
+         * @param {string} interaction.type - Type of interaction
+         * @param {string} interaction.value - Interaction value
+         * @param {string} [interaction.text] - Display text for the interaction
+         */
+        handleInteraction(interaction) {
+          const event = new CustomEvent("widgetInteraction", {
+            detail: {
+              widgetId: this.widgetId,
+              ...interaction
+            }
+          });
+          document.dispatchEvent(event);
+        }
+        /**
+         * Validate widget data structure
+         * @returns {boolean} True if data contains required type property
+         */
+        validate() {
+          return this.widgetData && this.widgetData.type;
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/container-widget.js
+  var ContainerWidget;
+  var init_container_widget = __esm({
+    "src/modules/widgets/container-widget.js"() {
+      init_base_widget();
+      ContainerWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the container widget
+         * @returns {HTMLElement} The container DOM element
+         */
+        createElement() {
+          const element = document.createElement("div");
+          element.className = "widget-container";
+          const props = this.widgetData.props || {};
+          const layout = props.layout || "vertical";
+          const gap = props.gap || "medium";
+          const alignment = props.alignment || "start";
+          if (layout === "flex" || layout === "horizontal" || layout === "vertical") {
+            this.applyFlexLayout(element, layout, gap, alignment, props);
+          } else if (layout === "grid") {
+            this.applyGridLayout(element, gap, alignment, props);
+          } else {
+            element.classList.add(`layout-${layout}`);
+            element.classList.add(`gap-${gap}`);
+            element.classList.add(`align-${alignment}`);
+          }
+          if (props.style) {
+            Object.assign(element.style, props.style);
+          }
+          return element;
+        }
+        /**
+         * Apply flexbox layout properties
+         * @private
+         * @param {HTMLElement} element - Container element
+         * @param {string} layout - Layout type
+         * @param {string} gap - Gap size
+         * @param {string} alignment - Alignment type
+         * @param {Object} props - Additional properties
+         */
+        applyFlexLayout(element, layout, gap, alignment, props) {
+          element.style.display = "flex";
+          if (layout === "horizontal") {
+            element.style.flexDirection = "row";
+          } else {
+            element.style.flexDirection = "column";
+          }
+          const gapSize = this.getGapSize(gap);
+          element.style.gap = gapSize;
+          if (layout === "horizontal") {
+            if (alignment === "center") element.style.justifyContent = "center";
+            else if (alignment === "end") element.style.justifyContent = "flex-end";
+            else if (alignment === "space-between") element.style.justifyContent = "space-between";
+            else if (alignment === "space-around") element.style.justifyContent = "space-around";
+            else element.style.justifyContent = "flex-start";
+            if (props.verticalAlignment === "center") element.style.alignItems = "center";
+            else if (props.verticalAlignment === "end") element.style.alignItems = "flex-end";
+            else if (props.verticalAlignment === "stretch") element.style.alignItems = "stretch";
+            else element.style.alignItems = "center";
+          } else {
+            if (alignment === "center") element.style.justifyContent = "center";
+            else if (alignment === "end") element.style.justifyContent = "flex-end";
+            else if (alignment === "space-between") element.style.justifyContent = "space-between";
+            else if (alignment === "space-around") element.style.justifyContent = "space-around";
+            else element.style.justifyContent = "flex-start";
+            if (props.horizontalAlignment === "center") element.style.alignItems = "center";
+            else if (props.horizontalAlignment === "end") element.style.alignItems = "flex-end";
+            else if (props.horizontalAlignment === "stretch") element.style.alignItems = "stretch";
+            else element.style.alignItems = "stretch";
+          }
+          if (props.wrap === "wrap") element.style.flexWrap = "wrap";
+          else if (props.wrap === "nowrap") element.style.flexWrap = "nowrap";
+          if (props.distribute === "evenly") {
+            element.style.justifyContent = "space-evenly";
+          }
+        }
+        /**
+         * Apply grid layout properties
+         * @private
+         * @param {HTMLElement} element - Container element
+         * @param {string} gap - Gap size
+         * @param {string} alignment - Alignment type
+         * @param {Object} props - Additional properties
+         */
+        applyGridLayout(element, gap, alignment, props) {
+          element.style.display = "grid";
+          const gapSize = this.getGapSize(gap);
+          element.style.gap = gapSize;
+          if (props.columns) {
+            if (typeof props.columns === "number") {
+              element.style.gridTemplateColumns = `repeat(${props.columns}, 1fr)`;
+            } else {
+              element.style.gridTemplateColumns = props.columns;
+            }
+          }
+          if (props.rows) {
+            if (typeof props.rows === "number") {
+              element.style.gridTemplateRows = `repeat(${props.rows}, 1fr)`;
+            } else {
+              element.style.gridTemplateRows = props.rows;
+            }
+          }
+          if (props.autoFlow) {
+            element.style.gridAutoFlow = props.autoFlow;
+          }
+          if (alignment === "center") {
+            element.style.justifyItems = "center";
+            element.style.alignItems = "center";
+          } else if (alignment === "end") {
+            element.style.justifyItems = "end";
+            element.style.alignItems = "end";
+          } else if (alignment === "stretch") {
+            element.style.justifyItems = "stretch";
+            element.style.alignItems = "stretch";
+          } else {
+            element.style.justifyItems = "start";
+            element.style.alignItems = "start";
+          }
+        }
+        /**
+         * Convert gap size to CSS value
+         * @private
+         * @param {string} gap - Gap size identifier
+         * @returns {string} CSS gap value
+         */
+        getGapSize(gap) {
+          const gapMap = {
+            "none": "0",
+            "xs": "4px",
+            "small": "8px",
+            "medium": "16px",
+            "large": "24px",
+            "xl": "32px",
+            "xxl": "48px"
+          };
+          return gapMap[gap] || gapMap["medium"];
+        }
+        /**
+         * Get the container for child widgets
+         * @returns {HTMLElement} The element that should contain child widgets
+         */
+        getChildrenContainer(element) {
+          return element;
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/card-widget.js
+  var CardWidget;
+  var init_card_widget = __esm({
+    "src/modules/widgets/card-widget.js"() {
+      init_base_widget();
+      CardWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the card widget
+         * @returns {HTMLElement} The card DOM element
+         */
+        createElement() {
+          const element = document.createElement("div");
+          element.className = "widget-card";
+          const variant = this.widgetData.props?.variant || "default";
+          const padding = this.widgetData.props?.padding || "medium";
+          element.classList.add(`variant-${variant}`);
+          element.classList.add(`padding-${padding}`);
+          if (this.widgetData.props?.style) {
+            Object.assign(element.style, this.widgetData.props.style);
+          }
+          return element;
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/text-widget.js
+  var TextWidget;
+  var init_text_widget = __esm({
+    "src/modules/widgets/text-widget.js"() {
+      init_base_widget();
+      TextWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the text widget
+         * @returns {HTMLElement} The text DOM element
+         */
+        createElement() {
+          const element = document.createElement("div");
+          element.className = "widget-text";
+          const content = this.widgetData.props?.content || "";
+          const format = this.widgetData.props?.format || "plain";
+          element.classList.add(`format-${format}`);
+          if (format === "markdown") {
+            element.innerHTML = this.parseBasicMarkdown(content);
+          } else if (format === "html") {
+            element.innerHTML = content;
+          } else {
+            element.textContent = content;
+          }
+          if (this.widgetData.props?.style) {
+            Object.assign(element.style, this.widgetData.props.style);
+          }
+          return element;
+        }
+        /**
+         * Parse basic markdown syntax
+         * @private
+         * @param {string} text - Markdown text
+         * @returns {string} HTML string
+         */
+        parseBasicMarkdown(text) {
+          return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>").replace(/`(.*?)`/g, "<code>$1</code>").replace(/\n/g, "<br>");
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/button-widget.js
+  var ButtonWidget;
+  var init_button_widget = __esm({
+    "src/modules/widgets/button-widget.js"() {
+      init_base_widget();
+      ButtonWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the button widget
+         * @returns {HTMLElement|Comment} Button element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid button widget data");
+          }
+          const button = document.createElement("button");
+          button.className = "widget-button";
+          const variant = this.widgetData.props?.variant || "primary";
+          const size = this.widgetData.props?.size || "medium";
+          button.classList.add(`variant-${variant}`);
+          button.classList.add(`size-${size}`);
+          button.textContent = this.widgetData.props?.label || "Button";
+          if (this.widgetData.props?.value) {
+            button.setAttribute("data-value", this.widgetData.props.value);
+          }
+          if (this.widgetData.props?.disabled) {
+            button.disabled = true;
+            button.classList.add("widget-button-disabled");
+          }
+          button.addEventListener("click", () => {
+            if (!button.disabled) {
+              if (this.widgetData.props?.disableOnClick !== false) {
+                button.disabled = true;
+                button.classList.add("widget-button-disabled");
+              }
+              this.handleInteraction({
+                value: this.widgetData.props?.value || this.widgetData.props?.label,
+                label: this.widgetData.props?.label,
+                widgetType: "button"
+              });
+            }
+          });
+          if (this.widgetData.props?.style) {
+            Object.assign(button.style, this.widgetData.props.style);
+          }
+          return button;
+        }
+        /**
+         * Validate button widget data structure
+         * @returns {boolean} True if data contains required properties for button widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "button" && this.widgetData.props && typeof this.widgetData.props.label === "string";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/input-widget.js
+  var InputWidget;
+  var init_input_widget = __esm({
+    "src/modules/widgets/input-widget.js"() {
+      init_base_widget();
+      InputWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the input widget
+         * @returns {HTMLElement|Comment} Input container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid input widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-input-container";
+          const props = this.widgetData.props || {};
+          const inputType = props.type || "text";
+          const placeholder = props.placeholder || "Enter your response...";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const input = document.createElement("input");
+          input.type = inputType;
+          input.className = "widget-input";
+          input.placeholder = placeholder;
+          input.classList.add(`variant-${variant}`);
+          input.classList.add(`size-${size}`);
+          if (props.maxLength) input.maxLength = props.maxLength;
+          if (props.required) input.required = props.required;
+          if (props.pattern) input.pattern = props.pattern;
+          if (props.min) input.min = props.min;
+          if (props.max) input.max = props.max;
+          if (props.step) input.step = props.step;
+          if (props.disabled) {
+            input.disabled = true;
+            input.classList.add("widget-input-disabled");
+          }
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-input-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-input-disabled");
+          }
+          const handleSubmit = () => {
+            if (!input.disabled && !submitButton.disabled) {
+              const value = input.value.trim();
+              if (props.required && !value) {
+                input.classList.add("widget-input-error");
+                return;
+              }
+              if (value || !props.required) {
+                if (props.disableOnSubmit !== false) {
+                  input.disabled = true;
+                  input.classList.add("widget-input-disabled");
+                  submitButton.disabled = true;
+                  submitButton.classList.add("widget-input-disabled");
+                }
+                this.handleInteraction({
+                  value,
+                  inputType,
+                  widgetType: "input"
+                });
+                if (props.clearOnSubmit !== false) {
+                  input.value = "";
+                }
+              }
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSubmit();
+            }
+          });
+          input.addEventListener("input", () => {
+            input.classList.remove("widget-input-error");
+          });
+          if (props.inputStyle) {
+            Object.assign(input.style, props.inputStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          container.appendChild(input);
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Validate input widget data structure
+         * @returns {boolean} True if data contains required properties for input widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "input";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/password-widget.js
+  var PasswordWidget;
+  var init_password_widget = __esm({
+    "src/modules/widgets/password-widget.js"() {
+      init_base_widget();
+      PasswordWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the password widget
+         * @returns {HTMLElement|Comment} Password container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid password widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-password-container";
+          const props = this.widgetData.props || {};
+          const placeholder = props.placeholder || "Enter your password...";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const autocomplete = props.autocomplete || "current-password";
+          const inputWrapper = document.createElement("div");
+          inputWrapper.className = "widget-password-wrapper";
+          const input = document.createElement("input");
+          input.type = "password";
+          input.className = "widget-password-input";
+          input.placeholder = placeholder;
+          input.autocomplete = autocomplete;
+          input.classList.add(`variant-${variant}`);
+          input.classList.add(`size-${size}`);
+          if (props.disabled) {
+            input.disabled = true;
+            input.classList.add("widget-password-disabled");
+          }
+          const toggleButton = document.createElement("button");
+          toggleButton.type = "button";
+          toggleButton.className = "widget-password-toggle";
+          toggleButton.setAttribute("aria-label", "Toggle password visibility");
+          toggleButton.innerHTML = "\u{1F441}\uFE0F";
+          toggleButton.classList.add(`variant-${variant}`);
+          toggleButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            toggleButton.disabled = true;
+            toggleButton.classList.add("widget-password-disabled");
+          }
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-password-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-password-disabled");
+          }
+          const toggleVisibility = () => {
+            if (!toggleButton.disabled) {
+              if (input.type === "password") {
+                input.type = "text";
+                toggleButton.innerHTML = "\u{1F648}";
+                toggleButton.setAttribute("aria-label", "Hide password");
+              } else {
+                input.type = "password";
+                toggleButton.innerHTML = "\u{1F441}\uFE0F";
+                toggleButton.setAttribute("aria-label", "Show password");
+              }
+            }
+          };
+          const handleSubmit = () => {
+            if (!input.disabled && !submitButton.disabled) {
+              const value = input.value.trim();
+              if (props.required && !value) {
+                input.classList.add("widget-password-error");
+                return;
+              }
+              if (value || !props.required) {
+                if (props.disableOnSubmit !== false) {
+                  input.disabled = true;
+                  input.classList.add("widget-password-disabled");
+                  toggleButton.disabled = true;
+                  toggleButton.classList.add("widget-password-disabled");
+                  submitButton.disabled = true;
+                  submitButton.classList.add("widget-password-disabled");
+                }
+                const passwordValue = value;
+                input.value = "";
+                this.handleInteraction({
+                  value: passwordValue,
+                  maskedValue: "\u2022".repeat(passwordValue.length),
+                  widgetType: "password"
+                });
+              }
+            }
+          };
+          toggleButton.addEventListener("click", toggleVisibility);
+          submitButton.addEventListener("click", handleSubmit);
+          input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSubmit();
+            }
+          });
+          input.addEventListener("input", () => {
+            input.classList.remove("widget-password-error");
+          });
+          if (props.inputStyle) {
+            Object.assign(input.style, props.inputStyle);
+          }
+          if (props.toggleStyle) {
+            Object.assign(toggleButton.style, props.toggleStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          inputWrapper.appendChild(input);
+          inputWrapper.appendChild(toggleButton);
+          container.appendChild(inputWrapper);
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Validate password widget data structure
+         * @returns {boolean} True if data contains required properties for password widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "password";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/textarea-widget.js
+  var TextareaWidget;
+  var init_textarea_widget = __esm({
+    "src/modules/widgets/textarea-widget.js"() {
+      init_base_widget();
+      TextareaWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the textarea widget
+         * @returns {HTMLElement|Comment} Textarea container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid textarea widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-textarea-container";
+          const props = this.widgetData.props || {};
+          const placeholder = props.placeholder || "Enter your response...";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const rows = props.rows || 4;
+          const maxLength = props.maxLength;
+          const resize = props.resize || "vertical";
+          const textarea = document.createElement("textarea");
+          textarea.className = "widget-textarea";
+          textarea.placeholder = placeholder;
+          textarea.rows = rows;
+          textarea.classList.add(`variant-${variant}`);
+          textarea.classList.add(`size-${size}`);
+          if (maxLength) textarea.maxLength = maxLength;
+          if (props.required) textarea.required = props.required;
+          if (props.readonly) textarea.readOnly = props.readonly;
+          textarea.style.resize = resize;
+          if (props.disabled) {
+            textarea.disabled = true;
+            textarea.classList.add("widget-textarea-disabled");
+          }
+          let counterElement = null;
+          if (maxLength && props.showCounter !== false) {
+            counterElement = document.createElement("div");
+            counterElement.className = "widget-textarea-counter";
+            counterElement.textContent = `0 / ${maxLength}`;
+            counterElement.style.fontSize = "12px";
+            counterElement.style.color = "#666";
+            counterElement.style.textAlign = "right";
+            counterElement.style.marginTop = "4px";
+          }
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-textarea-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-textarea-disabled");
+          }
+          const handleSubmit = () => {
+            if (!textarea.disabled && !submitButton.disabled) {
+              const value = textarea.value.trim();
+              if (props.required && !value) {
+                textarea.classList.add("widget-textarea-error");
+                return;
+              }
+              if (value || !props.required) {
+                if (props.disableOnSubmit !== false) {
+                  textarea.disabled = true;
+                  textarea.classList.add("widget-textarea-disabled");
+                  submitButton.disabled = true;
+                  submitButton.classList.add("widget-textarea-disabled");
+                }
+                this.handleInteraction({
+                  value,
+                  length: value.length,
+                  widgetType: "textarea"
+                });
+                if (props.clearOnSubmit !== false) {
+                  textarea.value = "";
+                  if (counterElement) {
+                    counterElement.textContent = `0 / ${maxLength}`;
+                  }
+                }
+              }
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          textarea.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && e.ctrlKey) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          });
+          if (counterElement) {
+            textarea.addEventListener("input", () => {
+              const currentLength = textarea.value.length;
+              counterElement.textContent = `${currentLength} / ${maxLength}`;
+              if (currentLength > maxLength * 0.9) {
+                counterElement.style.color = "#dc3545";
+              } else if (currentLength > maxLength * 0.7) {
+                counterElement.style.color = "#ffc107";
+              } else {
+                counterElement.style.color = "#666";
+              }
+              textarea.classList.remove("widget-textarea-error");
+            });
+          }
+          textarea.addEventListener("input", () => {
+            textarea.classList.remove("widget-textarea-error");
+          });
+          if (props.textareaStyle) {
+            Object.assign(textarea.style, props.textareaStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          container.appendChild(textarea);
+          if (counterElement) {
+            container.appendChild(counterElement);
+          }
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Validate textarea widget data structure
+         * @returns {boolean} True if data contains required properties for textarea widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "textarea";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/select-widget.js
+  var SelectWidget;
+  var init_select_widget = __esm({
+    "src/modules/widgets/select-widget.js"() {
+      init_base_widget();
+      SelectWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the select widget
+         * @returns {HTMLElement|Comment} Select element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid select widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-select-container";
+          const select = document.createElement("select");
+          select.className = "widget-select";
+          const variant = this.widgetData.props?.variant || "default";
+          const size = this.widgetData.props?.size || "medium";
+          select.classList.add(`variant-${variant}`);
+          select.classList.add(`size-${size}`);
+          if (this.widgetData.props?.placeholder) {
+            const placeholderOption = document.createElement("option");
+            placeholderOption.value = "";
+            placeholderOption.textContent = this.widgetData.props.placeholder;
+            placeholderOption.disabled = true;
+            placeholderOption.selected = true;
+            select.appendChild(placeholderOption);
+          }
+          const options = this.widgetData.props?.options || [];
+          options.forEach((option) => {
+            const optionElement = document.createElement("option");
+            optionElement.value = option.value || option.id;
+            optionElement.textContent = option.text || option.label;
+            optionElement.setAttribute("data-option-id", option.id);
+            if (option.disabled) {
+              optionElement.disabled = true;
+            }
+            select.appendChild(optionElement);
+          });
+          if (this.widgetData.props?.disabled) {
+            select.disabled = true;
+            select.classList.add("widget-select-disabled");
+          }
+          select.addEventListener("change", () => {
+            if (!select.disabled) {
+              const selectedOption = select.options[select.selectedIndex];
+              const optionData = options.find((opt) => opt.id === selectedOption.getAttribute("data-option-id"));
+              if (optionData) {
+                if (this.widgetData.props?.disableOnSelect !== false) {
+                  select.disabled = true;
+                  select.classList.add("widget-select-disabled");
+                }
+                this.handleInteraction({
+                  optionId: optionData.id,
+                  optionValue: optionData.value || optionData.id,
+                  optionText: optionData.text || optionData.label,
+                  widgetType: "select"
+                });
+              }
+            }
+          });
+          if (this.widgetData.props?.style) {
+            Object.assign(select.style, this.widgetData.props.style);
+          }
+          container.appendChild(select);
+          return container;
+        }
+        /**
+         * Validate select widget data structure
+         * @returns {boolean} True if data contains required properties for select widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "select" && this.widgetData.props && Array.isArray(this.widgetData.props.options) && this.widgetData.props.options.length > 0;
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/checkbox-widget.js
+  var CheckboxWidget;
+  var init_checkbox_widget = __esm({
+    "src/modules/widgets/checkbox-widget.js"() {
+      init_base_widget();
+      CheckboxWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the checkbox widget
+         * @returns {HTMLElement|Comment} Checkbox container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid checkbox widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-checkbox-container";
+          const props = this.widgetData.props || {};
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const layout = props.layout || "vertical";
+          const allowEmpty = props.allowEmpty !== false;
+          const checkboxContainer = document.createElement("div");
+          checkboxContainer.className = "widget-checkbox-options";
+          if (layout === "horizontal") {
+            checkboxContainer.style.display = "flex";
+            checkboxContainer.style.flexWrap = "wrap";
+            checkboxContainer.style.gap = "12px";
+          } else {
+            checkboxContainer.style.display = "flex";
+            checkboxContainer.style.flexDirection = "column";
+            checkboxContainer.style.gap = "8px";
+          }
+          const options = props.options || [];
+          options.forEach((option, index) => {
+            const checkboxWrapper = document.createElement("div");
+            checkboxWrapper.className = "widget-checkbox-item";
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "widget-checkbox";
+            checkbox.id = `checkbox-${this.widgetId}-${option.id}`;
+            checkbox.value = option.value || option.id;
+            checkbox.setAttribute("data-option-id", option.id);
+            if (option.checked) {
+              checkbox.checked = true;
+            }
+            if (props.disabled || option.disabled) {
+              checkbox.disabled = true;
+              checkbox.classList.add("widget-checkbox-disabled");
+            }
+            const label = document.createElement("label");
+            label.className = "widget-checkbox-label";
+            label.htmlFor = `checkbox-${this.widgetId}-${option.id}`;
+            label.textContent = option.text || option.label;
+            checkboxWrapper.appendChild(checkbox);
+            checkboxWrapper.appendChild(label);
+            checkboxContainer.appendChild(checkboxWrapper);
+          });
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-checkbox-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-checkbox-disabled");
+          }
+          const handleSubmit = () => {
+            if (!submitButton.disabled) {
+              const checkboxes = checkboxContainer.querySelectorAll(".widget-checkbox");
+              const selectedOptions = [];
+              checkboxes.forEach((checkbox) => {
+                if (checkbox.checked) {
+                  const optionId = checkbox.getAttribute("data-option-id");
+                  const optionData = options.find((opt) => opt.id === optionId);
+                  if (optionData) {
+                    selectedOptions.push({
+                      id: optionData.id,
+                      value: optionData.value || optionData.id,
+                      text: optionData.text || optionData.label
+                    });
+                  }
+                }
+              });
+              if (selectedOptions.length > 0 || allowEmpty) {
+                if (props.disableOnSubmit !== false) {
+                  checkboxes.forEach((cb) => {
+                    cb.disabled = true;
+                    cb.classList.add("widget-checkbox-disabled");
+                  });
+                  submitButton.disabled = true;
+                  submitButton.classList.add("widget-checkbox-disabled");
+                }
+                this.handleInteraction({
+                  selectedOptions,
+                  widgetType: "checkbox"
+                });
+              }
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          if (props.optionsStyle) {
+            Object.assign(checkboxContainer.style, props.optionsStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          container.appendChild(checkboxContainer);
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Validate checkbox widget data structure
+         * @returns {boolean} True if data contains required properties for checkbox widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "checkbox" && this.widgetData.props && Array.isArray(this.widgetData.props.options) && this.widgetData.props.options.length > 0;
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/radio-widget.js
+  var RadioWidget;
+  var init_radio_widget = __esm({
+    "src/modules/widgets/radio-widget.js"() {
+      init_base_widget();
+      RadioWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the radio widget
+         * @returns {HTMLElement|Comment} Radio container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid radio widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-radio-container";
+          const props = this.widgetData.props || {};
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const layout = props.layout || "vertical";
+          const radioName = `radio-${this.widgetId}`;
+          const radioContainer = document.createElement("div");
+          radioContainer.className = "widget-radio-options";
+          if (layout === "horizontal") {
+            radioContainer.style.display = "flex";
+            radioContainer.style.flexWrap = "wrap";
+            radioContainer.style.gap = "12px";
+          } else {
+            radioContainer.style.display = "flex";
+            radioContainer.style.flexDirection = "column";
+            radioContainer.style.gap = "8px";
+          }
+          const options = props.options || [];
+          options.forEach((option, index) => {
+            const radioWrapper = document.createElement("div");
+            radioWrapper.className = "widget-radio-item";
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.className = "widget-radio";
+            radio.name = radioName;
+            radio.id = `radio-${this.widgetId}-${option.id}`;
+            radio.value = option.value || option.id;
+            radio.setAttribute("data-option-id", option.id);
+            if (option.checked) {
+              radio.checked = true;
+            }
+            if (props.disabled || option.disabled) {
+              radio.disabled = true;
+              radio.classList.add("widget-radio-disabled");
+            }
+            const label = document.createElement("label");
+            label.className = "widget-radio-label";
+            label.htmlFor = `radio-${this.widgetId}-${option.id}`;
+            label.textContent = option.text || option.label;
+            radioWrapper.appendChild(radio);
+            radioWrapper.appendChild(label);
+            radioContainer.appendChild(radioWrapper);
+          });
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-radio-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-radio-disabled");
+          }
+          const handleSubmit = () => {
+            if (!submitButton.disabled) {
+              const selectedRadio = radioContainer.querySelector(".widget-radio:checked");
+              if (selectedRadio) {
+                const optionId = selectedRadio.getAttribute("data-option-id");
+                const optionData = options.find((opt) => opt.id === optionId);
+                if (optionData) {
+                  if (props.disableOnSubmit !== false) {
+                    const allRadios = radioContainer.querySelectorAll(".widget-radio");
+                    allRadios.forEach((radio) => {
+                      radio.disabled = true;
+                      radio.classList.add("widget-radio-disabled");
+                    });
+                    submitButton.disabled = true;
+                    submitButton.classList.add("widget-radio-disabled");
+                  }
+                  this.handleInteraction({
+                    selectedOption: {
+                      id: optionData.id,
+                      value: optionData.value || optionData.id,
+                      text: optionData.text || optionData.label
+                    },
+                    widgetType: "radio"
+                  });
+                }
+              }
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          if (props.optionsStyle) {
+            Object.assign(radioContainer.style, props.optionsStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          container.appendChild(radioContainer);
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Validate radio widget data structure
+         * @returns {boolean} True if data contains required properties for radio widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "radio" && this.widgetData.props && Array.isArray(this.widgetData.props.options) && this.widgetData.props.options.length > 0;
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/slider-widget.js
+  var SliderWidget;
+  var init_slider_widget = __esm({
+    "src/modules/widgets/slider-widget.js"() {
+      init_base_widget();
+      SliderWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the slider widget
+         * @returns {HTMLElement|Comment} Slider container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid slider widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-slider-container";
+          const props = this.widgetData.props || {};
+          const label = props.label || "Select a value";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const min = props.min || 0;
+          const max = props.max || 100;
+          const step = props.step || 1;
+          const defaultValue = props.defaultValue || Math.floor((min + max) / 2);
+          const showValue = props.showValue !== false;
+          const labelElement = document.createElement("label");
+          labelElement.className = "widget-slider-label";
+          labelElement.textContent = label;
+          labelElement.classList.add(`variant-${variant}`);
+          labelElement.classList.add(`size-${size}`);
+          const sliderWrapper = document.createElement("div");
+          sliderWrapper.className = "widget-slider-wrapper";
+          const slider = document.createElement("input");
+          slider.type = "range";
+          slider.className = "widget-slider";
+          slider.min = min;
+          slider.max = max;
+          slider.step = step;
+          slider.value = defaultValue;
+          slider.classList.add(`variant-${variant}`);
+          slider.classList.add(`size-${size}`);
+          if (props.disabled) {
+            slider.disabled = true;
+            slider.classList.add("widget-slider-disabled");
+          }
+          let valueDisplay = null;
+          if (showValue) {
+            valueDisplay = document.createElement("div");
+            valueDisplay.className = "widget-slider-value";
+            valueDisplay.textContent = defaultValue;
+            valueDisplay.classList.add(`variant-${variant}`);
+            valueDisplay.classList.add(`size-${size}`);
+          }
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-slider-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-slider-disabled");
+          }
+          const updateValue = () => {
+            if (valueDisplay) {
+              valueDisplay.textContent = slider.value;
+            }
+          };
+          slider.addEventListener("input", updateValue);
+          const handleSubmit = () => {
+            if (!slider.disabled && !submitButton.disabled) {
+              const value = parseFloat(slider.value);
+              if (props.disableOnSubmit !== false) {
+                slider.disabled = true;
+                slider.classList.add("widget-slider-disabled");
+                submitButton.disabled = true;
+                submitButton.classList.add("widget-slider-disabled");
+              }
+              this.handleInteraction({
+                value,
+                min,
+                max,
+                step,
+                widgetType: "slider"
+              });
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          if (props.sliderStyle) {
+            Object.assign(slider.style, props.sliderStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          container.appendChild(labelElement);
+          sliderWrapper.appendChild(slider);
+          if (valueDisplay) {
+            sliderWrapper.appendChild(valueDisplay);
+          }
+          container.appendChild(sliderWrapper);
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Validate slider widget data structure
+         * @returns {boolean} True if data contains required properties for slider widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "slider";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/rating-widget.js
+  var RatingWidget;
+  var init_rating_widget = __esm({
+    "src/modules/widgets/rating-widget.js"() {
+      init_base_widget();
+      RatingWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the rating widget
+         * @returns {HTMLElement|Comment} Rating container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid rating widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-rating-container";
+          const props = this.widgetData.props || {};
+          const label = props.label || "Rate this";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const maxRating = props.maxRating || 5;
+          const iconType = props.iconType || "stars";
+          let selectedRating = props.defaultValue || 0;
+          const labelElement = document.createElement("div");
+          labelElement.className = "widget-rating-label";
+          labelElement.textContent = label;
+          labelElement.classList.add(`variant-${variant}`);
+          labelElement.classList.add(`size-${size}`);
+          const starsContainer = document.createElement("div");
+          starsContainer.className = "widget-rating-stars";
+          const stars = [];
+          for (let i = 1; i <= maxRating; i++) {
+            const star = document.createElement("button");
+            star.className = "widget-rating-star";
+            star.setAttribute("data-rating", i);
+            star.classList.add(`variant-${variant}`);
+            star.classList.add(`size-${size}`);
+            if (iconType === "emojis") {
+              star.textContent = this.getEmojiForRating(i, maxRating);
+            } else if (iconType === "hearts") {
+              star.textContent = "\u2665";
+            } else {
+              star.textContent = "\u2605";
+            }
+            if (props.disabled) {
+              star.disabled = true;
+              star.classList.add("widget-rating-disabled");
+            }
+            star.addEventListener("mouseenter", () => {
+              if (!props.disabled) {
+                this.highlightStars(stars, i);
+              }
+            });
+            star.addEventListener("mouseleave", () => {
+              if (!props.disabled) {
+                this.highlightStars(stars, selectedRating);
+              }
+            });
+            star.addEventListener("click", () => {
+              if (!props.disabled) {
+                selectedRating = i;
+                this.highlightStars(stars, selectedRating);
+              }
+            });
+            stars.push(star);
+            starsContainer.appendChild(star);
+          }
+          let ratingDisplay = null;
+          if (props.showRating !== false) {
+            ratingDisplay = document.createElement("div");
+            ratingDisplay.className = "widget-rating-display";
+            ratingDisplay.textContent = `Rating: ${selectedRating}/${maxRating}`;
+            ratingDisplay.classList.add(`variant-${variant}`);
+            ratingDisplay.classList.add(`size-${size}`);
+          }
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-rating-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-rating-disabled");
+          }
+          this.highlightStars = (stars2, rating) => {
+            stars2.forEach((star, index) => {
+              if (index < rating) {
+                star.classList.add("active");
+              } else {
+                star.classList.remove("active");
+              }
+            });
+            if (ratingDisplay) {
+              ratingDisplay.textContent = `Rating: ${rating}/${maxRating}`;
+            }
+          };
+          const handleSubmit = () => {
+            if (!submitButton.disabled && selectedRating > 0) {
+              if (props.disableOnSubmit !== false) {
+                stars.forEach((star) => {
+                  star.disabled = true;
+                  star.classList.add("widget-rating-disabled");
+                });
+                submitButton.disabled = true;
+                submitButton.classList.add("widget-rating-disabled");
+              }
+              this.handleInteraction({
+                rating: selectedRating,
+                maxRating,
+                iconType,
+                widgetType: "rating"
+              });
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          if (selectedRating > 0) {
+            this.highlightStars(stars, selectedRating);
+          }
+          if (props.starsStyle) {
+            Object.assign(starsContainer.style, props.starsStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          container.appendChild(labelElement);
+          container.appendChild(starsContainer);
+          if (ratingDisplay) {
+            container.appendChild(ratingDisplay);
+          }
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Get emoji for rating based on position
+         * @private
+         * @param {number} rating - Current rating position
+         * @param {number} maxRating - Maximum rating
+         * @returns {string} Emoji character
+         */
+        getEmojiForRating(rating, maxRating) {
+          const emojis = ["\u{1F622}", "\u{1F615}", "\u{1F610}", "\u{1F642}", "\u{1F60A}"];
+          const index = Math.floor((rating - 1) / maxRating * (emojis.length - 1));
+          return emojis[Math.min(index, emojis.length - 1)];
+        }
+        /**
+         * Validate rating widget data structure
+         * @returns {boolean} True if data contains required properties for rating widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "rating";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/toggle-widget.js
+  var ToggleWidget;
+  var init_toggle_widget = __esm({
+    "src/modules/widgets/toggle-widget.js"() {
+      init_base_widget();
+      ToggleWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the toggle widget
+         * @returns {HTMLElement|Comment} Toggle container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid toggle widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-toggle-container";
+          const props = this.widgetData.props || {};
+          const label = props.label || "Enable";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const defaultValue = props.defaultValue || false;
+          let currentValue = defaultValue;
+          const labelElement = document.createElement("label");
+          labelElement.className = "widget-toggle-label";
+          labelElement.textContent = label;
+          labelElement.classList.add(`variant-${variant}`);
+          labelElement.classList.add(`size-${size}`);
+          const toggleWrapper = document.createElement("div");
+          toggleWrapper.className = "widget-toggle-wrapper";
+          const toggleInput = document.createElement("input");
+          toggleInput.type = "checkbox";
+          toggleInput.className = "widget-toggle-input";
+          toggleInput.checked = currentValue;
+          const toggleSlider = document.createElement("span");
+          toggleSlider.className = "widget-toggle-slider";
+          toggleSlider.classList.add(`variant-${variant}`);
+          toggleSlider.classList.add(`size-${size}`);
+          if (props.disabled) {
+            toggleInput.disabled = true;
+            toggleSlider.classList.add("widget-toggle-disabled");
+          }
+          const handleToggle = () => {
+            if (!props.disabled) {
+              currentValue = !currentValue;
+              toggleInput.checked = currentValue;
+              toggleSlider.classList.toggle("active", currentValue);
+              if (valueDisplay) {
+                valueDisplay.textContent = currentValue ? "ON" : "OFF";
+              }
+            }
+          };
+          toggleSlider.addEventListener("click", handleToggle);
+          labelElement.addEventListener("click", (e) => {
+            e.preventDefault();
+            handleToggle();
+          });
+          let valueDisplay = null;
+          if (props.showValue !== false) {
+            valueDisplay = document.createElement("div");
+            valueDisplay.className = "widget-toggle-value";
+            valueDisplay.textContent = currentValue ? "ON" : "OFF";
+            valueDisplay.classList.add(`variant-${variant}`);
+            valueDisplay.classList.add(`size-${size}`);
+          }
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-toggle-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-toggle-disabled");
+          }
+          const handleSubmit = () => {
+            if (!submitButton.disabled) {
+              if (props.disableOnSubmit !== false) {
+                toggleInput.disabled = true;
+                toggleSlider.classList.add("widget-toggle-disabled");
+                submitButton.disabled = true;
+                submitButton.classList.add("widget-toggle-disabled");
+              }
+              this.handleInteraction({
+                value: currentValue,
+                label,
+                widgetType: "toggle"
+              });
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          if (currentValue) {
+            toggleSlider.classList.add("active");
+          }
+          if (props.toggleStyle) {
+            Object.assign(toggleSlider.style, props.toggleStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          toggleWrapper.appendChild(toggleInput);
+          toggleWrapper.appendChild(toggleSlider);
+          container.appendChild(labelElement);
+          container.appendChild(toggleWrapper);
+          if (valueDisplay) {
+            container.appendChild(valueDisplay);
+          }
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Validate toggle widget data structure
+         * @returns {boolean} True if data contains required properties for toggle widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "toggle";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/buttons-widget.js
+  var ButtonsWidget;
+  var init_buttons_widget = __esm({
+    "src/modules/widgets/buttons-widget.js"() {
+      init_base_widget();
+      ButtonsWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the buttons widget
+         * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid buttons widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-buttons-container";
+          const props = this.widgetData.props || {};
+          const layout = props.layout || "vertical";
+          const gap = props.gap || "small";
+          const alignment = props.alignment || "start";
+          container.style.display = "flex";
+          if (layout === "horizontal") {
+            container.style.flexDirection = "row";
+          } else {
+            container.style.flexDirection = "column";
+          }
+          const gapSize = this.getGapSize(gap);
+          container.style.gap = gapSize;
+          if (layout === "horizontal") {
+            if (alignment === "center") container.style.justifyContent = "center";
+            else if (alignment === "end") container.style.justifyContent = "flex-end";
+            else if (alignment === "space-between") container.style.justifyContent = "space-between";
+            else if (alignment === "space-around") container.style.justifyContent = "space-around";
+            else container.style.justifyContent = "flex-start";
+            if (props.verticalAlignment === "center") container.style.alignItems = "center";
+            else if (props.verticalAlignment === "end") container.style.alignItems = "flex-end";
+            else if (props.verticalAlignment === "stretch") container.style.alignItems = "stretch";
+            else container.style.alignItems = "center";
+          } else {
+            if (alignment === "center") container.style.justifyContent = "center";
+            else if (alignment === "end") container.style.justifyContent = "flex-end";
+            else if (alignment === "space-between") container.style.justifyContent = "space-between";
+            else if (alignment === "space-around") container.style.justifyContent = "space-around";
+            else container.style.justifyContent = "flex-start";
+            if (props.horizontalAlignment === "center") container.style.alignItems = "center";
+            else if (props.horizontalAlignment === "end") container.style.alignItems = "flex-end";
+            else if (props.horizontalAlignment === "stretch") container.style.alignItems = "stretch";
+            else container.style.alignItems = "stretch";
+          }
+          const options = props.options || [];
+          options.forEach((option, index) => {
+            const button = document.createElement("button");
+            button.className = "widget-button";
+            const variant = option.variant || props.variant || "primary";
+            const size = option.size || props.size || "medium";
+            button.classList.add(`variant-${variant}`);
+            button.classList.add(`size-${size}`);
+            button.textContent = option.text || option.label || "Button";
+            button.setAttribute("data-option-id", option.id);
+            button.setAttribute("data-option-value", option.value || option.id);
+            if (option.disabled || props.disabled) {
+              button.disabled = true;
+              button.classList.add("widget-button-disabled");
+            }
+            button.addEventListener("click", () => {
+              if (!button.disabled) {
+                if (props.disableOnClick !== false) {
+                  const allButtons = container.querySelectorAll(".widget-button");
+                  allButtons.forEach((btn) => {
+                    btn.disabled = true;
+                    btn.classList.add("widget-button-disabled");
+                  });
+                }
+                this.handleInteraction({
+                  optionId: option.id,
+                  optionValue: option.value || option.id,
+                  optionText: option.text || option.label,
+                  widgetType: "buttons"
+                });
+              }
+            });
+            if (option.style) {
+              Object.assign(button.style, option.style);
+            } else if (props.buttonStyle) {
+              Object.assign(button.style, props.buttonStyle);
+            }
+            container.appendChild(button);
+          });
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          return container;
+        }
+        /**
+         * Convert gap size to CSS value
+         * @private
+         * @param {string} gap - Gap size identifier
+         * @returns {string} CSS gap value
+         */
+        getGapSize(gap) {
+          const gapMap = {
+            "none": "0",
+            "xs": "4px",
+            "small": "8px",
+            "medium": "16px",
+            "large": "24px",
+            "xl": "32px",
+            "xxl": "48px"
+          };
+          return gapMap[gap] || gapMap["medium"];
+        }
+        /**
+         * Validate buttons widget data structure
+         * @returns {boolean} True if data contains required properties for buttons widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "buttons" && this.widgetData.props && Array.isArray(this.widgetData.props.options) && this.widgetData.props.options.length > 0;
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/confirmation-widget.js
+  var ConfirmationWidget;
+  var init_confirmation_widget = __esm({
+    "src/modules/widgets/confirmation-widget.js"() {
+      init_base_widget();
+      ConfirmationWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the confirmation widget
+         * @returns {HTMLElement|Comment} Confirmation container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid confirmation widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-confirmation-container";
+          const props = this.widgetData.props || {};
+          const message = props.message || "Are you sure?";
+          const confirmText = props.confirmText || "Confirm";
+          const cancelText = props.cancelText || "Cancel";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const layout = props.layout || "horizontal";
+          const messageElement = document.createElement("div");
+          messageElement.className = "widget-confirmation-message";
+          messageElement.textContent = message;
+          messageElement.classList.add(`variant-${variant}`);
+          messageElement.classList.add(`size-${size}`);
+          const buttonsContainer = document.createElement("div");
+          buttonsContainer.className = "widget-confirmation-buttons";
+          if (layout === "horizontal") {
+            buttonsContainer.style.display = "flex";
+            buttonsContainer.style.gap = "12px";
+            buttonsContainer.style.justifyContent = "center";
+          } else {
+            buttonsContainer.style.display = "flex";
+            buttonsContainer.style.flexDirection = "column";
+            buttonsContainer.style.gap = "8px";
+          }
+          const cancelButton = document.createElement("button");
+          cancelButton.className = "widget-confirmation-cancel";
+          cancelButton.textContent = cancelText;
+          cancelButton.classList.add("variant-secondary");
+          cancelButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            cancelButton.disabled = true;
+            cancelButton.classList.add("widget-confirmation-disabled");
+          }
+          const confirmButton = document.createElement("button");
+          confirmButton.className = "widget-confirmation-confirm";
+          confirmButton.textContent = confirmText;
+          confirmButton.classList.add(`variant-${variant}`);
+          confirmButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            confirmButton.disabled = true;
+            confirmButton.classList.add("widget-confirmation-disabled");
+          }
+          const handleCancel = () => {
+            if (!cancelButton.disabled && !confirmButton.disabled) {
+              if (props.disableOnAction !== false) {
+                cancelButton.disabled = true;
+                cancelButton.classList.add("widget-confirmation-disabled");
+                confirmButton.disabled = true;
+                confirmButton.classList.add("widget-confirmation-disabled");
+              }
+              this.handleInteraction({
+                action: "cancel",
+                confirmed: false,
+                message,
+                widgetType: "confirmation"
+              });
+            }
+          };
+          const handleConfirm = () => {
+            if (!confirmButton.disabled && !cancelButton.disabled) {
+              if (props.disableOnAction !== false) {
+                cancelButton.disabled = true;
+                cancelButton.classList.add("widget-confirmation-disabled");
+                confirmButton.disabled = true;
+                confirmButton.classList.add("widget-confirmation-disabled");
+              }
+              this.handleInteraction({
+                action: "confirm",
+                confirmed: true,
+                message,
+                widgetType: "confirmation"
+              });
+            }
+          };
+          cancelButton.addEventListener("click", handleCancel);
+          confirmButton.addEventListener("click", handleConfirm);
+          container.addEventListener("keydown", (e) => {
+            if (props.disabled) return;
+            if (e.key === "Escape") {
+              handleCancel();
+            } else if (e.key === "Enter") {
+              handleConfirm();
+            }
+          });
+          if (props.messageStyle) {
+            Object.assign(messageElement.style, props.messageStyle);
+          }
+          if (props.buttonsStyle) {
+            Object.assign(buttonsContainer.style, props.buttonsStyle);
+          }
+          if (props.cancelStyle) {
+            Object.assign(cancelButton.style, props.cancelStyle);
+          }
+          if (props.confirmStyle) {
+            Object.assign(confirmButton.style, props.confirmStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          buttonsContainer.appendChild(cancelButton);
+          buttonsContainer.appendChild(confirmButton);
+          container.appendChild(messageElement);
+          container.appendChild(buttonsContainer);
+          return container;
+        }
+        /**
+         * Validate confirmation widget data structure
+         * @returns {boolean} True if data contains required properties for confirmation widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "confirmation";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/date-widget.js
+  var DateWidget;
+  var init_date_widget = __esm({
+    "src/modules/widgets/date-widget.js"() {
+      init_base_widget();
+      DateWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the date widget
+         * @returns {HTMLElement|Comment} Date container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid date widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-date-container";
+          const props = this.widgetData.props || {};
+          const label = props.label || "Select a date";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const inputType = props.inputType || "date";
+          const labelElement = document.createElement("label");
+          labelElement.className = "widget-date-label";
+          labelElement.textContent = label;
+          labelElement.classList.add(`variant-${variant}`);
+          labelElement.classList.add(`size-${size}`);
+          const dateInput = document.createElement("input");
+          dateInput.type = inputType;
+          dateInput.className = "widget-date-input";
+          dateInput.classList.add(`variant-${variant}`);
+          dateInput.classList.add(`size-${size}`);
+          if (props.minDate) dateInput.min = props.minDate;
+          if (props.maxDate) dateInput.max = props.maxDate;
+          if (props.defaultValue) dateInput.value = props.defaultValue;
+          if (props.disabled) {
+            dateInput.disabled = true;
+            dateInput.classList.add("widget-date-disabled");
+          }
+          let dateDisplay = null;
+          if (props.showFormatted !== false && inputType === "date") {
+            dateDisplay = document.createElement("div");
+            dateDisplay.className = "widget-date-display";
+            dateDisplay.classList.add(`variant-${variant}`);
+            dateDisplay.classList.add(`size-${size}`);
+            const updateDateDisplay = () => {
+              if (dateInput.value) {
+                const date = new Date(dateInput.value);
+                dateDisplay.textContent = date.toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric"
+                });
+              } else {
+                dateDisplay.textContent = "";
+              }
+            };
+            dateInput.addEventListener("change", updateDateDisplay);
+            updateDateDisplay();
+          }
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-date-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-date-disabled");
+          }
+          const handleSubmit = () => {
+            if (!dateInput.disabled && !submitButton.disabled) {
+              const value = dateInput.value;
+              if (props.required && !value) {
+                dateInput.classList.add("widget-date-error");
+                return;
+              }
+              if (value || !props.required) {
+                if (props.disableOnSubmit !== false) {
+                  dateInput.disabled = true;
+                  dateInput.classList.add("widget-date-disabled");
+                  submitButton.disabled = true;
+                  submitButton.classList.add("widget-date-disabled");
+                }
+                let formattedValue = value;
+                if (props.formatDate && value) {
+                  const date = new Date(value);
+                  formattedValue = date.toLocaleDateString(props.locale || "en-US", props.formatOptions);
+                }
+                this.handleInteraction({
+                  value,
+                  formattedValue,
+                  inputType,
+                  widgetType: "date"
+                });
+              }
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          dateInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSubmit();
+            }
+          });
+          dateInput.addEventListener("change", () => {
+            dateInput.classList.remove("widget-date-error");
+          });
+          if (props.inputStyle) {
+            Object.assign(dateInput.style, props.inputStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          container.appendChild(labelElement);
+          container.appendChild(dateInput);
+          if (dateDisplay) {
+            container.appendChild(dateDisplay);
+          }
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Validate date widget data structure
+         * @returns {boolean} True if data contains required properties for date widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "date";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/tags-widget.js
+  var TagsWidget;
+  var init_tags_widget = __esm({
+    "src/modules/widgets/tags-widget.js"() {
+      init_base_widget();
+      TagsWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the tags widget
+         * @returns {HTMLElement|Comment} Tags container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid tags widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-tags-container";
+          const props = this.widgetData.props || {};
+          const label = props.label || "Add tags";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const placeholder = props.placeholder || "Type and press Enter to add tag";
+          const maxTags = props.maxTags || 10;
+          const suggestions = props.suggestions || [];
+          let tags = [...props.initialTags || []];
+          const labelElement = document.createElement("label");
+          labelElement.className = "widget-tags-label";
+          labelElement.textContent = label;
+          labelElement.classList.add(`variant-${variant}`);
+          labelElement.classList.add(`size-${size}`);
+          const inputWrapper = document.createElement("div");
+          inputWrapper.className = "widget-tags-input-wrapper";
+          const tagsDisplay = document.createElement("div");
+          tagsDisplay.className = "widget-tags-display";
+          const input = document.createElement("input");
+          input.type = "text";
+          input.className = "widget-tags-input";
+          input.placeholder = placeholder;
+          input.classList.add(`variant-${variant}`);
+          input.classList.add(`size-${size}`);
+          if (props.disabled) {
+            input.disabled = true;
+            input.classList.add("widget-tags-disabled");
+          }
+          const suggestionsList = document.createElement("ul");
+          suggestionsList.className = "widget-tags-suggestions";
+          suggestionsList.style.display = "none";
+          const updateSubmitButton = () => {
+            submitButton.disabled = props.disabled || tags.length === 0;
+            submitButton.classList.toggle("widget-tags-disabled", submitButton.disabled);
+          };
+          const renderTags = () => {
+            tagsDisplay.innerHTML = "";
+            tags.forEach((tag, index) => {
+              const tagElement = document.createElement("span");
+              tagElement.className = "widget-tag";
+              tagElement.classList.add(`variant-${variant}`);
+              tagElement.classList.add(`size-${size}`);
+              tagElement.textContent = tag;
+              const removeButton = document.createElement("button");
+              removeButton.className = "widget-tag-remove";
+              removeButton.textContent = "\xD7";
+              removeButton.addEventListener("click", () => {
+                if (!props.disabled) {
+                  tags.splice(index, 1);
+                  renderTags();
+                }
+              });
+              tagElement.appendChild(removeButton);
+              tagsDisplay.appendChild(tagElement);
+            });
+            if (tags.length >= maxTags) {
+              input.placeholder = "Maximum tags reached";
+              input.disabled = true;
+            } else if (!props.disabled) {
+              input.disabled = false;
+              input.placeholder = placeholder;
+            }
+            updateSubmitButton();
+          };
+          const showSuggestions = (query) => {
+            if (!suggestions.length || !query || props.disabled) {
+              suggestionsList.style.display = "none";
+              return;
+            }
+            const filtered = suggestions.filter(
+              (s) => s.toLowerCase().includes(query.toLowerCase()) && !tags.includes(s) && tags.length < maxTags
+            );
+            if (filtered.length > 0) {
+              suggestionsList.innerHTML = "";
+              filtered.forEach((suggestion) => {
+                const li = document.createElement("li");
+                li.className = "widget-tags-suggestion";
+                li.textContent = suggestion;
+                li.addEventListener("click", () => {
+                  if (tags.length < maxTags && !props.disabled) {
+                    tags.push(suggestion);
+                    renderTags();
+                    input.value = "";
+                    suggestionsList.style.display = "none";
+                  }
+                });
+                suggestionsList.appendChild(li);
+              });
+              suggestionsList.style.display = "block";
+            } else {
+              suggestionsList.style.display = "none";
+            }
+          };
+          input.addEventListener("input", () => {
+            showSuggestions(input.value);
+          });
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const value = input.value.trim();
+              if (value && tags.length < maxTags && !tags.includes(value) && !props.disabled) {
+                tags.push(value);
+                renderTags();
+                input.value = "";
+                suggestionsList.style.display = "none";
+              }
+            } else if (e.key === "Backspace" && !input.value && tags.length > 0 && !props.disabled) {
+              tags.pop();
+              renderTags();
+            } else if (e.key === "Escape") {
+              suggestionsList.style.display = "none";
+              input.value = "";
+            }
+          });
+          document.addEventListener("click", (e) => {
+            if (!inputWrapper.contains(e.target)) {
+              suggestionsList.style.display = "none";
+            }
+          });
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-tags-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled || tags.length === 0) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-tags-disabled");
+          }
+          const handleSubmit = () => {
+            if (!submitButton.disabled && tags.length > 0) {
+              if (props.disableOnSubmit !== false) {
+                input.disabled = true;
+                input.classList.add("widget-tags-disabled");
+                submitButton.disabled = true;
+                submitButton.classList.add("widget-tags-disabled");
+              }
+              this.handleInteraction({
+                tags,
+                count: tags.length,
+                joinedTags: tags.join(", "),
+                widgetType: "tags"
+              });
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          if (props.inputStyle) {
+            Object.assign(input.style, props.inputStyle);
+          }
+          if (props.tagsStyle) {
+            Object.assign(tagsDisplay.style, props.tagsStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          inputWrapper.appendChild(tagsDisplay);
+          inputWrapper.appendChild(input);
+          inputWrapper.appendChild(suggestionsList);
+          container.appendChild(labelElement);
+          container.appendChild(inputWrapper);
+          container.appendChild(submitButton);
+          renderTags();
+          return container;
+        }
+        /**
+         * Validate tags widget data structure
+         * @returns {boolean} True if data contains required properties for tags widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "tags";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/file-upload-widget.js
+  var FileUploadWidget;
+  var init_file_upload_widget = __esm({
+    "src/modules/widgets/file-upload-widget.js"() {
+      init_base_widget();
+      FileUploadWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the file upload widget
+         * @returns {HTMLElement|Comment} File upload container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid file upload widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-file-upload-container";
+          const props = this.widgetData.props || {};
+          const label = props.label || "Upload a file";
+          const buttonText = props.buttonText || "Upload";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const maxFiles = props.maxFiles || 1;
+          const maxSize = props.maxSize || 10 * 1024 * 1024;
+          const accept = props.accept || "";
+          let selectedFiles = [];
+          const labelElement = document.createElement("label");
+          labelElement.className = "widget-file-upload-label";
+          labelElement.textContent = label;
+          labelElement.classList.add(`variant-${variant}`);
+          labelElement.classList.add(`size-${size}`);
+          const dropZone = document.createElement("div");
+          dropZone.className = "widget-file-dropzone";
+          dropZone.classList.add(`variant-${variant}`);
+          dropZone.classList.add(`size-${size}`);
+          const dropZoneContent = document.createElement("div");
+          dropZoneContent.className = "widget-file-dropzone-content";
+          dropZoneContent.innerHTML = `
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      <p>Drag and drop files here or click to select</p>
+    `;
+          const fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.className = "widget-file-upload-input";
+          fileInput.style.display = "none";
+          if (accept) {
+            fileInput.accept = accept;
+          }
+          if (maxFiles > 1) {
+            fileInput.multiple = true;
+          }
+          const fileList = document.createElement("div");
+          fileList.className = "widget-file-list";
+          const formatFileSize = (bytes) => {
+            if (bytes === 0) return "0 Bytes";
+            const k = 1024;
+            const sizes = ["Bytes", "KB", "MB", "GB"];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+          };
+          const renderFiles = () => {
+            fileList.innerHTML = "";
+            selectedFiles.forEach((file, index) => {
+              const fileItem = document.createElement("div");
+              fileItem.className = "widget-file-item";
+              fileItem.classList.add(`variant-${variant}`);
+              fileItem.classList.add(`size-${size}`);
+              const fileName = document.createElement("span");
+              fileName.className = "widget-file-name";
+              fileName.textContent = file.name;
+              const fileSize = document.createElement("span");
+              fileSize.className = "widget-file-size";
+              fileSize.textContent = formatFileSize(file.size);
+              const removeButton = document.createElement("button");
+              removeButton.className = "widget-file-remove";
+              removeButton.textContent = "\xD7";
+              removeButton.addEventListener("click", () => {
+                if (!props.disabled) {
+                  selectedFiles.splice(index, 1);
+                  renderFiles();
+                  updateSubmitButton();
+                }
+              });
+              fileItem.appendChild(fileName);
+              fileItem.appendChild(fileSize);
+              fileItem.appendChild(removeButton);
+              fileList.appendChild(fileItem);
+            });
+          };
+          const addFiles = (files) => {
+            const newFiles = [];
+            files.forEach((file) => {
+              if (selectedFiles.length >= maxFiles) return;
+              if (file.size > maxSize) {
+                alert(`File ${file.name} exceeds maximum size of ${formatFileSize(maxSize)}`);
+                return;
+              }
+              if (!selectedFiles.some((f) => f.name === file.name)) {
+                selectedFiles.push(file);
+                newFiles.push(file);
+              }
+            });
+            renderFiles();
+            updateSubmitButton();
+            if (newFiles.length > 0 && props.onFileSelect) {
+              const fileData = newFiles.map((file) => ({
+                name: file.name,
+                size: file.size,
+                type: file.type
+              }));
+              this.handleInteraction({
+                action: "fileSelect",
+                files: fileData,
+                widgetType: "file"
+              });
+            }
+          };
+          const updateSubmitButton = () => {
+            submitButton.disabled = props.disabled || selectedFiles.length === 0;
+            submitButton.classList.toggle("widget-file-upload-disabled", submitButton.disabled);
+          };
+          dropZone.addEventListener("click", () => {
+            if (!props.disabled) {
+              fileInput.click();
+            }
+          });
+          dropZone.addEventListener("dragover", (e) => {
+            if (!props.disabled) {
+              e.preventDefault();
+              dropZone.classList.add("widget-file-dropzone-active");
+            }
+          });
+          dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("widget-file-dropzone-active");
+          });
+          dropZone.addEventListener("drop", (e) => {
+            if (!props.disabled) {
+              e.preventDefault();
+              dropZone.classList.remove("widget-file-dropzone-active");
+              const files = Array.from(e.dataTransfer.files);
+              addFiles(files);
+            }
+          });
+          fileInput.addEventListener("change", () => {
+            const files = Array.from(fileInput.files);
+            addFiles(files);
+            fileInput.value = "";
+          });
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-file-upload-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-file-upload-disabled");
+          }
+          const handleSubmit = () => {
+            if (!submitButton.disabled && selectedFiles.length > 0) {
+              const fileData = selectedFiles.map((file) => ({
+                name: file.name,
+                size: file.size,
+                type: file.type
+              }));
+              if (props.disableOnSubmit !== false) {
+                dropZone.classList.add("widget-file-upload-disabled");
+                submitButton.disabled = true;
+                submitButton.classList.add("widget-file-upload-disabled");
+              }
+              this.handleInteraction({
+                action: "upload",
+                files: fileData,
+                count: selectedFiles.length,
+                totalSize: selectedFiles.reduce((sum, file) => sum + file.size, 0),
+                widgetType: "file"
+              });
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          if (props.dropzoneStyle) {
+            Object.assign(dropZone.style, props.dropzoneStyle);
+          }
+          if (props.fileListStyle) {
+            Object.assign(fileList.style, props.fileListStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          dropZone.appendChild(dropZoneContent);
+          container.appendChild(labelElement);
+          container.appendChild(dropZone);
+          container.appendChild(fileList);
+          container.appendChild(submitButton);
+          container.appendChild(fileInput);
+          updateSubmitButton();
+          return container;
+        }
+        /**
+         * Validate file upload widget data structure
+         * @returns {boolean} True if data contains required properties for file upload widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "file";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/color-picker-widget.js
+  var ColorPickerWidget;
+  var init_color_picker_widget = __esm({
+    "src/modules/widgets/color-picker-widget.js"() {
+      init_base_widget();
+      ColorPickerWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the color picker widget
+         * @returns {HTMLElement|Comment} Color picker container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid color picker widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-color-picker-container";
+          const props = this.widgetData.props || {};
+          const label = props.label || "Select a color";
+          const buttonText = props.buttonText || "Submit";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const defaultColor = props.defaultColor || "#000000";
+          const presetColors = props.presetColors || [];
+          const showHex = props.showHex !== false;
+          const showPresets = props.showPresets !== false && presetColors.length > 0;
+          const labelElement = document.createElement("label");
+          labelElement.className = "widget-color-picker-label";
+          labelElement.textContent = label;
+          labelElement.classList.add(`variant-${variant}`);
+          labelElement.classList.add(`size-${size}`);
+          const colorWrapper = document.createElement("div");
+          colorWrapper.className = "widget-color-wrapper";
+          colorWrapper.classList.add(`variant-${variant}`);
+          colorWrapper.classList.add(`size-${size}`);
+          const colorInput = document.createElement("input");
+          colorInput.type = "color";
+          colorInput.className = "widget-color-input";
+          colorInput.value = defaultColor;
+          if (props.disabled) {
+            colorInput.disabled = true;
+            colorInput.classList.add("widget-color-picker-disabled");
+          }
+          const colorDisplay = document.createElement("div");
+          colorDisplay.className = "widget-color-display";
+          colorDisplay.style.backgroundColor = defaultColor;
+          if (showHex) {
+            colorDisplay.textContent = defaultColor.toUpperCase();
+          }
+          let presetContainer = null;
+          if (showPresets) {
+            presetContainer = document.createElement("div");
+            presetContainer.className = "widget-color-presets";
+            presetContainer.classList.add(`variant-${variant}`);
+            presetContainer.classList.add(`size-${size}`);
+            presetColors.forEach((color) => {
+              const preset = document.createElement("button");
+              preset.className = "widget-color-preset";
+              preset.style.backgroundColor = color;
+              preset.setAttribute("data-color", color);
+              preset.setAttribute("aria-label", `Select color ${color}`);
+              if (props.disabled) {
+                preset.disabled = true;
+                preset.classList.add("widget-color-picker-disabled");
+              }
+              preset.addEventListener("click", () => {
+                if (!props.disabled && !colorInput.disabled) {
+                  colorInput.value = color;
+                  colorDisplay.style.backgroundColor = color;
+                  if (showHex) {
+                    colorDisplay.textContent = color.toUpperCase();
+                  }
+                  if (props.onColorChange) {
+                    this.handleInteraction({
+                      action: "colorChange",
+                      color,
+                      hex: color.toUpperCase(),
+                      widgetType: "color"
+                    });
+                  }
+                }
+              });
+              presetContainer.appendChild(preset);
+            });
+          }
+          colorInput.addEventListener("input", () => {
+            colorDisplay.style.backgroundColor = colorInput.value;
+            if (showHex) {
+              colorDisplay.textContent = colorInput.value.toUpperCase();
+            }
+          });
+          const submitButton = document.createElement("button");
+          submitButton.className = "widget-color-picker-submit";
+          submitButton.textContent = buttonText;
+          submitButton.classList.add(`variant-${variant}`);
+          submitButton.classList.add(`size-${size}`);
+          if (props.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add("widget-color-picker-disabled");
+          }
+          const handleSubmit = () => {
+            if (!submitButton.disabled && !colorInput.disabled) {
+              const color = colorInput.value;
+              if (props.disableOnSubmit !== false) {
+                colorInput.disabled = true;
+                colorInput.classList.add("widget-color-picker-disabled");
+                submitButton.disabled = true;
+                submitButton.classList.add("widget-color-picker-disabled");
+              }
+              this.handleInteraction({
+                action: "submit",
+                color,
+                hex: color.toUpperCase(),
+                rgb: this.hexToRgb(color),
+                widgetType: "color"
+              });
+            }
+          };
+          submitButton.addEventListener("click", handleSubmit);
+          colorInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSubmit();
+            }
+          });
+          if (props.inputStyle) {
+            Object.assign(colorInput.style, props.inputStyle);
+          }
+          if (props.displayStyle) {
+            Object.assign(colorDisplay.style, props.displayStyle);
+          }
+          if (props.presetStyle && presetContainer) {
+            Object.assign(presetContainer.style, props.presetStyle);
+          }
+          if (props.buttonStyle) {
+            Object.assign(submitButton.style, props.buttonStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          colorWrapper.appendChild(colorInput);
+          colorWrapper.appendChild(colorDisplay);
+          container.appendChild(labelElement);
+          container.appendChild(colorWrapper);
+          if (presetContainer) {
+            container.appendChild(presetContainer);
+          }
+          container.appendChild(submitButton);
+          return container;
+        }
+        /**
+         * Convert hex color to RGB
+         * @param {string} hex - Hex color value
+         * @returns {Object} RGB object with r, g, b values
+         */
+        hexToRgb(hex) {
+          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+          return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+          } : null;
+        }
+        /**
+         * Validate color picker widget data structure
+         * @returns {boolean} True if data contains required properties for color picker widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "color";
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/progress-widget.js
+  var ProgressWidget;
+  var init_progress_widget = __esm({
+    "src/modules/widgets/progress-widget.js"() {
+      init_base_widget();
+      ProgressWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the progress widget
+         * @returns {HTMLElement|Comment} Progress container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid progress widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-progress-container";
+          const props = this.widgetData.props || {};
+          const label = props.label || "Progress";
+          const variant = props.variant || "primary";
+          const size = props.size || "medium";
+          const value = props.value || 0;
+          const max = props.max || 100;
+          const showPercentage = props.showPercentage !== false;
+          const showText = props.showText !== false;
+          const animated = props.animated !== false;
+          const percentage = Math.min(Math.max(value / max * 100, 0), 100);
+          const labelElement = document.createElement("div");
+          labelElement.className = "widget-progress-label";
+          labelElement.textContent = label;
+          labelElement.classList.add(`variant-${variant}`);
+          labelElement.classList.add(`size-${size}`);
+          const progressBarWrapper = document.createElement("div");
+          progressBarWrapper.className = "widget-progress-bar-wrapper";
+          progressBarWrapper.classList.add(`variant-${variant}`);
+          progressBarWrapper.classList.add(`size-${size}`);
+          const progressBar = document.createElement("div");
+          progressBar.className = "widget-progress-bar";
+          progressBar.classList.add(`variant-${variant}`);
+          progressBar.classList.add(`size-${size}`);
+          if (animated) {
+            progressBar.classList.add("animated");
+          }
+          progressBar.style.width = `${percentage}%`;
+          let progressText = null;
+          if (showText) {
+            progressText = document.createElement("div");
+            progressText.className = "widget-progress-text";
+            progressText.classList.add(`variant-${variant}`);
+            progressText.classList.add(`size-${size}`);
+            let text = `${value} / ${max}`;
+            if (showPercentage) {
+              text += ` (${Math.round(percentage)}%)`;
+            }
+            progressText.textContent = text;
+          }
+          let statusIndicator = null;
+          if (props.showStatus) {
+            statusIndicator = document.createElement("div");
+            statusIndicator.className = "widget-progress-status";
+            statusIndicator.classList.add(`variant-${variant}`);
+            statusIndicator.classList.add(`size-${size}`);
+            let status = "in-progress";
+            let statusText = "In Progress";
+            if (percentage >= 100) {
+              status = "complete";
+              statusText = "Complete";
+              progressBar.classList.add("complete");
+            } else if (percentage === 0) {
+              status = "not-started";
+              statusText = "Not Started";
+            }
+            statusIndicator.classList.add(status);
+            statusIndicator.textContent = statusText;
+          }
+          if (props.barStyle) {
+            Object.assign(progressBar.style, props.barStyle);
+          }
+          if (props.wrapperStyle) {
+            Object.assign(progressBarWrapper.style, props.wrapperStyle);
+          }
+          if (props.labelStyle) {
+            Object.assign(labelElement.style, props.labelStyle);
+          }
+          if (props.textStyle && progressText) {
+            Object.assign(progressText.style, props.textStyle);
+          }
+          if (props.statusStyle && statusIndicator) {
+            Object.assign(statusIndicator.style, props.statusStyle);
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          progressBarWrapper.appendChild(progressBar);
+          container.appendChild(labelElement);
+          container.appendChild(progressBarWrapper);
+          if (progressText) {
+            container.appendChild(progressText);
+          }
+          if (statusIndicator) {
+            container.appendChild(statusIndicator);
+          }
+          return container;
+        }
+        /**
+         * Validate progress widget data structure
+         * @returns {boolean} True if data contains required properties for progress widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "progress" && this.widgetData.props && typeof this.widgetData.props.value === "number" && typeof this.widgetData.props.max === "number" && this.widgetData.props.max > 0;
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/list-widget.js
+  var ListWidget;
+  var init_list_widget = __esm({
+    "src/modules/widgets/list-widget.js"() {
+      init_base_widget();
+      ListWidget = class extends BaseWidget {
+        /**
+         * Create the DOM element for the list widget
+         * @returns {HTMLElement|Comment} List container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid list widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-list-container";
+          const props = this.widgetData.props || {};
+          const items = props.items || [];
+          const itemTemplate = props.itemTemplate;
+          const layout = props.layout || "vertical";
+          const variant = props.variant || "default";
+          const size = props.size || "medium";
+          const selectable = props.selectable || false;
+          const multiSelect = props.multiSelect || false;
+          container.classList.add(`variant-${variant}`);
+          container.classList.add(`size-${size}`);
+          container.classList.add(`layout-${layout}`);
+          let headerElement = null;
+          if (props.header) {
+            headerElement = document.createElement("div");
+            headerElement.className = "widget-list-header";
+            headerElement.textContent = props.header;
+            container.appendChild(headerElement);
+          }
+          const listContent = document.createElement("div");
+          listContent.className = "widget-list-content";
+          this.applyLayoutStyles(listContent, layout);
+          this.selectedItems = /* @__PURE__ */ new Set();
+          this.renderItems(listContent, items, itemTemplate, selectable, multiSelect);
+          let footerElement = null;
+          if (props.footer) {
+            footerElement = document.createElement("div");
+            footerElement.className = "widget-list-footer";
+            footerElement.textContent = props.footer;
+            container.appendChild(footerElement);
+          }
+          let actionsContainer = null;
+          if (props.actions && props.actions.length > 0) {
+            actionsContainer = document.createElement("div");
+            actionsContainer.className = "widget-list-actions";
+            props.actions.forEach((action) => {
+              const button = document.createElement("button");
+              button.className = "widget-list-action";
+              button.textContent = action.text;
+              button.classList.add(`variant-${action.variant || "primary"}`);
+              button.classList.add(`size-${action.size || size}`);
+              button.addEventListener("click", () => {
+                this.handleAction(action, Array.from(this.selectedItems));
+              });
+              actionsContainer.appendChild(button);
+            });
+          }
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          if (props.contentStyle) {
+            Object.assign(listContent.style, props.contentStyle);
+          }
+          if (headerElement) container.appendChild(headerElement);
+          container.appendChild(listContent);
+          if (footerElement) container.appendChild(footerElement);
+          if (actionsContainer) container.appendChild(actionsContainer);
+          return container;
+        }
+        /**
+         * Apply layout styles to list content
+         * @param {HTMLElement} content - List content element
+         * @param {string} layout - Layout type
+         */
+        applyLayoutStyles(content, layout) {
+          switch (layout) {
+            case "vertical":
+              content.style.display = "flex";
+              content.style.flexDirection = "column";
+              content.style.gap = "8px";
+              break;
+            case "horizontal":
+              content.style.display = "flex";
+              content.style.flexDirection = "row";
+              content.style.flexWrap = "wrap";
+              content.style.gap = "12px";
+              break;
+            case "grid":
+              content.style.display = "grid";
+              content.style.gridTemplateColumns = "repeat(auto-fill, minmax(200px, 1fr))";
+              content.style.gap = "16px";
+              break;
+            case "masonry":
+              content.style.display = "flex";
+              content.style.flexWrap = "wrap";
+              content.style.alignContent = "flex-start";
+              content.style.gap = "16px";
+              break;
+            default:
+              content.style.display = "flex";
+              content.style.flexDirection = "column";
+              content.style.gap = "8px";
+          }
+        }
+        /**
+         * Render list items
+         * @param {HTMLElement} container - Container to render into
+         * @param {Array} items - Items to render
+         * @param {Object} itemTemplate - Item template configuration
+         * @param {boolean} selectable - Whether items are selectable
+         * @param {boolean} multiSelect - Whether multiple items can be selected
+         */
+        renderItems(container, items, itemTemplate, selectable, multiSelect) {
+          container.innerHTML = "";
+          items.forEach((item, index) => {
+            const itemElement = this.createItemElement(item, index, itemTemplate, selectable, multiSelect);
+            container.appendChild(itemElement);
+          });
+        }
+        /**
+         * Create individual list item element
+         * @param {*} item - Item data
+         * @param {number} index - Item index
+         * @param {Object} itemTemplate - Item template configuration
+         * @param {boolean} selectable - Whether item is selectable
+         * @param {boolean} multiSelect - Whether multiple selection is allowed
+         * @returns {HTMLElement} Item element
+         */
+        createItemElement(item, index, itemTemplate, selectable, multiSelect) {
+          const itemElement = document.createElement("div");
+          itemElement.className = "widget-list-item";
+          itemElement.setAttribute("data-item-index", index);
+          const content = this.renderItemContent(item, itemTemplate);
+          itemElement.appendChild(content);
+          if (selectable) {
+            itemElement.classList.add("selectable");
+            itemElement.addEventListener("click", () => {
+              this.handleItemSelection(itemElement, item, index, multiSelect);
+            });
+            if (multiSelect) {
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.className = "widget-list-item-checkbox";
+              checkbox.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this.handleItemSelection(itemElement, item, index, multiSelect);
+              });
+              itemElement.insertBefore(checkbox, itemElement.firstChild);
+            }
+          }
+          return itemElement;
+        }
+        /**
+         * Render item content based on template
+         * @param {*} item - Item data
+         * @param {Object} template - Item template configuration
+         * @returns {HTMLElement} Content element
+         */
+        renderItemContent(item, template) {
+          const content = document.createElement("div");
+          content.className = "widget-list-item-content";
+          if (!template) {
+            content.textContent = typeof item === "string" ? item : JSON.stringify(item);
+            return content;
+          }
+          if (template.type === "text") {
+            const textElement = document.createElement("div");
+            textElement.className = "widget-list-item-text";
+            textElement.textContent = this.interpolateTemplate(template.text, item);
+            content.appendChild(textElement);
+          }
+          if (template.type === "card") {
+            content.classList.add("widget-list-item-card");
+            if (template.title) {
+              const titleElement = document.createElement("div");
+              titleElement.className = "widget-list-item-title";
+              titleElement.textContent = this.interpolateTemplate(template.title, item);
+              content.appendChild(titleElement);
+            }
+            if (template.subtitle) {
+              const subtitleElement = document.createElement("div");
+              subtitleElement.className = "widget-list-item-subtitle";
+              subtitleElement.textContent = this.interpolateTemplate(template.subtitle, item);
+              content.appendChild(subtitleElement);
+            }
+            if (template.description) {
+              const descElement = document.createElement("div");
+              descElement.className = "widget-list-item-description";
+              descElement.textContent = this.interpolateTemplate(template.description, item);
+              content.appendChild(descElement);
+            }
+          }
+          if (template.type === "custom" && template.render) {
+            const customContent = template.render(item);
+            if (customContent instanceof HTMLElement) {
+              content.appendChild(customContent);
+            } else {
+              content.innerHTML = customContent;
+            }
+          }
+          return content;
+        }
+        /**
+         * Interpolate template string with item data
+         * @param {string} template - Template string
+         * @param {*} item - Item data
+         * @returns {string} Interpolated string
+         */
+        interpolateTemplate(template, item) {
+          if (typeof template !== "string") return template;
+          return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+            return item[key] !== void 0 ? item[key] : match;
+          });
+        }
+        /**
+         * Handle item selection
+         * @param {HTMLElement} itemElement - Item element
+         * @param {*} item - Item data
+         * @param {number} index - Item index
+         * @param {boolean} multiSelect - Whether multi-select is enabled
+         */
+        handleItemSelection(itemElement, item, index, multiSelect) {
+          if (!multiSelect) {
+            this.selectedItems.clear();
+            document.querySelectorAll(".widget-list-item.selected").forEach((el) => {
+              el.classList.remove("selected");
+            });
+          }
+          if (this.selectedItems.has(index)) {
+            this.selectedItems.delete(index);
+            itemElement.classList.remove("selected");
+            const checkbox = itemElement.querySelector(".widget-list-item-checkbox");
+            if (checkbox) checkbox.checked = false;
+          } else {
+            this.selectedItems.add(index);
+            itemElement.classList.add("selected");
+            const checkbox = itemElement.querySelector(".widget-list-item-checkbox");
+            if (checkbox) checkbox.checked = true;
+          }
+          this.handleInteraction({
+            action: "selectionChange",
+            selectedItems: Array.from(this.selectedItems).map((i) => this.widgetData.props.items[i]),
+            selectedIndices: Array.from(this.selectedItems),
+            widgetType: "list"
+          });
+        }
+        /**
+         * Handle action button click
+         * @param {Object} action - Action configuration
+         * @param {Array} selectedItems - Selected items
+         */
+        handleAction(action, selectedItems) {
+          this.handleInteraction({
+            action: action.action || "custom",
+            selectedItems,
+            actionData: action.data,
+            widgetType: "list"
+          });
+        }
+        /**
+         * Update list items
+         * @param {Array} newItems - New items array
+         */
+        updateItems(newItems) {
+          const container = document.querySelector(".widget-list-content");
+          if (container) {
+            const props = this.widgetData.props || {};
+            this.renderItems(container, newItems, props.itemTemplate, props.selectable, props.multiSelect);
+          }
+        }
+        /**
+         * Get selected items
+         * @returns {Array} Selected items
+         */
+        getSelectedItems() {
+          return Array.from(this.selectedItems).map((i) => this.widgetData.props.items[i]);
+        }
+        /**
+         * Validate list widget data structure
+         * @returns {boolean} True if data contains required properties for list widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "list" && this.widgetData.props && Array.isArray(this.widgetData.props.items);
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/widget-types.js
+  var WIDGET_TYPES, LEGACY_WIDGET_TYPES, SERVER_TYPE_MAPPINGS, WIDGET_TYPE_MAPPINGS;
+  var init_widget_types = __esm({
+    "src/modules/widgets/widget-types.js"() {
+      WIDGET_TYPES = {
+        // Legacy widget types
+        BUTTONS: "buttons",
+        SELECT: "select",
+        INPUT: "input",
+        PASSWORD: "password",
+        CHECKBOX: "checkbox",
+        TEXTAREA: "textarea",
+        SLIDER: "slider",
+        RATING: "rating",
+        TOGGLE: "toggle",
+        DATE: "date",
+        TAGS: "tags",
+        FILE_UPLOAD: "file_upload",
+        COLOR_PICKER: "color_picker",
+        CONFIRMATION: "confirmation",
+        RADIO: "radio",
+        PROGRESS: "progress",
+        // New composable widget types
+        TEXT: "text",
+        CONTAINER: "container",
+        CARD: "card",
+        IMAGE: "image",
+        ICON: "icon",
+        BUTTON: "button",
+        ROW: "row",
+        COLUMN: "column",
+        // Advanced composition widget types
+        CONDITIONAL: "conditional",
+        LIST: "list"
+      };
+      LEGACY_WIDGET_TYPES = {
+        FILE: "file",
+        COLOR: "color"
+      };
+      SERVER_TYPE_MAPPINGS = {
+        [WIDGET_TYPES.FILE_UPLOAD]: LEGACY_WIDGET_TYPES.FILE,
+        [WIDGET_TYPES.COLOR_PICKER]: LEGACY_WIDGET_TYPES.COLOR
+      };
+      WIDGET_TYPE_MAPPINGS = {
+        [LEGACY_WIDGET_TYPES.FILE]: WIDGET_TYPES.FILE_UPLOAD,
+        [LEGACY_WIDGET_TYPES.COLOR]: WIDGET_TYPES.COLOR_PICKER
+      };
+    }
+  });
+
+  // src/modules/widgets/widget-factory.js
+  var widget_factory_exports = {};
+  __export(widget_factory_exports, {
+    WidgetFactory: () => WidgetFactory2
+  });
+  var WidgetFactory2;
+  var init_widget_factory = __esm({
+    "src/modules/widgets/widget-factory.js"() {
+      init_container_widget();
+      init_card_widget();
+      init_text_widget();
+      init_button_widget();
+      init_select_widget();
+      init_buttons_widget();
+      init_input_widget();
+      init_password_widget();
+      init_checkbox_widget();
+      init_textarea_widget();
+      init_slider_widget();
+      init_rating_widget();
+      init_toggle_widget();
+      init_date_widget();
+      init_tags_widget();
+      init_radio_widget();
+      init_confirmation_widget();
+      init_progress_widget();
+      init_file_upload_widget();
+      init_color_picker_widget();
+      init_conditional_widget();
+      init_list_widget();
+      init_widget_types();
+      WidgetFactory2 = class {
+        /**
+         * Map of widget type identifiers to their corresponding classes
+         * @static
+         * @type {Map<string, BaseWidget>}
+         */
+        static widgetTypes = /* @__PURE__ */ new Map([
+          // Widget type mappings
+          [WIDGET_TYPES.BUTTONS, ButtonsWidget],
+          [WIDGET_TYPES.SELECT, SelectWidget],
+          [WIDGET_TYPES.INPUT, InputWidget],
+          [WIDGET_TYPES.PASSWORD, PasswordWidget],
+          [WIDGET_TYPES.CHECKBOX, CheckboxWidget],
+          [WIDGET_TYPES.TEXTAREA, TextareaWidget],
+          [WIDGET_TYPES.SLIDER, SliderWidget],
+          [WIDGET_TYPES.RATING, RatingWidget],
+          [WIDGET_TYPES.TOGGLE, ToggleWidget],
+          [WIDGET_TYPES.DATE, DateWidget],
+          [WIDGET_TYPES.TAGS, TagsWidget],
+          [WIDGET_TYPES.RADIO, RadioWidget],
+          [WIDGET_TYPES.CONFIRMATION, ConfirmationWidget],
+          [WIDGET_TYPES.PROGRESS, ProgressWidget],
+          [WIDGET_TYPES.FILE, FileUploadWidget],
+          [WIDGET_TYPES.COLOR, ColorPickerWidget],
+          // Layout and content widgets
+          [WIDGET_TYPES.TEXT, TextWidget],
+          [WIDGET_TYPES.CONTAINER, ContainerWidget],
+          [WIDGET_TYPES.CARD, CardWidget],
+          [WIDGET_TYPES.IMAGE, ContainerWidget],
+          // Placeholder for future image widget
+          [WIDGET_TYPES.ICON, ContainerWidget],
+          // Placeholder for future icon widget
+          [WIDGET_TYPES.BUTTON, ButtonWidget],
+          [WIDGET_TYPES.ROW, ContainerWidget],
+          [WIDGET_TYPES.COLUMN, ContainerWidget],
+          // Advanced composition widgets
+          [WIDGET_TYPES.CONDITIONAL, ConditionalWidget],
+          [WIDGET_TYPES.LIST, ListWidget]
+        ]);
+        /**
+         * Register a new widget type
+         * @static
+         * @param {string} type - Widget type identifier
+         * @param {class} WidgetClass - Widget class constructor extending BaseWidget
+         */
+        static registerWidget(type, WidgetClass) {
+          this.widgetTypes.set(type, WidgetClass);
+        }
+        /**
+         * Create a widget instance based on data type with recursive support
+         * @static
+         * @param {Object} widgetConfig - Widget configuration data
+         * @param {string} widgetConfig.type - Widget type identifier
+         * @param {Array} [widgetConfig.children] - Nested child widgets
+         * @param {string} widgetId - Widget container ID for scoping
+         * @returns {HTMLElement|null} Widget DOM element or null if type not supported
+         */
+        static createWidget(widgetConfig, widgetId) {
+          if (!widgetConfig || !widgetConfig.type) {
+            console.warn("Invalid widget config:", widgetConfig);
+            return null;
+          }
+          const widgetType = SERVER_TYPE_MAPPINGS[widgetConfig.type] || widgetConfig.type;
+          const WidgetClass = this.widgetTypes.get(widgetType);
+          if (!WidgetClass) {
+            console.warn(`Unsupported widget type: ${widgetConfig.type} (mapped to: ${widgetType})`);
+            return null;
+          }
+          try {
+            const mappedWidgetConfig = { ...widgetConfig, type: widgetType };
+            const widgetInstance = new WidgetClass(mappedWidgetConfig, widgetId);
+            const element = widgetInstance.createElement();
+            if (widgetConfig.children && Array.isArray(widgetConfig.children)) {
+              const childrenContainer = widgetInstance.getChildrenContainer ? widgetInstance.getChildrenContainer(element) : element;
+              widgetConfig.children.forEach((childConfig) => {
+                const childElement = this.createWidget(childConfig, widgetId);
+                if (childElement) {
+                  childrenContainer.appendChild(childElement);
+                }
+              });
+            }
+            return element;
+          } catch (error) {
+            console.error(`Error creating widget of type ${widgetConfig.type}:`, error);
+            return null;
+          }
+        }
+        /**
+         * Get list of all supported widget types
+         * @static
+         * @returns {string[]} Array of supported widget type names
+         */
+        static getSupportedTypes() {
+          return Array.from(this.widgetTypes.keys());
+        }
+      };
+    }
+  });
+
+  // src/modules/widgets/conditional-widget.js
+  var ConditionalWidget;
+  var init_conditional_widget = __esm({
+    "src/modules/widgets/conditional-widget.js"() {
+      init_base_widget();
+      ConditionalWidget = class extends BaseWidget {
+        constructor(widgetData, widgetId) {
+          super(widgetData, widgetId);
+          this.state = /* @__PURE__ */ new Map();
+          this.evaluator = this.createEvaluator();
+        }
+        /**
+         * Create the DOM element for the conditional container
+         * @returns {HTMLElement|Comment} Conditional container element or comment for invalid data
+         */
+        createElement() {
+          if (!this.validate()) {
+            return document.createComment("Invalid conditional widget data");
+          }
+          const container = document.createElement("div");
+          container.className = "widget-conditional-container";
+          const props = this.widgetData.props || {};
+          const condition = props.condition;
+          const children = props.children || [];
+          const fallback = props.fallback;
+          const variant = props.variant || "default";
+          const size = props.size || "medium";
+          container.classList.add(`variant-${variant}`);
+          container.classList.add(`size-${size}`);
+          const contentContainer = document.createElement("div");
+          contentContainer.className = "widget-conditional-content";
+          const fallbackContainer = document.createElement("div");
+          fallbackContainer.className = "widget-conditional-fallback";
+          fallbackContainer.style.display = "none";
+          this.renderChildren(contentContainer, children);
+          if (fallback) {
+            this.renderChildren(fallbackContainer, Array.isArray(fallback) ? fallback : [fallback]);
+          }
+          this.updateVisibility(container, contentContainer, fallbackContainer, condition);
+          this.setupStateListeners(container, contentContainer, fallbackContainer, condition);
+          if (props.style) {
+            Object.assign(container.style, props.style);
+          }
+          if (props.contentStyle) {
+            Object.assign(contentContainer.style, props.contentStyle);
+          }
+          if (props.fallbackStyle) {
+            Object.assign(fallbackContainer.style, props.fallbackStyle);
+          }
+          container.appendChild(contentContainer);
+          if (fallback) {
+            container.appendChild(fallbackContainer);
+          }
+          return container;
+        }
+        /**
+         * Create condition evaluator function
+         * @returns {Function} Evaluator function
+         */
+        createEvaluator() {
+          return (condition, state) => {
+            if (!condition) return true;
+            try {
+              if (typeof condition === "function") {
+                return condition(state);
+              }
+              if (typeof condition === "string") {
+                if (condition.startsWith("showIf:")) {
+                  const key = condition.substring(7);
+                  return Boolean(state.get(key));
+                }
+                if (condition.startsWith("hideIf:")) {
+                  const key = condition.substring(7);
+                  return !Boolean(state.get(key));
+                }
+                if (condition.includes(":")) {
+                  const [key, value] = condition.split(":");
+                  return state.get(key) === value;
+                }
+                return Boolean(state.get(condition));
+              }
+              if (typeof condition === "object") {
+                const { operator, key, value, conditions } = condition;
+                switch (operator) {
+                  case "equals":
+                    return state.get(key) === value;
+                  case "notEquals":
+                    return state.get(key) !== value;
+                  case "greaterThan":
+                    return Number(state.get(key)) > Number(value);
+                  case "lessThan":
+                    return Number(state.get(key)) < Number(value);
+                  case "contains":
+                    return String(state.get(key)).includes(String(value));
+                  case "and":
+                    return conditions.every((cond) => this.evaluator(cond, state));
+                  case "or":
+                    return conditions.some((cond) => this.evaluator(cond, state));
+                  default:
+                    return true;
+                }
+              }
+              return true;
+            } catch (error) {
+              console.warn("Condition evaluation error:", error);
+              return true;
+            }
+          };
+        }
+        /**
+         * Update visibility based on condition
+         * @param {HTMLElement} container - Main container
+         * @param {HTMLElement} contentContainer - Content container
+         * @param {HTMLElement} fallbackContainer - Fallback container
+         * @param {*} condition - Condition to evaluate
+         */
+        updateVisibility(container, contentContainer, fallbackContainer, condition) {
+          const shouldShow = this.evaluator(condition, this.state);
+          if (shouldShow) {
+            contentContainer.style.display = "";
+            if (fallbackContainer) {
+              fallbackContainer.style.display = "none";
+            }
+            container.classList.remove("conditional-hidden");
+            container.classList.add("conditional-visible");
+          } else {
+            contentContainer.style.display = "none";
+            if (fallbackContainer) {
+              fallbackContainer.style.display = "";
+            }
+            container.classList.remove("conditional-visible");
+            container.classList.add("conditional-hidden");
+          }
+        }
+        /**
+         * Set up state change listeners
+         * @param {HTMLElement} container - Main container
+         * @param {HTMLElement} contentContainer - Content container
+         * @param {HTMLElement} fallbackContainer - Fallback container
+         * @param {*} condition - Condition to evaluate
+         */
+        setupStateListeners(container, contentContainer, fallbackContainer, condition) {
+          document.addEventListener("widgetInteraction", (event) => {
+            const { widgetId, widgetType, ...data } = event.detail;
+            if (widgetId === this.widgetId) {
+              Object.keys(data).forEach((key) => {
+                this.state.set(key, data[key]);
+              });
+              this.updateVisibility(container, contentContainer, fallbackContainer, condition);
+            }
+          });
+        }
+        /**
+         * Render children widgets
+         * @param {HTMLElement} container - Container to render into
+         * @param {Array} children - Children to render
+         */
+        renderChildren(container, children) {
+          Promise.resolve().then(() => (init_widget_factory(), widget_factory_exports)).then(({ WidgetFactory: WidgetFactory3 }) => {
+            children.forEach((childConfig) => {
+              const childElement = WidgetFactory3.createWidget(childConfig, this.widgetId);
+              if (childElement) {
+                container.appendChild(childElement);
+              }
+            });
+          });
+        }
+        /**
+         * Set state value
+         * @param {string} key - State key
+         * @param {*} value - State value
+         */
+        setState(key, value) {
+          this.state.set(key, value);
+          const container = document.querySelector(`[data-widget-id="${this.widgetId}"]`);
+          if (container) {
+            const contentContainer = container.querySelector(".widget-conditional-content");
+            const fallbackContainer = container.querySelector(".widget-conditional-fallback");
+            const condition = this.widgetData.props?.condition;
+            this.updateVisibility(container, contentContainer, fallbackContainer, condition);
+          }
+        }
+        /**
+         * Get state value
+         * @param {string} key - State key
+         * @returns {*} State value
+         */
+        getState(key) {
+          return this.state.get(key);
+        }
+        /**
+         * Validate conditional widget data structure
+         * @returns {boolean} True if data contains required properties for conditional widget
+         */
+        validate() {
+          return super.validate() && this.widgetData.type === "conditional";
+        }
+      };
+    }
+  });
+
   // src/modules/api-legacy.js
   var LegacyAPI = class {
     /**
@@ -80,18 +3277,20 @@
       return true;
     }
     /**
-     * Get the stored session key from sessionStorage (more secure than localStorage)
-     * @returns {string} The session key or empty string if not found
+     * Get the stored session key from sessionStorage
+     * @returns {string} The stored session key or empty string
      */
     getSessionKey() {
-      return sessionStorage.getItem("chat_session_key") || "";
+      return typeof sessionStorage !== "undefined" ? sessionStorage.getItem("chat_session_key") || "" : "";
     }
     /**
      * Store a session key in sessionStorage (more secure than localStorage)
      * @param {string} key - The session key to store
      */
     setSessionKey(key) {
-      sessionStorage.setItem("chat_session_key", key);
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("chat_session_key", key);
+      }
     }
     /**
      * Check if running in test environment (localhost:32000)
@@ -914,1504 +4113,31 @@
     ).replace(/^/, "#");
   }
 
-  // src/modules/widgets/base-widget.js
-  var BaseWidget = class {
-    /**
-     * Create a new widget instance
-     * @param {Object} widgetData - Widget configuration data
-     * @param {string} widgetId - Widget ID for scoping
-     */
-    constructor(widgetData, widgetId) {
-      this.widgetData = widgetData;
-      this.widgetId = widgetId;
-    }
-    /**
-     * Create the DOM element for this widget
-     * @returns {HTMLElement} The widget DOM element
-     */
-    createElement() {
-      throw new Error("createElement() must be implemented by subclass");
-    }
-    /**
-     * Get the container element for nested children widgets
-     * Override this method in container widgets to specify where children should be placed
-     * @param {HTMLElement} element - The widget's main element
-     * @returns {HTMLElement} Container element for children (defaults to main element)
-     */
-    getChildrenContainer(element) {
-      return element;
-    }
-    /**
-     * Handle widget interaction and dispatch custom event
-     * @param {Object} interaction - Interaction data
-     * @param {string} interaction.type - Type of interaction
-     * @param {string} interaction.value - Interaction value
-     * @param {string} [interaction.text] - Display text for the interaction
-     */
-    handleInteraction(interaction) {
-      const event = new CustomEvent("widgetInteraction", {
-        detail: {
-          widgetId: this.widgetId,
-          ...interaction
-        }
-      });
-      document.dispatchEvent(event);
-    }
-    /**
-     * Validate widget data structure
-     * @returns {boolean} True if data contains required type property
-     */
-    validate() {
-      return this.widgetData && this.widgetData.type;
-    }
-  };
-
-  // src/modules/widgets/widget-types.js
-  var WIDGET_TYPES = {
-    // Legacy widget types
-    BUTTONS: "buttons",
-    SELECT: "select",
-    INPUT: "input",
-    PASSWORD: "password",
-    CHECKBOX: "checkbox",
-    TEXTAREA: "textarea",
-    SLIDER: "slider",
-    RATING: "rating",
-    TOGGLE: "toggle",
-    DATE: "date",
-    TAGS: "tags",
-    FILE_UPLOAD: "file_upload",
-    COLOR_PICKER: "color_picker",
-    CONFIRMATION: "confirmation",
-    RADIO: "radio",
-    PROGRESS: "progress",
-    // New composable widget types
-    TEXT: "text",
-    CONTAINER: "container",
-    CARD: "card",
-    IMAGE: "image",
-    ICON: "icon",
-    BUTTON: "button",
-    ROW: "row",
-    COLUMN: "column"
-  };
-  var LEGACY_WIDGET_TYPES = {
-    FILE: "file",
-    COLOR: "color"
-  };
-  var SERVER_TYPE_MAPPINGS = {
-    [WIDGET_TYPES.FILE_UPLOAD]: LEGACY_WIDGET_TYPES.FILE,
-    [WIDGET_TYPES.COLOR_PICKER]: LEGACY_WIDGET_TYPES.COLOR
-  };
-  var WIDGET_TYPE_MAPPINGS = {
-    [LEGACY_WIDGET_TYPES.FILE]: WIDGET_TYPES.FILE_UPLOAD,
-    [LEGACY_WIDGET_TYPES.COLOR]: WIDGET_TYPES.COLOR_PICKER
-  };
-
-  // src/modules/widgets/buttons-widget.js
-  var ButtonsWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the buttons widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid buttons widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === WIDGET_TYPES.BUTTONS && this.widgetData.options) {
-        const buttonsContainer = document.createElement("div");
-        buttonsContainer.className = "widget-buttons";
-        this.widgetData.options.forEach((option) => {
-          const button = document.createElement("button");
-          button.className = "widget-button";
-          button.textContent = option.text;
-          button.setAttribute("data-widget-id", this.widgetId);
-          button.setAttribute("data-option-id", option.id);
-          button.setAttribute("data-option-value", option.value);
-          button.addEventListener("click", () => {
-            const allButtons = buttonsContainer.querySelectorAll(".widget-button");
-            allButtons.forEach((btn) => {
-              btn.disabled = true;
-              btn.classList.add("widget-button-disabled");
-            });
-            this.handleInteraction({
-              optionId: option.id,
-              optionValue: option.value,
-              optionText: option.text,
-              widgetType: "buttons"
-            });
-          });
-          buttonsContainer.appendChild(button);
-        });
-        widgetContainer.appendChild(buttonsContainer);
-      }
-      return widgetContainer;
-    }
-    /**
-     * Validate buttons widget data structure
-     * @returns {boolean} True if data contains required properties for buttons widget
-     */
-    validate() {
-      return super.validate() && this.widgetData.type === WIDGET_TYPES.BUTTONS && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
-    }
-  };
-
-  // src/modules/widgets/select-widget.js
-  var SelectWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the select widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid select widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "select" && this.widgetData.options) {
-        const selectContainer = document.createElement("div");
-        selectContainer.className = "widget-select";
-        const select = document.createElement("select");
-        select.className = "widget-select-element";
-        select.setAttribute("data-widget-id", this.widgetId);
-        if (this.widgetData.placeholder) {
-          const placeholderOption = document.createElement("option");
-          placeholderOption.value = "";
-          placeholderOption.textContent = this.widgetData.placeholder;
-          placeholderOption.disabled = true;
-          placeholderOption.selected = true;
-          select.appendChild(placeholderOption);
-        }
-        this.widgetData.options.forEach((option) => {
-          const optionElement = document.createElement("option");
-          optionElement.value = option.value;
-          optionElement.textContent = option.text;
-          optionElement.setAttribute("data-option-id", option.id);
-          select.appendChild(optionElement);
-        });
-        select.addEventListener("change", () => {
-          const selectedOption = select.options[select.selectedIndex];
-          const optionData = this.widgetData.options.find((opt) => opt.id === selectedOption.getAttribute("data-option-id"));
-          if (optionData) {
-            select.disabled = true;
-            select.classList.add("widget-select-disabled");
-            this.handleInteraction({
-              optionId: optionData.id,
-              optionValue: optionData.value,
-              optionText: optionData.text,
-              widgetType: "select"
-            });
-          }
-        });
-        selectContainer.appendChild(select);
-        widgetContainer.appendChild(selectContainer);
-      }
-      return widgetContainer;
-    }
-    /**
-     * Validate select widget data structure
-     * @returns {boolean} True if data contains required properties for select widget
-     */
-    validate() {
-      return super.validate() && this.widgetData.type === "select" && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
-    }
-  };
-
-  // src/modules/widgets/input-widget.js
-  var InputWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the input widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid input widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "input") {
-        const formContainer = document.createElement("div");
-        formContainer.className = "widget-input";
-        const input = document.createElement("input");
-        input.type = this.widgetData.inputType || "text";
-        input.className = "widget-input-element";
-        input.placeholder = this.widgetData.placeholder || "Enter your response...";
-        input.setAttribute("data-widget-id", this.widgetId);
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-input-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        const handleSubmit = () => {
-          const value = input.value.trim();
-          if (value) {
-            input.disabled = true;
-            input.classList.add("widget-input-disabled");
-            submitButton.disabled = true;
-            submitButton.classList.add("widget-input-disabled");
-            this.handleInteraction({
-              optionId: "input-submit",
-              optionValue: value,
-              optionText: value,
-              widgetType: "input"
-            });
-            input.value = "";
-          }
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        input.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            handleSubmit();
-          }
-        });
-        formContainer.appendChild(input);
-        formContainer.appendChild(submitButton);
-        widgetContainer.appendChild(formContainer);
-      }
-      return widgetContainer;
-    }
-    /**
-     * Validate input widget data structure
-     * @returns {boolean} True if data contains required properties for input widget
-     */
-    validate() {
-      return super.validate() && this.widgetData.type === "input";
-    }
-  };
-
-  // src/modules/widgets/password-widget.js
-  var PasswordWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the password widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid password widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "password") {
-        const formContainer = document.createElement("div");
-        formContainer.className = "widget-password";
-        const inputWrapper = document.createElement("div");
-        inputWrapper.className = "widget-password-wrapper";
-        const input = document.createElement("input");
-        input.type = "password";
-        input.className = "widget-password-element";
-        input.placeholder = this.widgetData.placeholder || "Enter your password...";
-        input.setAttribute("data-widget-id", this.widgetId);
-        input.autocomplete = this.widgetData.autocomplete || "current-password";
-        const toggleButton = document.createElement("button");
-        toggleButton.type = "button";
-        toggleButton.className = "widget-password-toggle";
-        toggleButton.setAttribute("aria-label", "Toggle password visibility");
-        toggleButton.innerHTML = "\u{1F441}\uFE0F";
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-password-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        const toggleVisibility = () => {
-          if (input.type === "password") {
-            input.type = "text";
-            toggleButton.innerHTML = "\u{1F648}";
-            toggleButton.setAttribute("aria-label", "Hide password");
-          } else {
-            input.type = "password";
-            toggleButton.innerHTML = "\u{1F441}\uFE0F";
-            toggleButton.setAttribute("aria-label", "Show password");
-          }
-        };
-        const handleSubmit = () => {
-          const value = input.value.trim();
-          if (value) {
-            input.disabled = true;
-            input.classList.add("widget-password-disabled");
-            toggleButton.disabled = true;
-            toggleButton.classList.add("widget-password-disabled");
-            submitButton.disabled = true;
-            submitButton.classList.add("widget-password-disabled");
-            const passwordValue = value;
-            input.value = "";
-            this.handleInteraction({
-              optionId: "password-submit",
-              optionValue: passwordValue,
-              optionText: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
-              // Mask the password in display
-              widgetType: "password"
-            });
-          }
-        };
-        toggleButton.addEventListener("click", toggleVisibility);
-        submitButton.addEventListener("click", handleSubmit);
-        input.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            handleSubmit();
-          }
-        });
-        inputWrapper.appendChild(input);
-        inputWrapper.appendChild(toggleButton);
-        formContainer.appendChild(inputWrapper);
-        formContainer.appendChild(submitButton);
-        widgetContainer.appendChild(formContainer);
-      }
-      return widgetContainer;
-    }
-    /**
-     * Validate password widget data structure
-     * @returns {boolean} True if data contains required properties for password widget
-     */
-    validate() {
-      return super.validate() && this.widgetData.type === "password";
-    }
-  };
-
-  // src/modules/widgets/checkbox-widget.js
-  var CheckboxWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the checkbox widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid checkbox widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "checkbox" && this.widgetData.options) {
-        const checkboxContainer = document.createElement("div");
-        checkboxContainer.className = "widget-checkbox";
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-checkbox-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        this.widgetData.options.forEach((option) => {
-          const checkboxWrapper = document.createElement("div");
-          checkboxWrapper.className = "widget-checkbox-item";
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.className = "widget-checkbox-element";
-          checkbox.id = `checkbox-${this.widgetId}-${option.id}`;
-          checkbox.value = option.value;
-          checkbox.setAttribute("data-widget-id", this.widgetId);
-          checkbox.setAttribute("data-option-id", option.id);
-          if (option.checked) {
-            checkbox.checked = true;
-          }
-          const label = document.createElement("label");
-          label.className = "widget-checkbox-label";
-          label.htmlFor = `checkbox-${this.widgetId}-${option.id}`;
-          label.textContent = option.text;
-          checkboxWrapper.appendChild(checkbox);
-          checkboxWrapper.appendChild(label);
-          checkboxContainer.appendChild(checkboxWrapper);
-        });
-        const handleSubmit = () => {
-          const checkboxes = checkboxContainer.querySelectorAll(".widget-checkbox-element");
-          const selectedOptions = [];
-          checkboxes.forEach((checkbox) => {
-            if (checkbox.checked) {
-              const optionId = checkbox.getAttribute("data-option-id");
-              const optionData = this.widgetData.options.find((opt) => opt.id === optionId);
-              if (optionData) {
-                selectedOptions.push({
-                  optionId: optionData.id,
-                  optionValue: optionData.value,
-                  optionText: optionData.text
-                });
-              }
-            }
-          });
-          if (selectedOptions.length > 0 || this.widgetData.allowEmpty !== false) {
-            const allCheckboxes = checkboxContainer.querySelectorAll(".widget-checkbox-element");
-            allCheckboxes.forEach((cb) => {
-              cb.disabled = true;
-              cb.classList.add("widget-checkbox-disabled");
-            });
-            submitButton.disabled = true;
-            submitButton.classList.add("widget-checkbox-disabled");
-            this.handleInteraction({
-              selectedOptions,
-              widgetType: "checkbox"
-            });
-          }
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        checkboxContainer.appendChild(submitButton);
-        widgetContainer.appendChild(checkboxContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "checkbox" && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
-    }
-  };
-
-  // src/modules/widgets/textarea-widget.js
-  var TextareaWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the textarea widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid textarea widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "textarea") {
-        const formContainer = document.createElement("div");
-        formContainer.className = "widget-textarea";
-        const textarea = document.createElement("textarea");
-        textarea.className = "widget-textarea-element";
-        textarea.placeholder = this.widgetData.placeholder || "Enter your response...";
-        textarea.rows = this.widgetData.rows || 4;
-        textarea.setAttribute("data-widget-id", this.widgetId);
-        if (this.widgetData.maxLength) {
-          textarea.maxLength = this.widgetData.maxLength;
-        }
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-textarea-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        const handleSubmit = () => {
-          const value = textarea.value.trim();
-          if (value) {
-            textarea.disabled = true;
-            textarea.classList.add("widget-textarea-disabled");
-            submitButton.disabled = true;
-            submitButton.classList.add("widget-textarea-disabled");
-            this.handleInteraction({
-              optionId: "textarea-submit",
-              optionValue: value,
-              optionText: value,
-              widgetType: "textarea"
-            });
-            textarea.value = "";
-          }
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        textarea.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && e.ctrlKey) {
-            e.preventDefault();
-            handleSubmit();
-          }
-        });
-        formContainer.appendChild(textarea);
-        formContainer.appendChild(submitButton);
-        widgetContainer.appendChild(formContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "textarea";
-    }
-  };
-
-  // src/modules/widgets/slider-widget.js
-  var SliderWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the slider widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid slider widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "slider") {
-        const sliderContainer = document.createElement("div");
-        sliderContainer.className = "widget-slider";
-        const label = document.createElement("label");
-        label.className = "widget-slider-label";
-        label.textContent = this.widgetData.label || "Select a value";
-        const sliderWrapper = document.createElement("div");
-        sliderWrapper.className = "widget-slider-wrapper";
-        const slider = document.createElement("input");
-        slider.type = "range";
-        slider.className = "widget-slider-element";
-        slider.min = this.widgetData.min || 0;
-        slider.max = this.widgetData.max || 100;
-        slider.step = this.widgetData.step || 1;
-        slider.value = this.widgetData.defaultValue || Math.floor((slider.min + slider.max) / 2);
-        slider.setAttribute("data-widget-id", this.widgetId);
-        const valueDisplay = document.createElement("div");
-        valueDisplay.className = "widget-slider-value";
-        valueDisplay.textContent = slider.value;
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-slider-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        slider.addEventListener("input", () => {
-          valueDisplay.textContent = slider.value;
-        });
-        const handleSubmit = () => {
-          const value = parseFloat(slider.value);
-          slider.disabled = true;
-          slider.classList.add("widget-slider-disabled");
-          submitButton.disabled = true;
-          submitButton.classList.add("widget-slider-disabled");
-          this.handleInteraction({
-            optionId: "slider-submit",
-            optionValue: value,
-            optionText: value.toString(),
-            widgetType: "slider"
-          });
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        sliderWrapper.appendChild(slider);
-        sliderWrapper.appendChild(valueDisplay);
-        sliderContainer.appendChild(label);
-        sliderContainer.appendChild(sliderWrapper);
-        sliderContainer.appendChild(submitButton);
-        widgetContainer.appendChild(sliderContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "slider" && typeof this.widgetData.min === "number" && typeof this.widgetData.max === "number" && this.widgetData.max > this.widgetData.min;
-    }
-  };
-
-  // src/modules/widgets/rating-widget.js
-  var RatingWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the rating widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid rating widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "rating") {
-        const ratingContainer = document.createElement("div");
-        ratingContainer.className = "widget-rating";
-        const label = document.createElement("div");
-        label.className = "widget-rating-label";
-        label.textContent = this.widgetData.label || "Rate this";
-        const starsContainer = document.createElement("div");
-        starsContainer.className = "widget-rating-stars";
-        const maxRating = this.widgetData.maxRating || 5;
-        const iconType = this.widgetData.iconType || "stars";
-        for (let i = 1; i <= maxRating; i++) {
-          const star = document.createElement("button");
-          star.className = "widget-rating-star";
-          star.setAttribute("data-rating", i);
-          star.setAttribute("data-widget-id", this.widgetId);
-          if (iconType === "emojis") {
-            star.textContent = "\u2B50";
-          } else {
-            star.innerHTML = "\u2605";
-          }
-          star.addEventListener("mouseenter", () => {
-            this.highlightStars(starsContainer, i);
-          });
-          star.addEventListener("mouseleave", () => {
-            this.resetStars(starsContainer);
-          });
-          star.addEventListener("click", () => {
-            this.selectRating(starsContainer, i);
-            const allStars = starsContainer.querySelectorAll(".widget-rating-star");
-            allStars.forEach((s) => {
-              s.disabled = true;
-              s.classList.add("widget-rating-disabled");
-            });
-            this.handleInteraction({
-              optionId: "rating-submit",
-              optionValue: i,
-              optionText: `${i} star${i > 1 ? "s" : ""}`,
-              widgetType: "rating"
-            });
-          });
-          starsContainer.appendChild(star);
-        }
-        ratingContainer.appendChild(label);
-        ratingContainer.appendChild(starsContainer);
-        widgetContainer.appendChild(ratingContainer);
-      }
-      return widgetContainer;
-    }
-    highlightStars(container, rating) {
-      const stars = container.querySelectorAll(".widget-rating-star");
-      stars.forEach((star, index) => {
-        if (index < rating) {
-          star.classList.add("widget-rating-star-hover");
-        } else {
-          star.classList.remove("widget-rating-star-hover");
-        }
-      });
-    }
-    resetStars(container) {
-      const stars = container.querySelectorAll(".widget-rating-star");
-      stars.forEach((star) => {
-        star.classList.remove("widget-rating-star-hover");
-      });
-    }
-    selectRating(container, rating) {
-      const stars = container.querySelectorAll(".widget-rating-star");
-      stars.forEach((star, index) => {
-        if (index < rating) {
-          star.classList.add("widget-rating-star-selected");
-        } else {
-          star.classList.remove("widget-rating-star-selected");
-        }
-      });
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "rating" && typeof this.widgetData.maxRating === "number" && this.widgetData.maxRating > 0;
-    }
-  };
-
-  // src/modules/widgets/toggle-widget.js
-  var ToggleWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the toggle widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid toggle widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "toggle") {
-        const toggleContainer = document.createElement("div");
-        toggleContainer.className = "widget-toggle";
-        const label = document.createElement("label");
-        label.className = "widget-toggle-label";
-        label.textContent = this.widgetData.label || "Enable";
-        const toggleWrapper = document.createElement("div");
-        toggleWrapper.className = "widget-toggle-wrapper";
-        const toggle = document.createElement("input");
-        toggle.type = "checkbox";
-        toggle.className = "widget-toggle-input";
-        toggle.setAttribute("data-widget-id", this.widgetId);
-        if (this.widgetData.defaultValue === true) {
-          toggle.checked = true;
-        }
-        const toggleSlider = document.createElement("span");
-        toggleSlider.className = "widget-toggle-slider";
-        toggleSlider.addEventListener("click", () => {
-          toggle.checked = !toggle.checked;
-        });
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-toggle-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        const handleSubmit = () => {
-          const value = toggle.checked;
-          toggle.disabled = true;
-          toggle.classList.add("widget-toggle-disabled");
-          submitButton.disabled = true;
-          submitButton.classList.add("widget-toggle-disabled");
-          this.handleInteraction({
-            optionId: "toggle-submit",
-            optionValue: value,
-            optionText: value ? "enabled" : "disabled",
-            widgetType: "toggle"
-          });
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        toggleWrapper.appendChild(toggle);
-        toggleWrapper.appendChild(toggleSlider);
-        toggleContainer.appendChild(label);
-        toggleContainer.appendChild(toggleWrapper);
-        toggleContainer.appendChild(submitButton);
-        widgetContainer.appendChild(toggleContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "toggle";
-    }
-  };
-
-  // src/modules/widgets/date-widget.js
-  var DateWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the date widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid date widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "date") {
-        const dateContainer = document.createElement("div");
-        dateContainer.className = "widget-date";
-        const label = document.createElement("label");
-        label.className = "widget-date-label";
-        label.textContent = this.widgetData.label || "Select a date";
-        const dateInput = document.createElement("input");
-        dateInput.type = "date";
-        dateInput.className = "widget-date-element";
-        dateInput.setAttribute("data-widget-id", this.widgetId);
-        if (this.widgetData.minDate) {
-          dateInput.min = this.widgetData.minDate;
-        }
-        if (this.widgetData.maxDate) {
-          dateInput.max = this.widgetData.maxDate;
-        }
-        if (this.widgetData.placeholder) {
-          dateInput.placeholder = this.widgetData.placeholder;
-        }
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-date-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        const handleSubmit = () => {
-          const value = dateInput.value;
-          if (value) {
-            dateInput.disabled = true;
-            dateInput.classList.add("widget-date-disabled");
-            submitButton.disabled = true;
-            submitButton.classList.add("widget-date-disabled");
-            this.handleInteraction({
-              optionId: "date-submit",
-              optionValue: value,
-              optionText: value,
-              widgetType: "date"
-            });
-          }
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        dateInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            handleSubmit();
-          }
-        });
-        dateContainer.appendChild(label);
-        dateContainer.appendChild(dateInput);
-        dateContainer.appendChild(submitButton);
-        widgetContainer.appendChild(dateContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "date";
-    }
-  };
-
-  // src/modules/widgets/tags-widget.js
-  var TagsWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the tags widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid tags widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "tags") {
-        const tagsContainer = document.createElement("div");
-        tagsContainer.className = "widget-tags";
-        const label = document.createElement("label");
-        label.className = "widget-tags-label";
-        label.textContent = this.widgetData.label || "Add tags";
-        const inputWrapper = document.createElement("div");
-        inputWrapper.className = "widget-tags-input-wrapper";
-        const tagsDisplay = document.createElement("div");
-        tagsDisplay.className = "widget-tags-display";
-        const input = document.createElement("input");
-        input.type = "text";
-        input.className = "widget-tags-input";
-        input.placeholder = this.widgetData.placeholder || "Type and press Enter to add tag";
-        input.setAttribute("data-widget-id", this.widgetId);
-        const suggestionsList = document.createElement("ul");
-        suggestionsList.className = "widget-tags-suggestions";
-        suggestionsList.style.display = "none";
-        const maxTags = this.widgetData.maxTags || 10;
-        let tags = [];
-        const renderTags = () => {
-          tagsDisplay.innerHTML = "";
-          tags.forEach((tag, index) => {
-            const tagElement = document.createElement("span");
-            tagElement.className = "widget-tag";
-            tagElement.textContent = tag;
-            const removeButton = document.createElement("button");
-            removeButton.className = "widget-tag-remove";
-            removeButton.textContent = "\xD7";
-            removeButton.addEventListener("click", () => {
-              tags.splice(index, 1);
-              renderTags();
-            });
-            tagElement.appendChild(removeButton);
-            tagsDisplay.appendChild(tagElement);
-          });
-        };
-        const showSuggestions = (query) => {
-          if (!this.widgetData.suggestions || !query) {
-            suggestionsList.style.display = "none";
-            return;
-          }
-          const filtered = this.widgetData.suggestions.filter(
-            (s) => s.toLowerCase().includes(query.toLowerCase()) && !tags.includes(s)
-          );
-          if (filtered.length > 0) {
-            suggestionsList.innerHTML = "";
-            filtered.forEach((suggestion) => {
-              const li = document.createElement("li");
-              li.className = "widget-tags-suggestion";
-              li.textContent = suggestion;
-              li.addEventListener("click", () => {
-                if (tags.length < maxTags) {
-                  tags.push(suggestion);
-                  renderTags();
-                  input.value = "";
-                  suggestionsList.style.display = "none";
-                }
-              });
-              suggestionsList.appendChild(li);
-            });
-            suggestionsList.style.display = "block";
-          } else {
-            suggestionsList.style.display = "none";
-          }
-        };
-        input.addEventListener("input", () => {
-          showSuggestions(input.value);
-        });
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            const value = input.value.trim();
-            if (value && tags.length < maxTags && !tags.includes(value)) {
-              tags.push(value);
-              renderTags();
-              input.value = "";
-              suggestionsList.style.display = "none";
-            }
-          } else if (e.key === "Backspace" && !input.value && tags.length > 0) {
-            tags.pop();
-            renderTags();
-          }
-        });
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-tags-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        const handleSubmit = () => {
-          if (tags.length > 0) {
-            input.disabled = true;
-            input.classList.add("widget-tags-disabled");
-            submitButton.disabled = true;
-            submitButton.classList.add("widget-tags-disabled");
-            this.handleInteraction({
-              optionId: "tags-submit",
-              optionValue: tags,
-              optionText: tags.join(", "),
-              widgetType: "tags"
-            });
-          }
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        inputWrapper.appendChild(tagsDisplay);
-        inputWrapper.appendChild(input);
-        inputWrapper.appendChild(suggestionsList);
-        tagsContainer.appendChild(label);
-        tagsContainer.appendChild(inputWrapper);
-        tagsContainer.appendChild(submitButton);
-        widgetContainer.appendChild(tagsContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "tags";
-    }
-  };
-
-  // src/modules/widgets/file-upload-widget.js
-  var FileUploadWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the file upload widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid file upload widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === LEGACY_WIDGET_TYPES.FILE) {
-        const uploadContainer = document.createElement("div");
-        uploadContainer.className = "widget-file-upload";
-        const label = document.createElement("label");
-        label.className = "widget-file-label";
-        label.textContent = this.widgetData.label || "Upload a file";
-        const dropZone = document.createElement("div");
-        dropZone.className = "widget-file-dropzone";
-        const dropZoneContent = document.createElement("div");
-        dropZoneContent.className = "widget-file-dropzone-content";
-        dropZoneContent.innerHTML = `
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="17 8 12 3 7 8"></polyline>
-          <line x1="12" y1="3" x2="12" y2="15"></line>
-        </svg>
-        <p>Drag and drop files here or click to select</p>
-      `;
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.className = "widget-file-input";
-        fileInput.setAttribute("data-widget-id", this.widgetId);
-        fileInput.style.display = "none";
-        if (this.widgetData.accept) {
-          fileInput.accept = this.widgetData.accept;
-        }
-        if (this.widgetData.maxFiles) {
-          fileInput.multiple = this.widgetData.maxFiles > 1;
-        }
-        const fileList = document.createElement("div");
-        fileList.className = "widget-file-list";
-        let selectedFiles = [];
-        const maxFiles = this.widgetData.maxFiles || 1;
-        const maxSize = this.widgetData.maxSize || 10 * 1024 * 1024;
-        const renderFiles = () => {
-          fileList.innerHTML = "";
-          selectedFiles.forEach((file, index) => {
-            const fileItem = document.createElement("div");
-            fileItem.className = "widget-file-item";
-            const fileName = document.createElement("span");
-            fileName.className = "widget-file-name";
-            fileName.textContent = file.name;
-            const fileSize = document.createElement("span");
-            fileSize.className = "widget-file-size";
-            fileSize.textContent = this.formatFileSize(file.size);
-            const removeButton = document.createElement("button");
-            removeButton.className = "widget-file-remove";
-            removeButton.textContent = "\xD7";
-            removeButton.addEventListener("click", () => {
-              selectedFiles.splice(index, 1);
-              renderFiles();
-            });
-            fileItem.appendChild(fileName);
-            fileItem.appendChild(fileSize);
-            fileItem.appendChild(removeButton);
-            fileList.appendChild(fileItem);
-          });
-        };
-        dropZone.addEventListener("click", () => {
-          fileInput.click();
-        });
-        dropZone.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          dropZone.classList.add("widget-file-dropzone-active");
-        });
-        dropZone.addEventListener("dragleave", () => {
-          dropZone.classList.remove("widget-file-dropzone-active");
-        });
-        dropZone.addEventListener("drop", (e) => {
-          e.preventDefault();
-          dropZone.classList.remove("widget-file-dropzone-active");
-          const files = Array.from(e.dataTransfer.files);
-          this.addFiles(files);
-        });
-        fileInput.addEventListener("change", () => {
-          const files = Array.from(fileInput.files);
-          this.addFiles(files);
-          fileInput.value = "";
-        });
-        this.addFiles = (files) => {
-          files.forEach((file) => {
-            if (selectedFiles.length >= maxFiles) return;
-            if (file.size > maxSize) {
-              alert(`File ${file.name} exceeds maximum size of ${this.formatFileSize(maxSize)}`);
-              return;
-            }
-            if (!selectedFiles.some((f) => f.name === file.name)) {
-              selectedFiles.push(file);
-            }
-          });
-          renderFiles();
-        };
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-file-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Upload";
-        const handleSubmit = () => {
-          if (selectedFiles.length > 0) {
-            const fileData = selectedFiles.map((file) => ({
-              name: file.name,
-              size: file.size,
-              type: file.type
-            }));
-            dropZone.classList.add("widget-file-disabled");
-            submitButton.disabled = true;
-            submitButton.classList.add("widget-file-disabled");
-            const fileNames = selectedFiles.map((file) => file.name).join(", ");
-            this.handleInteraction({
-              optionId: "file-upload",
-              optionValue: fileData,
-              optionText: fileNames || `${selectedFiles.length} file(s)`,
-              widgetType: "file"
-            });
-          }
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        dropZone.appendChild(dropZoneContent);
-        uploadContainer.appendChild(label);
-        uploadContainer.appendChild(dropZone);
-        uploadContainer.appendChild(fileList);
-        uploadContainer.appendChild(submitButton);
-        uploadContainer.appendChild(fileInput);
-        widgetContainer.appendChild(uploadContainer);
-      }
-      return widgetContainer;
-    }
-    formatFileSize(bytes) {
-      if (bytes === 0) return "0 Bytes";
-      const k = 1024;
-      const sizes = ["Bytes", "KB", "MB", "GB"];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === LEGACY_WIDGET_TYPES.FILE;
-    }
-  };
-
-  // src/modules/widgets/color-picker-widget.js
-  var ColorPickerWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the color picker widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid color picker widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === LEGACY_WIDGET_TYPES.COLOR) {
-        const colorContainer = document.createElement("div");
-        colorContainer.className = "widget-color-picker";
-        const label = document.createElement("label");
-        label.className = "widget-color-label";
-        label.textContent = this.widgetData.label || "Select a color";
-        const colorWrapper = document.createElement("div");
-        colorWrapper.className = "widget-color-wrapper";
-        const colorInput = document.createElement("input");
-        colorInput.type = "color";
-        colorInput.className = "widget-color-input";
-        colorInput.setAttribute("data-widget-id", this.widgetId);
-        if (this.widgetData.defaultColor) {
-          colorInput.value = this.widgetData.defaultColor;
-        }
-        const colorDisplay = document.createElement("div");
-        colorDisplay.className = "widget-color-display";
-        colorDisplay.style.backgroundColor = colorInput.value;
-        colorDisplay.textContent = colorInput.value.toUpperCase();
-        const presetContainer = document.createElement("div");
-        presetContainer.className = "widget-color-presets";
-        if (this.widgetData.presetColors && this.widgetData.presetColors.length > 0) {
-          this.widgetData.presetColors.forEach((color) => {
-            const preset = document.createElement("button");
-            preset.className = "widget-color-preset";
-            preset.style.backgroundColor = color;
-            preset.setAttribute("data-color", color);
-            preset.addEventListener("click", () => {
-              colorInput.value = color;
-              colorDisplay.style.backgroundColor = color;
-              colorDisplay.textContent = color.toUpperCase();
-            });
-            presetContainer.appendChild(preset);
-          });
-        }
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-color-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        colorInput.addEventListener("input", () => {
-          colorDisplay.style.backgroundColor = colorInput.value;
-          colorDisplay.textContent = colorInput.value.toUpperCase();
-        });
-        const handleSubmit = () => {
-          const value = colorInput.value;
-          colorInput.disabled = true;
-          colorInput.classList.add("widget-color-disabled");
-          submitButton.disabled = true;
-          submitButton.classList.add("widget-color-disabled");
-          this.handleInteraction({
-            optionId: "color-submit",
-            optionValue: value,
-            optionText: value.toUpperCase(),
-            widgetType: "color"
-          });
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        colorWrapper.appendChild(colorInput);
-        colorWrapper.appendChild(colorDisplay);
-        colorContainer.appendChild(label);
-        colorContainer.appendChild(colorWrapper);
-        if (this.widgetData.presetColors && this.widgetData.presetColors.length > 0) {
-          colorContainer.appendChild(presetContainer);
-        }
-        colorContainer.appendChild(submitButton);
-        widgetContainer.appendChild(colorContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === LEGACY_WIDGET_TYPES.COLOR;
-    }
-  };
-
-  // src/modules/widgets/confirmation-widget.js
-  var ConfirmationWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the confirmation widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid confirmation widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "confirmation") {
-        const confirmationContainer = document.createElement("div");
-        confirmationContainer.className = "widget-confirmation";
-        const message = document.createElement("div");
-        message.className = "widget-confirmation-message";
-        message.textContent = this.widgetData.message || "Are you sure?";
-        const buttonsContainer = document.createElement("div");
-        buttonsContainer.className = "widget-confirmation-buttons";
-        const cancelButton = document.createElement("button");
-        cancelButton.className = "widget-confirmation-cancel";
-        cancelButton.textContent = this.widgetData.cancelText || "Cancel";
-        const confirmButton = document.createElement("button");
-        confirmButton.className = "widget-confirmation-confirm";
-        confirmButton.textContent = this.widgetData.confirmText || "Confirm";
-        const handleCancel = () => {
-          cancelButton.disabled = true;
-          cancelButton.classList.add("widget-confirmation-disabled");
-          confirmButton.disabled = true;
-          confirmButton.classList.add("widget-confirmation-disabled");
-          this.handleInteraction({
-            optionId: "confirmation-cancel",
-            optionValue: false,
-            optionText: "cancelled",
-            widgetType: "confirmation"
-          });
-        };
-        const handleConfirm = () => {
-          cancelButton.disabled = true;
-          cancelButton.classList.add("widget-confirmation-disabled");
-          confirmButton.disabled = true;
-          confirmButton.classList.add("widget-confirmation-disabled");
-          this.handleInteraction({
-            optionId: "confirmation-confirm",
-            optionValue: true,
-            optionText: "confirmed",
-            widgetType: "confirmation"
-          });
-        };
-        cancelButton.addEventListener("click", handleCancel);
-        confirmButton.addEventListener("click", handleConfirm);
-        buttonsContainer.appendChild(cancelButton);
-        buttonsContainer.appendChild(confirmButton);
-        confirmationContainer.appendChild(message);
-        confirmationContainer.appendChild(buttonsContainer);
-        widgetContainer.appendChild(confirmationContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "confirmation" && this.widgetData.message;
-    }
-  };
-
-  // src/modules/widgets/radio-widget.js
-  var RadioWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the radio widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid radio widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "radio" && this.widgetData.options) {
-        const radioContainer = document.createElement("div");
-        radioContainer.className = "widget-radio";
-        const submitButton = document.createElement("button");
-        submitButton.className = "widget-radio-submit";
-        submitButton.textContent = this.widgetData.buttonText || "Submit";
-        this.widgetData.options.forEach((option) => {
-          const radioWrapper = document.createElement("div");
-          radioWrapper.className = "widget-radio-item";
-          const radio = document.createElement("input");
-          radio.type = "radio";
-          radio.name = `radio-${this.widgetId}`;
-          radio.className = "widget-radio-element";
-          radio.id = `radio-${this.widgetId}-${option.id}`;
-          radio.value = option.value;
-          radio.setAttribute("data-widget-id", this.widgetId);
-          radio.setAttribute("data-option-id", option.id);
-          if (option.checked) {
-            radio.checked = true;
-          }
-          const label = document.createElement("label");
-          label.className = "widget-radio-label";
-          label.htmlFor = `radio-${this.widgetId}-${option.id}`;
-          label.textContent = option.text;
-          radioWrapper.appendChild(radio);
-          radioWrapper.appendChild(label);
-          radioContainer.appendChild(radioWrapper);
-        });
-        const handleSubmit = () => {
-          const selectedRadio = radioContainer.querySelector(".widget-radio-element:checked");
-          if (selectedRadio) {
-            const optionId = selectedRadio.getAttribute("data-option-id");
-            const optionData = this.widgetData.options.find((opt) => opt.id === optionId);
-            if (optionData) {
-              const allRadios = radioContainer.querySelectorAll(".widget-radio-element");
-              allRadios.forEach((r) => {
-                r.disabled = true;
-                r.classList.add("widget-radio-disabled");
-              });
-              submitButton.disabled = true;
-              submitButton.classList.add("widget-radio-disabled");
-              this.handleInteraction({
-                optionId: optionData.id,
-                optionValue: optionData.value,
-                optionText: optionData.text,
-                widgetType: "radio"
-              });
-            }
-          }
-        };
-        submitButton.addEventListener("click", handleSubmit);
-        radioContainer.appendChild(submitButton);
-        widgetContainer.appendChild(radioContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "radio" && Array.isArray(this.widgetData.options) && this.widgetData.options.length > 0;
-    }
-  };
-
-  // src/modules/widgets/progress-widget.js
-  var ProgressWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the progress widget
-     * @returns {HTMLElement|Comment} Widget container element or comment for invalid data
-     */
-    createElement() {
-      if (!this.validate()) {
-        return document.createComment("Invalid progress widget data");
-      }
-      const widgetContainer = document.createElement("div");
-      widgetContainer.className = "widget";
-      if (this.widgetData.type === "progress") {
-        const progressContainer = document.createElement("div");
-        progressContainer.className = "widget-progress";
-        const label = document.createElement("div");
-        label.className = "widget-progress-label";
-        label.textContent = this.widgetData.label || "Progress";
-        const progressBarWrapper = document.createElement("div");
-        progressBarWrapper.className = "widget-progress-bar-wrapper";
-        const progressBar = document.createElement("div");
-        progressBar.className = "widget-progress-bar";
-        const value = this.widgetData.value || 0;
-        const max = this.widgetData.max || 100;
-        const percentage = Math.min(Math.max(value / max * 100, 0), 100);
-        progressBar.style.width = `${percentage}%`;
-        const progressText = document.createElement("div");
-        progressText.className = "widget-progress-text";
-        progressText.textContent = `${value} / ${max}`;
-        if (this.widgetData.showPercentage !== false) {
-          progressText.textContent += ` (${Math.round(percentage)}%)`;
-        }
-        progressBarWrapper.appendChild(progressBar);
-        progressContainer.appendChild(label);
-        progressContainer.appendChild(progressBarWrapper);
-        progressContainer.appendChild(progressText);
-        widgetContainer.appendChild(progressContainer);
-      }
-      return widgetContainer;
-    }
-    validate() {
-      return super.validate() && this.widgetData.type === "progress" && typeof this.widgetData.value === "number" && typeof this.widgetData.max === "number" && this.widgetData.max > 0;
-    }
-  };
-
-  // src/modules/widgets/container-widget.js
-  var ContainerWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the container widget
-     * @returns {HTMLElement} The container DOM element
-     */
-    createElement() {
-      const element = document.createElement("div");
-      element.className = "widget-container";
-      const layout = this.widgetData.props?.layout || "vertical";
-      const gap = this.widgetData.props?.gap || "medium";
-      const alignment = this.widgetData.props?.alignment || "start";
-      element.classList.add(`layout-${layout}`);
-      element.classList.add(`gap-${gap}`);
-      element.classList.add(`align-${alignment}`);
-      if (this.widgetData.props?.style) {
-        Object.assign(element.style, this.widgetData.props.style);
-      }
-      return element;
-    }
-  };
-
-  // src/modules/widgets/card-widget.js
-  var CardWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the card widget
-     * @returns {HTMLElement} The card DOM element
-     */
-    createElement() {
-      const element = document.createElement("div");
-      element.className = "widget-card";
-      const variant = this.widgetData.props?.variant || "default";
-      const padding = this.widgetData.props?.padding || "medium";
-      element.classList.add(`variant-${variant}`);
-      element.classList.add(`padding-${padding}`);
-      if (this.widgetData.props?.style) {
-        Object.assign(element.style, this.widgetData.props.style);
-      }
-      return element;
-    }
-  };
-
-  // src/modules/widgets/text-widget.js
-  var TextWidget = class extends BaseWidget {
-    /**
-     * Create the DOM element for the text widget
-     * @returns {HTMLElement} The text DOM element
-     */
-    createElement() {
-      const element = document.createElement("div");
-      element.className = "widget-text";
-      const content = this.widgetData.props?.content || "";
-      const format = this.widgetData.props?.format || "plain";
-      element.classList.add(`format-${format}`);
-      if (format === "markdown") {
-        element.innerHTML = this.parseBasicMarkdown(content);
-      } else if (format === "html") {
-        element.innerHTML = content;
-      } else {
-        element.textContent = content;
-      }
-      if (this.widgetData.props?.style) {
-        Object.assign(element.style, this.widgetData.props.style);
-      }
-      return element;
-    }
-    /**
-     * Parse basic markdown syntax
-     * @private
-     * @param {string} text - Markdown text
-     * @returns {string} HTML string
-     */
-    parseBasicMarkdown(text) {
-      return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>").replace(/`(.*?)`/g, "<code>$1</code>").replace(/\n/g, "<br>");
-    }
-  };
-
-  // src/modules/widgets/widget-factory.js
-  var WidgetFactory2 = class {
-    /**
-     * Map of widget type identifiers to their corresponding classes
-     * @static
-     * @type {Map<string, BaseWidget>}
-     */
-    static widgetTypes = /* @__PURE__ */ new Map([
-      // Legacy widget types
-      [WIDGET_TYPES.BUTTONS, ButtonsWidget],
-      [WIDGET_TYPES.SELECT, SelectWidget],
-      [WIDGET_TYPES.INPUT, InputWidget],
-      [WIDGET_TYPES.PASSWORD, PasswordWidget],
-      [WIDGET_TYPES.CHECKBOX, CheckboxWidget],
-      [WIDGET_TYPES.TEXTAREA, TextareaWidget],
-      [WIDGET_TYPES.SLIDER, SliderWidget],
-      [WIDGET_TYPES.RATING, RatingWidget],
-      [WIDGET_TYPES.TOGGLE, ToggleWidget],
-      [WIDGET_TYPES.DATE, DateWidget],
-      [WIDGET_TYPES.TAGS, TagsWidget],
-      [LEGACY_WIDGET_TYPES.FILE, FileUploadWidget],
-      [LEGACY_WIDGET_TYPES.COLOR, ColorPickerWidget],
-      [WIDGET_TYPES.CONFIRMATION, ConfirmationWidget],
-      [WIDGET_TYPES.RADIO, RadioWidget],
-      [WIDGET_TYPES.PROGRESS, ProgressWidget],
-      // New composable widget types
-      [WIDGET_TYPES.TEXT, TextWidget],
-      [WIDGET_TYPES.CONTAINER, ContainerWidget],
-      [WIDGET_TYPES.CARD, CardWidget],
-      [WIDGET_TYPES.IMAGE, ContainerWidget],
-      // Placeholder for future image widget
-      [WIDGET_TYPES.ICON, ContainerWidget],
-      // Placeholder for future icon widget
-      [WIDGET_TYPES.BUTTON, ContainerWidget],
-      // Placeholder for future button widget
-      [WIDGET_TYPES.ROW, ContainerWidget],
-      [WIDGET_TYPES.COLUMN, ContainerWidget]
-    ]);
-    /**
-     * Register a new widget type
-     * @static
-     * @param {string} type - Widget type identifier
-     * @param {class} WidgetClass - Widget class constructor extending BaseWidget
-     */
-    static registerWidget(type, WidgetClass) {
-      this.widgetTypes.set(type, WidgetClass);
-    }
-    /**
-     * Create a widget instance based on data type with recursive support
-     * @static
-     * @param {Object} widgetConfig - Widget configuration data
-     * @param {string} widgetConfig.type - Widget type identifier
-     * @param {Array} [widgetConfig.children] - Nested child widgets
-     * @param {string} widgetId - Widget container ID for scoping
-     * @returns {HTMLElement|null} Widget DOM element or null if type not supported
-     */
-    static createWidget(widgetConfig, widgetId) {
-      if (!widgetConfig || !widgetConfig.type) {
-        console.warn("Invalid widget config:", widgetConfig);
-        return null;
-      }
-      const widgetType = SERVER_TYPE_MAPPINGS[widgetConfig.type] || widgetConfig.type;
-      const WidgetClass = this.widgetTypes.get(widgetType);
-      if (!WidgetClass) {
-        console.warn(`Unsupported widget type: ${widgetConfig.type} (mapped to: ${widgetType})`);
-        return null;
-      }
-      try {
-        const mappedWidgetConfig = { ...widgetConfig, type: widgetType };
-        const widgetInstance = new WidgetClass(mappedWidgetConfig, widgetId);
-        const element = widgetInstance.createElement();
-        if (widgetConfig.children && Array.isArray(widgetConfig.children)) {
-          const childrenContainer = widgetInstance.getChildrenContainer ? widgetInstance.getChildrenContainer(element) : element;
-          widgetConfig.children.forEach((childConfig) => {
-            const childElement = this.createWidget(childConfig, widgetId);
-            if (childElement) {
-              childrenContainer.appendChild(childElement);
-            }
-          });
-        }
-        return element;
-      } catch (error) {
-        console.error(`Error creating widget of type ${widgetConfig.type}:`, error);
-        return null;
-      }
-    }
-    /**
-     * Get list of all supported widget types
-     * @static
-     * @returns {string[]} Array of supported widget type names
-     */
-    static getSupportedTypes() {
-      return Array.from(this.widgetTypes.keys());
-    }
-  };
+  // src/modules/widgets/index.js
+  init_base_widget();
+  init_container_widget();
+  init_card_widget();
+  init_text_widget();
+  init_button_widget();
+  init_input_widget();
+  init_password_widget();
+  init_textarea_widget();
+  init_select_widget();
+  init_checkbox_widget();
+  init_radio_widget();
+  init_slider_widget();
+  init_rating_widget();
+  init_toggle_widget();
+  init_buttons_widget();
+  init_confirmation_widget();
+  init_date_widget();
+  init_tags_widget();
+  init_file_upload_widget();
+  init_color_picker_widget();
+  init_progress_widget();
+  init_conditional_widget();
+  init_list_widget();
+  init_widget_factory();
 
   // src/modules/ui.js
   function injectStyles(widgetId, themeConfig) {

@@ -1,5 +1,10 @@
-import { ButtonsWidget } from './buttons-widget.js';
+// Composable widgets
+import { ContainerWidget } from './container-widget.js';
+import { CardWidget } from './card-widget.js';
+import { TextWidget } from './text-widget.js';
+import { ButtonWidget } from './button-widget.js';
 import { SelectWidget } from './select-widget.js';
+import { ButtonsWidget } from './buttons-widget.js';
 import { InputWidget } from './input-widget.js';
 import { PasswordWidget } from './password-widget.js';
 import { CheckboxWidget } from './checkbox-widget.js';
@@ -9,16 +14,13 @@ import { RatingWidget } from './rating-widget.js';
 import { ToggleWidget } from './toggle-widget.js';
 import { DateWidget } from './date-widget.js';
 import { TagsWidget } from './tags-widget.js';
+import { RadioWidget } from './radio-widget.js';
+import { ConfirmationWidget } from './confirmation-widget.js';
+import { ProgressWidget } from './progress-widget.js';
 import { FileUploadWidget } from './file-upload-widget.js';
 import { ColorPickerWidget } from './color-picker-widget.js';
-import { ConfirmationWidget } from './confirmation-widget.js';
-import { RadioWidget } from './radio-widget.js';
-import { ProgressWidget } from './progress-widget.js';
-
-// New composable widgets
-import { ContainerWidget } from './container-widget.js';
-import { CardWidget } from './card-widget.js';
-import { TextWidget } from './text-widget.js';
+import { ConditionalWidget } from './conditional-widget.js';
+import { ListWidget } from './list-widget.js';
 
 import { WIDGET_TYPES, SERVER_TYPE_MAPPINGS, LEGACY_WIDGET_TYPES } from './widget-types.js';
 
@@ -34,7 +36,7 @@ export class WidgetFactory {
    * @type {Map<string, BaseWidget>}
    */
   static widgetTypes = new Map([
-    // Legacy widget types
+    // Widget type mappings
     [WIDGET_TYPES.BUTTONS, ButtonsWidget],
     [WIDGET_TYPES.SELECT, SelectWidget],
     [WIDGET_TYPES.INPUT, InputWidget],
@@ -46,21 +48,25 @@ export class WidgetFactory {
     [WIDGET_TYPES.TOGGLE, ToggleWidget],
     [WIDGET_TYPES.DATE, DateWidget],
     [WIDGET_TYPES.TAGS, TagsWidget],
-    [LEGACY_WIDGET_TYPES.FILE, FileUploadWidget],
-    [LEGACY_WIDGET_TYPES.COLOR, ColorPickerWidget],
-    [WIDGET_TYPES.CONFIRMATION, ConfirmationWidget],
     [WIDGET_TYPES.RADIO, RadioWidget],
+    [WIDGET_TYPES.CONFIRMATION, ConfirmationWidget],
     [WIDGET_TYPES.PROGRESS, ProgressWidget],
+    [WIDGET_TYPES.FILE, FileUploadWidget],
+    [WIDGET_TYPES.COLOR, ColorPickerWidget],
     
-    // New composable widget types
+    // Layout and content widgets
     [WIDGET_TYPES.TEXT, TextWidget],
     [WIDGET_TYPES.CONTAINER, ContainerWidget],
     [WIDGET_TYPES.CARD, CardWidget],
     [WIDGET_TYPES.IMAGE, ContainerWidget], // Placeholder for future image widget
     [WIDGET_TYPES.ICON, ContainerWidget],   // Placeholder for future icon widget
-    [WIDGET_TYPES.BUTTON, ContainerWidget], // Placeholder for future button widget
+    [WIDGET_TYPES.BUTTON, ButtonWidget],
     [WIDGET_TYPES.ROW, ContainerWidget],
-    [WIDGET_TYPES.COLUMN, ContainerWidget]
+    [WIDGET_TYPES.COLUMN, ContainerWidget],
+    
+    // Advanced composition widgets
+    [WIDGET_TYPES.CONDITIONAL, ConditionalWidget],
+    [WIDGET_TYPES.LIST, ListWidget]
   ]);
 
   /**

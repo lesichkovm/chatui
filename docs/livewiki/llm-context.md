@@ -1,0 +1,521 @@
+---
+path: llm-context.md
+page-type: overview
+summary: Complete codebase summary optimized for LLM consumption and understanding.
+tags: [llm, context, summary, codebase]
+created: 2026-01-22
+updated: 2026-01-22
+version: 1.0.0
+---
+
+# LLM Context: ChatUI
+
+## Project Summary
+
+ChatUI is a professional, ultra-lightweight (~12KB) chat UI widget built with pure Vanilla JavaScript. It provides a modern conversational interface without framework dependencies or technical complexity, designed for easy integration into any web application with support for multiple transport protocols (WebSocket, CORS, JSONP) and 15+ interactive widget components.
+
+## Key Technologies
+
+- **Pure Vanilla JavaScript** - No framework dependencies
+- **ES6 Classes** - Modern class-based architecture
+- **CSS Custom Properties** - Dynamic theming system
+- **WebSocket API** - Real-time bidirectional communication
+- **Fetch API** - Modern HTTP requests with CORS support
+- **JSONP** - Legacy fallback for older servers
+- **Docsify** - Documentation generation
+- **Playwright** - End-to-end testing
+- **ESBuild** - Fast bundling and compilation
+
+## Directory Structure
+
+```
+chatui/
+├── src/                    # Source code
+│   ├── entry.js           # Entry point and global API
+│   └── modules/           # Core modules
+│       ├── api.js         # API abstraction layer
+│       ├── api-cors.js    # CORS transport implementation
+│       ├── api-legacy.js  # JSONP transport implementation
+│       ├── chat-widget.class.js  # Main widget orchestrator
+│       ├── theme.js       # Theme and styling system
+│       ├── ui.js          # UI management and DOM manipulation
+│       ├── utils.js       # Utility functions
+│       └── widgets/       # Interactive widget components
+│           ├── base-widget.js    # Abstract base widget class
+│           ├── widget-factory.js  # Widget factory and registry
+│           ├── widget-types.js    # Widget type definitions
+│           └── [20+ component widgets]
+├── demo/                  # Demo files and server
+├── dist/                  # Built distribution files
+├── tests/                 # Playwright test suites
+├── scripts/               # Build and utility scripts
+└── docs/                  # Documentation and LiveWiki
+```
+
+## Core Concepts
+
+### 1. Transport-Agnostic Communication
+ChatUI abstracts communication protocols, automatically detecting and using the appropriate transport:
+- **WebSocket** (ws/wss) for real-time bidirectional communication
+- **CORS** (http/https) for modern fetch-based API calls
+- **JSONP** (http/https) for legacy server compatibility
+
+### 2. Widget System Architecture
+A flexible component system for interactive elements:
+- **BaseWidget** abstract class defining common interface
+- **WidgetFactory** for dynamic widget creation and management
+- **Event-driven communication** between widgets and main system
+- **25+ specialized widgets** (rating, date picker, file upload, conditional, list, etc.)
+- **Container widgets** for grouping and layout management
+- **Card widgets** for structured content display
+- Event-driven communication between widgets and main system
+
+### 3. Theme System
+Dynamic theming with CSS custom properties:
+- **Light/Dark modes** with automatic detection
+- **Custom color schemes** and CSS variable management
+- **Responsive design** with mobile-first approach
+- **Accessibility support** with high contrast and reduced motion
+
+### 4. Event-Driven Architecture
+Comprehensive event system for component communication:
+- **Widget lifecycle events** (created, mounted, destroyed)
+- **User interaction events** (focus, blur, change, submit)
+- **Communication events** (connected, disconnected, message)
+- **Global window events** for external integration
+
+## Common Patterns
+
+### 1. Module Pattern with ES6 Classes
+```javascript
+class ChatWidget {
+    constructor(config) {
+        this.config = this.parseConfig(config);
+        this.api = new API(this.config);
+        this.ui = new UI(this.config);
+        this.theme = new Theme(this.config);
+        this.init();
+    }
+}
+```
+
+### 2. Factory Pattern for Widgets
+```javascript
+class WidgetFactory {
+    static create(type, config) {
+        const WidgetClass = widgetRegistry[type];
+        if (!WidgetClass) {
+            throw new Error(`Unknown widget type: ${type}`);
+        }
+        return new WidgetClass(config);
+    }
+}
+```
+
+### 3. Transport Abstraction
+```javascript
+class API {
+    detectTransport(url) {
+        if (url.startsWith('ws://') || url.startsWith('wss://')) {
+            return new WebSocketTransport(this.config);
+        }
+        return this.config.preferJsonP 
+            ? new JSONPTransport(this.config)
+            : new CORSTransport(this.config);
+    }
+}
+```
+
+### 4. Event Emission Pattern
+```javascript
+class BaseWidget {
+    emit(event, data) {
+        const customEvent = new CustomEvent(`chatwidget:${event}`, {
+            detail: data
+        });
+        window.dispatchEvent(customEvent);
+    }
+}
+```
+
+### 5. Configuration Validation
+```javascript
+class ChatWidget {
+    parseConfig(config) {
+        const defaults = {
+            serverUrl: 'http://localhost:3000',
+            position: 'bottom-right',
+            color: '#007bff'
+        };
+        return { ...defaults, ...config };
+    }
+}
+```
+
+## Important Files
+
+### Core System Files
+- **`src/entry.js`** - Entry point, global API exposure, auto-initialization
+- **`src/modules/chat-widget.class.js`** - Main orchestrator class coordinating all subsystems
+- **`src/modules/api.js`** - Transport abstraction layer and protocol detection
+- **`src/modules/ui.js`** - DOM management, message rendering, event handling
+- **`src/modules/theme.js`** - Dynamic theming, CSS generation, responsive design
+
+### Transport Implementation Files
+- **`src/modules/api-cors.js`** - CORS transport using fetch API
+- **`src/modules/api-legacy.js`** - JSONP transport for legacy servers
+- **`src/modules/widgets/widget-factory.js`** - Widget creation and management
+- **`src/modules/widgets/base-widget.js`** - Abstract base class for all widgets
+
+### Widget Component Files
+- **`src/modules/widgets/rating-widget.js`** - Star rating component
+- **`src/modules/widgets/date-widget.js`** - Date picker component
+- **`src/modules/widgets/file-upload-widget.js`** - File upload with preview
+- **`src/modules/widgets/input-widget.js`** - Text input with validation
+- **`src/modules/widgets/select-widget.js`** - Dropdown selection component
+
+### Build and Test Files
+- **`scripts/build.js`** - ESBuild configuration for bundling
+- **`playwright.config.ts`** - End-to-end test configuration
+- **`demo/server.js`** - Demo API server for testing
+- **`package.json`** - Project dependencies and scripts
+
+## API Integration Points
+
+### Server Endpoints Required
+
+#### Handshake Endpoint
+```
+POST /api/handshake (CORS)
+GET /api/handshake?callback=cb (JSONP)
+Request: { type: 'handshake', timestamp: 1234567890 }
+Response: { status: 'success', session_key: 'abc123...' }
+```
+
+#### Messages Endpoint
+```
+POST /api/messages (CORS)
+GET /api/messages?callback=cb&message=... (JSONP)
+Request: { type: 'message', message: '...', session_key: '...', timestamp: 1234567890 }
+Response: { text: 'Response', sender: 'bot', widget: {...} }
+```
+
+#### WebSocket Messages
+```
+Client → Server: { type: 'handshake|message|typing|read_receipt', payload: {...}, session_key: '...', timestamp: 1234567890 }
+Server → Client: { type: 'handshake|message|typing|read_receipt', text: '...', widget: {...}, session_key: '...', timestamp: 1234567890 }
+```
+
+### Client-Side API
+```javascript
+// Global API
+window.ChatUI.init(config)
+window.createChatWidget(scriptElement)
+
+// Widget Instance Methods
+chat.open()
+chat.close()
+chat.toggle()
+chat.sendMessage(text, data)
+chat.addWidget(type, config)
+chat.getConfig()
+chat.updateConfig(newConfig)
+```
+
+## Configuration Schema
+
+### Core Configuration
+```javascript
+{
+    serverUrl: 'https://api.example.com',    // Required
+    id: 'chat-widget',                       // Widget ID
+    title: 'Chat with us',                   // Header title
+    color: '#007bff',                        // Primary color
+    position: 'bottom-right',                // Corner position
+    displayMode: 'popup',                    // popup|fullpage
+    themeMode: 'light',                      // light|dark|auto
+    width: '380px',                          // Widget width
+    height: '600px',                         // Widget height
+    targetSelector: null,                    // Container for fullpage mode
+}
+```
+
+### Communication Configuration
+```javascript
+{
+    preferJsonP: false,                      // Force JSONP mode
+    forceJsonP: false,                        // JSONP only, no CORS
+    timeout: 5000,                           // Request timeout (ms)
+    autoReconnect: true,                      // Auto-reconnect WebSocket
+    reconnectDelay: 1000,                    // Reconnection delay (ms)
+    headers: {},                             // Custom headers
+}
+```
+
+### UI Configuration
+```javascript
+{
+    zIndex: 9999,                            // Widget z-index
+    showHeader: true,                        // Show header bar
+    showFooter: true,                        // Show footer area
+    autoOpen: false,                         // Auto-open on load
+    placeholder: 'Type a message...',        // Input placeholder
+    customCSS: '',                           // Custom CSS styles
+}
+```
+
+## Widget System
+
+### Available Widget Types
+- **Input Widgets**: input, textarea, password
+- **Selection Widgets**: select, radio, checkbox, toggle
+- **Interactive Widgets**: rating, date, color-picker, slider, tags
+- **Action Widgets**: buttons, confirmation, file-upload
+- **Display Widgets**: text, card, progress, container
+- **Advanced Widgets**: conditional, list, buttons (enhanced)
+
+### Advanced Widget Features
+- **Conditional Widget**: Dynamic content rendering based on complex conditions
+- **List Widget**: Dynamic lists with multiple layouts, selection, and custom templates
+- **Buttons Widget**: Enhanced buttons with variants, icons, loading states
+- **Container Widget**: Flexible layout containers with responsive design
+- **Card Widget**: Structured content display with media and actions
+
+### Widget Composition Patterns
+- **Nested Containers**: Container widgets can contain other containers
+- **Conditional Logic**: Conditional widgets can show/hide based on user input
+- **Dynamic Lists**: List widgets support real-time updates and filtering
+- **Form Patterns**: Combination of input widgets with validation and submission
+
+### Widget Configuration Pattern
+```javascript
+{
+    type: 'rating',
+    config: {
+        max: 5,
+        required: true,
+        onChange: (value) => console.log(value),
+        onSubmit: (value) => submitRating(value)
+    }
+}
+```
+
+### Custom Widget Development
+```javascript
+class CustomWidget extends BaseWidget {
+    static get type() { return 'custom'; }
+    
+    render() {
+        this.element = this.createElement('div', 'custom-widget');
+        // Custom rendering logic
+        return this.element;
+    }
+    
+    getValue() {
+        // Return current value
+        return this.value;
+    }
+    
+    validate() {
+        // Validation logic
+        return this.value !== null;
+    }
+}
+
+WidgetFactory.register('custom', CustomWidget);
+```
+
+## Event System
+
+### Global Events
+```javascript
+// Widget lifecycle
+window.addEventListener('chatwidget:ready', (e) => {});
+window.addEventListener('chatwidget:open', (e) => {});
+window.addEventListener('chatwidget:close', (e) => {});
+
+// Communication
+window.addEventListener('chatwidget:connected', (e) => {});
+window.addEventListener('chatwidget:disconnected', (e) => {});
+window.addEventListener('chatwidget:message', (e) => {});
+
+// Widget interactions
+window.addEventListener('chatwidget:widget:created', (e) => {});
+window.addEventListener('chatwidget:widget:submitted', (e) => {});
+```
+
+### Internal Events
+```javascript
+// API events
+this.api.on('connected', () => {});
+this.api.on('message', (message) => {});
+this.api.on('error', (error) => {});
+
+// UI events
+this.ui.on('send_requested', () => {});
+this.ui.on('close_requested', () => {});
+
+// Widget events
+this.widget.on('change', (value) => {});
+this.widget.on('submit', (value) => {});
+```
+
+## Development Workflow
+
+### Build Process
+```bash
+npm run build          # Build distribution files
+npm run start:demo     # Start demo server
+npm test               # Run Playwright tests
+npm run test:ui        # Run tests with UI
+npm run test:debug     # Debug tests
+```
+
+### Testing Strategy
+- **Unit Tests**: Widget validation and behavior
+- **Integration Tests**: API communication and data flow
+- **E2E Tests**: Complete user workflows with Playwright
+- **Accessibility Tests**: Screen reader and keyboard navigation
+- **Performance Tests**: Bundle size and runtime performance
+
+### Code Organization Principles
+- **Single Responsibility**: Each module has one clear purpose
+- **Dependency Injection**: Configuration passed to constructors
+- **Event-Driven**: Loose coupling through events
+- **Transport Agnostic**: Abstract communication layer
+- **Widget Factory**: Dynamic component creation
+- **Theme System**: CSS custom properties for styling
+
+## Security Considerations
+
+### XSS Prevention
+- Input sanitization with `escapeHtml()` utility
+- Safe HTML generation and DOM manipulation
+- Scoped CSS with `#chat-widget` prefix
+- JSONP callback validation
+
+### CORS Security
+- Proper header validation
+- Origin checking for WebSocket connections
+- Timeout protection for hanging requests
+- Automatic fallback to JSONP when needed
+
+### Data Validation
+- Server-side validation for all inputs
+- Client-side validation for immediate feedback
+- Widget configuration validation
+- Message format validation
+
+## Performance Optimizations
+
+### Bundle Size
+- **Tree shaking** for unused widgets
+- **Conditional loading** of components
+- **Minification** with ESBuild
+- **Gzip compression** for deployment
+
+### Runtime Performance
+- **Event delegation** for efficient DOM handling
+- **RequestAnimationFrame** for smooth animations
+- **Debouncing** for frequent events
+- **Virtual scrolling** for long message lists
+
+### Memory Management
+- **Proper cleanup** in destroy() methods
+- **Event listener removal** to prevent leaks
+- **Widget pooling** for frequently used components
+- **Reference clearing** for garbage collection
+
+## Browser Compatibility
+
+### Modern Browsers (Full Support)
+- Chrome 60+
+- Firefox 55+
+- Safari 12+
+- Edge 79+
+
+### Legacy Support
+- **IE 11**: Limited support with polyfills
+- **Older browsers**: JSONP fallback for CORS issues
+- **Mobile browsers**: Responsive design and touch support
+
+### Polyfills Used
+- `requestAnimationFrame` for animations
+- `URL` constructor for validation
+- `CustomEvent` for event system
+- `Promise` for async operations
+
+## Integration Examples
+
+### Basic HTML Integration
+```html
+<script 
+  id="chat-widget"
+  src="chat-widget.js"
+  data-server-url="https://api.example.com"
+  data-position="bottom-right"
+  data-color="#007bff"
+  data-title="Chat with us">
+</script>
+```
+
+### Programmatic Integration
+```javascript
+const chat = ChatUI.init({
+    serverUrl: 'https://api.example.com',
+    title: 'Support Chat',
+    color: '#28a745',
+    position: 'bottom-left',
+    onMessage: (message) => console.log('New message:', message)
+});
+
+chat.open();
+chat.sendMessage('Hello, I need help!');
+```
+
+### Custom Widget Integration
+```javascript
+// Add custom widget
+chat.addWidget('rating', {
+    max: 5,
+    required: true,
+    onSubmit: (rating) => {
+        console.log('User rated:', rating);
+        chat.sendMessage(`Rating: ${rating}`);
+    }
+});
+
+// Listen for widget events
+window.addEventListener('chatwidget:widget:submitted', (e) => {
+    const { widgetId, data } = e.detail;
+    console.log(`Widget ${widgetId} submitted:`, data);
+});
+```
+
+## Troubleshooting Common Issues
+
+### Widget Not Appearing
+- Check script tag has `id="chat-widget"`
+- Verify script path is correct
+- Ensure no JavaScript errors in console
+- Check CSS conflicts with scoped styles
+
+### Connection Issues
+- Verify `serverUrl` is correct and accessible
+- Check CORS headers on server
+- Try JSONP mode for legacy servers
+- Test WebSocket endpoint separately
+
+### Styling Issues
+- Use scoped CSS with `#chat-widget` prefix
+- Check CSS specificity conflicts
+- Verify color format (hex codes)
+- Test responsive breakpoints
+
+### Widget Issues
+- Check widget type is registered
+- Validate widget configuration
+- Ensure required methods are implemented
+- Test widget validation logic
+
+This context provides comprehensive understanding of the ChatUI codebase for LLM consumption, covering architecture, implementation details, integration patterns, and troubleshooting guidance.

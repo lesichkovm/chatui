@@ -30,7 +30,11 @@ export const WIDGET_TYPES = {
   ICON: 'icon',
   BUTTON: 'button',
   ROW: 'row',
-  COLUMN: 'column'
+  COLUMN: 'column',
+  
+  // Advanced composition widget types
+  CONDITIONAL: 'conditional',
+  LIST: 'list'
 };
 
 // Legacy type mappings for backward compatibility

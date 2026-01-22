@@ -89,11 +89,12 @@ export class LegacyAPI {
   }
 
   /**
-   * Get the stored session key from sessionStorage (more secure than localStorage)
-   * @returns {string} The session key or empty string if not found
+   * Get the stored session key from sessionStorage
+   * @returns {string} The stored session key or empty string
    */
   getSessionKey() {
-    return sessionStorage.getItem("chat_session_key") || "";
+    return (typeof sessionStorage !== 'undefined') ? 
+           sessionStorage.getItem("chat_session_key") || "" : "";
   }
 
   /**
@@ -101,7 +102,9 @@ export class LegacyAPI {
    * @param {string} key - The session key to store
    */
   setSessionKey(key) {
-    sessionStorage.setItem("chat_session_key", key);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem("chat_session_key", key);
+    }
   }
 
   /**
