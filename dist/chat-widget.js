@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-22T20:56:40.788Z
+ * Generated on: 2026-01-22T21:01:19.734Z
  */
 
 
@@ -7544,6 +7544,17 @@
         () => {
           console.log("ChatWidget: Handshake successful");
           this.clearError();
+          this.api.connect(
+            // Message callback
+            (text, sender, widgetData) => this.addMessage(text, sender, widgetData),
+            // Error callback
+            (error) => {
+              console.error("ChatWidget: Connection failed", error);
+              this.showError(
+                "Connection to server lost. Attempting to reconnect..."
+              );
+            }
+          );
         },
         // Error callback
         (error) => {
@@ -7551,15 +7562,6 @@
           this.showError(
             "Failed to connect to chat server. Some features may not work."
           );
-        }
-      );
-      this.api.connect(
-        // Message callback
-        (text, sender, widgetData) => this.addMessage(text, sender, widgetData),
-        // Error callback
-        (error) => {
-          console.error("ChatWidget: Connection failed", error);
-          this.showError("Connection to server lost. Attempting to reconnect...");
         }
       );
     }

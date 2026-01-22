@@ -161,6 +161,20 @@ export class ChatWidget {
       () => {
         console.log("ChatWidget: Handshake successful");
         this.clearError();
+
+        // Connect with error handling after successful handshake
+        this.api.connect(
+          // Message callback
+          (text, sender, widgetData) =>
+            this.addMessage(text, sender, widgetData),
+          // Error callback
+          (error) => {
+            console.error("ChatWidget: Connection failed", error);
+            this.showError(
+              "Connection to server lost. Attempting to reconnect...",
+            );
+          },
+        );
       },
       // Error callback
       (error) => {
@@ -168,17 +182,6 @@ export class ChatWidget {
         this.showError(
           "Failed to connect to chat server. Some features may not work.",
         );
-      },
-    );
-
-    // Connect with error handling
-    this.api.connect(
-      // Message callback
-      (text, sender, widgetData) => this.addMessage(text, sender, widgetData),
-      // Error callback
-      (error) => {
-        console.error("ChatWidget: Connection failed", error);
-        this.showError("Connection to server lost. Attempting to reconnect...");
       },
     );
   }
