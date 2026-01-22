@@ -1,6 +1,30 @@
+---
+path: composition-recipes.md
+page-type: tutorial
+summary: Practical examples and patterns for composing widgets using the ChatUI widget system.
+tags: [tutorial, composition, patterns, widgets, examples]
+created: 2026-01-22
+updated: 2026-01-22
+version: 2.0.0
+---
+
 # Composition Recipes
 
-This guide provides practical examples and patterns for composing widgets using the ChatUI widget system.
+This guide shows how to build complex experiences using the **composable widget schema**. Every recipe uses the current widget format:
+
+```json
+{
+  "type": "container",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    { "type": "text", "props": { "content": "Hello", "format": "plain" } }
+  ]
+}
+```
+
+> **Note:** Widgets are nested via `children`. Widget configuration is always inside `props`.
+
+---
 
 ## Table of Contents
 
@@ -10,642 +34,417 @@ This guide provides practical examples and patterns for composing widgets using 
 4. [Form Patterns](#form-patterns)
 5. [Data Display](#data-display)
 6. [Interactive Workflows](#interactive-workflows)
+7. [Responsive Layouts](#responsive-layouts)
+
+---
 
 ## Basic Composition
 
-### Container with Text and Button
+### Container with Text and Buttons
 
-```javascript
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'medium',
-    children: [
-      {
-        type: 'text',
-        props: {
-          content: 'Welcome to our application!',
-          format: 'plain'
-        }
-      },
-      {
-        type: 'button',
-        props: {
-          label: 'Get Started',
-          variant: 'primary',
-          size: 'large'
-        }
+  "type": "container",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    {
+      "type": "text",
+      "props": { "content": "Welcome to our application!", "format": "plain" }
+    },
+    {
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "start", "text": "Get Started", "value": "start" },
+          { "id": "learn", "text": "Learn More", "value": "learn" }
+        ]
       }
-    ]
-  }
+    }
+  ]
 }
 ```
 
-### Card with Multiple Widgets
+### Card with Nested Widgets
 
-```javascript
+```json
 {
-  type: 'card',
-  props: {
-    variant: 'default',
-    padding: 'medium',
-    children: [
-      {
-        type: 'text',
-        props: {
-          content: '**User Profile**',
-          format: 'markdown'
+  "type": "card",
+  "props": { "variant": "default", "padding": "medium" },
+  "children": [
+    {
+      "type": "text",
+      "props": { "content": "**User Profile**", "format": "markdown" }
+    },
+    {
+      "type": "container",
+      "props": { "layout": "vertical", "gap": "small" },
+      "children": [
+        {
+          "type": "input",
+          "props": {
+            "placeholder": "Enter your name",
+            "showSubmitButton": true,
+            "buttonText": "Save"
+          }
+        },
+        {
+          "type": "textarea",
+          "props": {
+            "placeholder": "Enter your bio",
+            "showSubmitButton": true,
+            "buttonText": "Update Bio"
+          }
         }
-      },
-      {
-        type: 'container',
-        props: {
-          layout: 'vertical',
-          gap: 'small',
-          children: [
-            {
-              type: 'input',
-              props: {
-                type: 'text',
-                placeholder: 'Enter your name',
-                buttonText: 'Save',
-                variant: 'secondary'
-              }
-            },
-            {
-              type: 'textarea',
-              props: {
-                placeholder: 'Enter your bio',
-                buttonText: 'Update Bio',
-                variant: 'primary'
-              }
-            }
-          ]
-        }
-      }
-    ]
-  }
+      ]
+    }
+  ]
 }
 ```
+
+---
 
 ## Conditional Logic
 
 ### Show/Hide Based on User Input
 
-```javascript
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'medium',
-    children: [
-      {
-        type: 'input',
-        props: {
-          type: 'text',
-          placeholder: 'Enter "admin" to see advanced options',
-          buttonText: 'Submit'
-        }
-      },
-      {
-        type: 'conditional',
-        props: {
-          condition: 'showIf:value',
-          children: [
-            {
-              type: 'text',
-              props: {
-                content: '**Admin Panel**\nAdvanced settings available',
-                format: 'markdown'
-              }
-            },
-            {
-              type: 'toggle',
-              props: {
-                label: 'Enable debug mode',
-                buttonText: 'Apply'
-              }
+  "type": "container",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    {
+      "type": "input",
+      "props": {
+        "placeholder": "Enter \"admin\" to see advanced options",
+        "showSubmitButton": true,
+        "buttonText": "Submit"
+      }
+    },
+    {
+      "type": "conditional",
+      "props": {
+        "condition": "showIf:value",
+        "children": [
+          {
+            "type": "text",
+            "props": {
+              "content": "**Admin Panel**\\nAdvanced settings available",
+              "format": "markdown"
             }
-          ],
-          fallback: {
-            type: 'text',
-            props: {
-              content: '_Admin access required_',
-              format: 'markdown'
-            }
+          },
+          {
+            "type": "toggle",
+            "props": { "label": "Enable debug mode" }
           }
+        ],
+        "fallback": {
+          "type": "text",
+          "props": { "content": "_Admin access required_", "format": "markdown" }
         }
       }
-    ]
-  }
+    }
+  ]
 }
 ```
 
 ### Complex Conditions
 
-```javascript
+```json
 {
-  type: 'conditional',
-  props: {
-    condition: {
-      operator: 'and',
-      conditions: [
-        'showIf:userRole',
-        { operator: 'greaterThan', key: 'userLevel', value: 5 }
+  "type": "conditional",
+  "props": {
+    "condition": {
+      "operator": "and",
+      "conditions": [
+        "showIf:userRole",
+        { "operator": "greaterThan", "key": "userLevel", "value": 5 }
       ]
     },
-    children: [
+    "children": [
       {
-        type: 'text',
-        props: {
-          content: 'Premium features unlocked!',
-          format: 'plain'
-        }
+        "type": "text",
+        "props": { "content": "Premium features unlocked!", "format": "plain" }
       }
     ]
   }
 }
 ```
+
+---
 
 ## Dynamic Lists
 
-### Simple Item List
+### Simple Vertical List
 
-```javascript
+```json
 {
-  type: 'list',
-  props: {
-    header: 'Task List',
-    layout: 'vertical',
-    selectable: true,
-    items: [
-      { id: 1, title: 'Complete project', status: 'pending' },
-      { id: 2, title: 'Review code', status: 'in-progress' },
-      { id: 3, title: 'Deploy to production', status: 'completed' }
+  "type": "list",
+  "props": {
+    "header": "Task List",
+    "layout": "vertical",
+    "selectable": true,
+    "items": [
+      { "id": 1, "title": "Complete project", "status": "pending" },
+      { "id": 2, "title": "Review code", "status": "in-progress" },
+      { "id": 3, "title": "Deploy to production", "status": "completed" }
     ],
-    itemTemplate: {
-      type: 'text',
-      text: '{{title}} - {{status}}'
+    "itemTemplate": {
+      "type": "text",
+      "props": { "content": "{{title}} - {{status}}", "format": "plain" }
     },
-    actions: [
-      {
-        text: 'Complete Selected',
-        variant: 'primary',
-        action: 'complete'
-      }
+    "actions": [
+      { "text": "Complete Selected", "variant": "primary", "action": "complete" }
     ]
   }
 }
 ```
 
-### Card-based List
+### Card Grid List
 
-```javascript
+```json
 {
-  type: 'list',
-  props: {
-    header: 'Product Catalog',
-    layout: 'grid',
-    selectable: true,
-    multiSelect: true,
-    items: [
-      { id: 1, name: 'Widget Pro', price: '$99', description: 'Advanced widget tool' },
-      { id: 2, name: 'Widget Lite', price: '$49', description: 'Basic widget tool' },
-      { id: 3, name: 'Widget Enterprise', price: '$299', description: 'Full-featured solution' }
+  "type": "list",
+  "props": {
+    "header": "Product Catalog",
+    "layout": "grid",
+    "selectable": true,
+    "multiSelect": true,
+    "items": [
+      { "id": 1, "name": "Widget Pro", "price": "$99", "description": "Advanced widget tool" },
+      { "id": 2, "name": "Widget Lite", "price": "$49", "description": "Basic widget tool" },
+      { "id": 3, "name": "Widget Enterprise", "price": "$299", "description": "Full-featured solution" }
     ],
-    itemTemplate: {
-      type: 'card',
-      title: '{{name}}',
-      subtitle: '{{price}}',
-      description: '{{description}}'
-    },
-    actions: [
-      {
-        text: 'Add to Cart',
-        variant: 'primary',
-        action: 'addToCart'
-      },
-      {
-        text: 'Compare',
-        variant: 'secondary',
-        action: 'compare'
+    "itemTemplate": {
+      "type": "card",
+      "props": {
+        "title": "{{name}}",
+        "subtitle": "{{price}}",
+        "description": "{{description}}"
       }
+    },
+    "actions": [
+      { "text": "Add to Cart", "variant": "primary", "action": "addToCart" },
+      { "text": "Compare", "variant": "secondary", "action": "compare" }
     ]
   }
 }
 ```
 
-### Custom List Rendering
-
-```javascript
-{
-  type: 'list',
-  props: {
-    header: 'Custom Items',
-    layout: 'horizontal',
-    items: [
-      { id: 1, color: '#ff0000', label: 'Red' },
-      { id: 2, color: '#00ff00', label: 'Green' },
-      { id: 3, color: '#0000ff', label: 'Blue' }
-    ],
-    itemTemplate: {
-      type: 'custom',
-      render: (item) => {
-        const div = document.createElement('div');
-        div.style.display = 'flex';
-        div.style.alignItems = 'center';
-        div.style.gap = '8px';
-        
-        const colorBox = document.createElement('div');
-        colorBox.style.width = '20px';
-        colorBox.style.height = '20px';
-        colorBox.style.backgroundColor = item.color;
-        colorBox.style.borderRadius = '4px';
-        
-        const label = document.createElement('span');
-        label.textContent = item.label;
-        
-        div.appendChild(colorBox);
-        div.appendChild(label);
-        
-        return div;
-      }
-    }
-  }
-}
-```
+---
 
 ## Form Patterns
 
-### Multi-step Form
+### Simple Contact Form (Form Widget)
 
-```javascript
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'large',
-    children: [
-      {
-        type: 'text',
-        props: {
-          content: '## Step 1: Personal Information',
-          format: 'markdown'
-        }
-      },
-      {
-        type: 'container',
-        props: {
-          layout: 'vertical',
-          gap: 'medium',
-          children: [
-            {
-              type: 'input',
-              props: {
-                type: 'text',
-                placeholder: 'First Name',
-                buttonText: 'Next',
-                variant: 'primary'
-              }
-            },
-            {
-              type: 'input',
-              props: {
-                type: 'text',
-                placeholder: 'Last Name',
-                buttonText: 'Next',
-                variant: 'primary'
-              }
-            }
-          ]
-        }
-      },
-      {
-        type: 'conditional',
-        props: {
-          condition: 'showIf:firstName',
-          children: [
-            {
-              type: 'text',
-              props: {
-                content: '## Step 2: Contact Information',
-                format: 'markdown'
-              }
-            },
-            {
-              type: 'input',
-              props: {
-                type: 'email',
-                placeholder: 'Email Address',
-                buttonText: 'Next',
-                variant: 'primary'
-              }
-            }
-          ]
-        }
+  "type": "form",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    {
+      "type": "input",
+      "props": {
+        "placeholder": "Enter your name",
+        "required": true
       }
-    ]
-  }
+    },
+    {
+      "type": "input",
+      "props": {
+        "type": "email",
+        "placeholder": "Enter your email",
+        "required": true
+      }
+    },
+    {
+      "type": "textarea",
+      "props": {
+        "placeholder": "Enter your message",
+        "rows": 4,
+        "required": true
+      }
+    },
+    {
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "submit", "text": "Send Message", "value": "submit" },
+          { "id": "cancel", "text": "Cancel", "value": "cancel" }
+        ]
+      }
+    }
+  ]
 }
 ```
 
-### Survey Form
+### Horizontal Grouping Inside a Form
 
-```javascript
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'medium',
-    children: [
-      {
-        type: 'text',
-        props: {
-          content: '## Customer Satisfaction Survey',
-          format: 'markdown'
-        }
-      },
-      {
-        type: 'rating',
-        props: {
-          label: 'How satisfied are you with our service?',
-          buttonText: 'Continue',
-          maxRating: 5
-        }
-      },
-      {
-        type: 'conditional',
-        props: {
-          condition: {
-            operator: 'lessThan',
-            key: 'rating',
-            value: 4
-          },
-          children: [
-            {
-              type: 'textarea',
-              props: {
-                placeholder: 'Please tell us how we can improve',
-                buttonText: 'Submit Feedback',
-                variant: 'primary'
-              }
-            }
-          ]
-        }
-      }
-    ]
-  }
+  "type": "form",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    {
+      "type": "container",
+      "props": { "layout": "horizontal", "gap": "medium" },
+      "children": [
+        { "type": "input", "props": { "placeholder": "First Name", "required": true } },
+        { "type": "input", "props": { "placeholder": "Last Name", "required": true } }
+      ]
+    },
+    {
+      "type": "buttons",
+      "props": { "options": [{ "id": "continue", "text": "Continue", "value": "continue" }] }
+    }
+  ]
 }
 ```
+
+---
 
 ## Data Display
 
-### User Dashboard
+### Summary Card with Progress
 
-```javascript
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'large',
-    children: [
-      {
-        type: 'card',
-        props: {
-          variant: 'default',
-          children: [
-            {
-              type: 'text',
-              props: {
-                content: '**User Statistics**',
-                format: 'markdown'
-              }
-            },
-            {
-              type: 'container',
-              props: {
-                layout: 'horizontal',
-                gap: 'medium',
-                children: [
-                  {
-                    type: 'progress',
-                    props: {
-                      label: 'Profile Completion',
-                      value: 75,
-                      max: 100,
-                      showPercentage: true
-                    }
-                  },
-                  {
-                    type: 'progress',
-                    props: {
-                      label: 'Activity Score',
-                      value: 850,
-                      max: 1000,
-                      showPercentage: true
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        type: 'list',
-        props: {
-          header: 'Recent Activity',
-          layout: 'vertical',
-          items: [
-            { id: 1, action: 'Logged in', time: '2 hours ago' },
-            { id: 2, action: 'Updated profile', time: '1 day ago' },
-            { id: 3, action: 'Completed task', time: '3 days ago' }
-          ],
-          itemTemplate: {
-            type: 'card',
-            title: '{{action}}',
-            subtitle: '{{time}}'
-          }
-        }
-      }
-    ]
-  }
-}
-```
-
-### Data Table Alternative
-
-```javascript
-{
-  type: 'list',
-  props: {
-    header: 'Sales Report',
-    layout: 'vertical',
-    selectable: true,
-    items: [
-      { id: 1, product: 'Widget A', sales: 1500, revenue: '$15,000', growth: '+12%' },
-      { id: 2, product: 'Widget B', sales: 2300, revenue: '$23,000', growth: '+8%' },
-      { id: 3, product: 'Widget C', sales: 980, revenue: '$9,800', growth: '-3%' }
-    ],
-    itemTemplate: {
-      type: 'custom',
-      render: (item) => {
-        const row = document.createElement('div');
-        row.style.display = 'grid';
-        row.style.gridTemplateColumns = '2fr 1fr 1fr 1fr';
-        row.style.gap = '12px';
-        row.style.padding = '8px';
-        row.style.borderBottom = '1px solid #eee';
-        
-        row.innerHTML = `
-          <div><strong>${item.product}</strong></div>
-          <div>${item.sales}</div>
-          <div>${item.revenue}</div>
-          <div style="color: ${item.growth.startsWith('+') ? 'green' : 'red'}">${item.growth}</div>
-        `;
-        
-        return row;
-      }
+  "type": "card",
+  "props": { "variant": "default", "padding": "medium" },
+  "children": [
+    {
+      "type": "text",
+      "props": { "content": "Onboarding Progress", "format": "plain" }
     },
-    actions: [
-      {
-        text: 'Export Data',
-        variant: 'primary',
-        action: 'export'
-      }
-    ]
-  }
+    {
+      "type": "progress",
+      "props": { "value": 60, "max": 100, "showPercentage": true }
+    },
+    {
+      "type": "text",
+      "props": { "content": "Step 3 of 5 completed", "format": "plain" }
+    }
+  ]
 }
 ```
+
+---
 
 ## Interactive Workflows
 
-### Wizard Flow
+### Rating + Follow‑up Feedback
 
-```javascript
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'large',
-    children: [
-      {
-        type: 'text',
-        props: {
-          content: '## Setup Wizard',
-          format: 'markdown'
-        }
-      },
-      {
-        type: 'conditional',
-        props: {
-          condition: 'showIf:step',
-          children: [
-            {
-              type: 'container',
-              props: {
-                layout: 'vertical',
-                gap: 'medium',
-                children: [
-                  {
-                    type: 'text',
-                    props: {
-                      content: '### Step 1: Choose Plan',
-                      format: 'markdown'
-                    }
-                  },
-                  {
-                    type: 'radio',
-                    props: {
-                      options: [
-                        { id: 'free', text: 'Free Plan', value: 'free' },
-                        { id: 'pro', text: 'Pro Plan ($10/month)', value: 'pro' },
-                        { id: 'enterprise', text: 'Enterprise Plan', value: 'enterprise' }
-                      ],
-                      buttonText: 'Continue'
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          fallback: {
-            type: 'button',
-            props: {
-              label: 'Start Setup',
-              variant: 'primary',
-              size: 'large'
+  "type": "container",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    {
+      "type": "rating",
+      "props": {
+        "label": "How satisfied are you?",
+        "maxRating": 5,
+        "showSubmitButton": true
+      }
+    },
+    {
+      "type": "conditional",
+      "props": {
+        "condition": { "operator": "lessThan", "key": "rating", "value": 4 },
+        "children": [
+          {
+            "type": "textarea",
+            "props": {
+              "placeholder": "What could we improve?",
+              "rows": 3,
+              "showSubmitButton": true
             }
           }
-        }
+        ]
       }
-    ]
-  }
+    }
+  ]
 }
 ```
 
-### Dynamic Content Based on Selection
+### Multi‑Step Wizard
 
-```javascript
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'medium',
-    children: [
-      {
-        type: 'select',
-        props: {
-          placeholder: 'Choose a category',
-          options: [
-            { id: 'tech', text: 'Technology', value: 'tech' },
-            { id: 'art', text: 'Art & Design', value: 'art' },
-            { id: 'music', text: 'Music', value: 'music' }
-          ]
-        }
-      },
-      {
-        type: 'conditional',
-        props: {
-          condition: 'value',
-          children: [
-            {
-              type: 'list',
-              props: {
-                header: 'Recommended Items',
-                layout: 'horizontal',
-                selectable: true,
-                items: [], // This would be populated based on the selection
-                itemTemplate: {
-                  type: 'card',
-                  title: '{{name}}',
-                  subtitle: '{{category}}'
-                }
-              }
-            }
-          ]
-        }
+  "type": "container",
+  "props": { "layout": "vertical", "gap": "large" },
+  "children": [
+    {
+      "type": "text",
+      "props": { "content": "## Step 1: Basics", "format": "markdown" }
+    },
+    {
+      "type": "input",
+      "props": { "placeholder": "Product Name", "required": true }
+    },
+    {
+      "type": "select",
+      "props": {
+        "placeholder": "Product Category",
+        "options": [
+          { "id": "electronics", "text": "Electronics", "value": "electronics" },
+          { "id": "books", "text": "Books", "value": "books" },
+          { "id": "home", "text": "Home & Garden", "value": "home" }
+        ]
       }
-    ]
-  }
+    },
+    {
+      "type": "buttons",
+      "props": { "options": [{ "id": "next", "text": "Next Step →", "value": "next" }] }
+    }
+  ]
 }
 ```
 
-## Best Practices
+---
 
-1. **Use meaningful container names** - Organize related widgets in logical containers
-2. **Leverage conditional logic** - Show/hide content based on user interactions
-3. **Choose appropriate layouts** - Use vertical for forms, horizontal for options, grid for cards
-4. **Provide fallbacks** - Always include fallback content for conditional widgets
-5. **Keep templates simple** - Use clear, readable template strings
-6. **Handle loading states** - Use conditional widgets to show loading indicators
-7. **Test interactions** - Ensure all widget interactions work as expected in compositions
+## Responsive Layouts
 
-## Advanced Tips
+### Two-Column Grid in a Card
 
-- **Nested conditionals**: Use conditional widgets inside other conditional widgets for complex logic
-- **Dynamic list updates**: Use the `updateItems()` method to refresh list content
-- **State management**: Leverage the conditional widget's state system for complex workflows
-- **Custom rendering**: Use custom list item templates for unique display requirements
-- **Performance**: Avoid deeply nested compositions when possible for better performance
+```json
+{
+  "type": "card",
+  "props": { "padding": "medium" },
+  "children": [
+    {
+      "type": "container",
+      "props": {
+        "layout": "grid",
+        "columns": 2,
+        "gap": "medium"
+      },
+      "children": [
+        { "type": "input", "props": { "placeholder": "City" } },
+        { "type": "input", "props": { "placeholder": "Postal Code" } },
+        { "type": "select", "props": { "placeholder": "Country", "options": [
+          { "id": "us", "text": "United States", "value": "US" },
+          { "id": "uk", "text": "United Kingdom", "value": "UK" }
+        ]}}
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## Notes & Best Practices
+
+- Put all widget configuration inside `props`.
+- Use `children` only for widgets that compose other widgets (`container`, `card`, `form`, `conditional`, `list` templates).
+- Prefer **composable widgets** in server responses (use `widgets` array).
+- For form submissions, include a `buttons` widget inside a `form` container.
+- Keep labels and text in `text` widgets (not in container props).
+
+---
+
+## See Also
+
+- `docs/widget-system.md`
+- `docs/form-composition-examples.md`
+- `docs/backend-integration-guide.md`

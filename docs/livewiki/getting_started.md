@@ -5,233 +5,219 @@ summary: Step-by-step guide for setting up and integrating the ChatUI widget.
 tags: [tutorial, setup, installation, integration]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Getting Started
 
-This guide will help you integrate the ChatUI widget into your web application in minutes.
+This guide helps you integrate the ChatUI widget in minutes. It covers the recommended script-tag setup, programmatic initialization, transport selection, and basic customization.
 
 ## Prerequisites
 
 - A web server or hosting environment
 - Basic HTML/JavaScript knowledge
-- A chat backend API (optional for testing)
+- A backend endpoint for the chat API (optional for static demos)
 
-## Installation
+---
 
-### 1. Include the Widget
+## 1) Include the Widget Bundle
 
-Download the built widget file and include it in your HTML:
+Add the built bundle to your page:
 
 ```html
-<script src="path/to/chat-widget.js"></script>
+<script src="dist/chat-widget.min.js"></script>
 ```
 
-### 2. Basic HTML Integration
+---
 
-The simplest way to use ChatUI is through HTML data attributes:
+## 2) Auto‑Initialize via Script Tag (Recommended)
+
+ChatUI auto-initializes any script tag whose `id` starts with `chat-widget`.
 
 ```html
-<script 
+<script
   id="chat-widget"
-  src="path/to/chat-widget.js"
+  src="dist/chat-widget.min.js"
   data-server-url="https://your-server.com"
   data-position="bottom-right"
-  data-color="#007bff"
   data-title="Chat with us">
 </script>
 ```
 
-The widget will automatically initialize when the page loads.
+### Display Modes
 
-## Configuration Options
-
-### Required Attributes
-
-| Attribute | Description | Example |
-|-----------|-------------|---------|
-| `data-server-url` | Your chat backend URL | `https://api.example.com` |
-
-### Optional Attributes
-
-| Attribute | Description | Default | Example |
-|-----------|-------------|---------|---------|
-| `data-position` | Widget position | `bottom-right` | `bottom-left` |
-| `data-color` | Primary theme color | `#007bff` | `#28a745` |
-| `data-title` | Header title | `Chat with us` | `Support Chat` |
-| `data-display` | Display mode | `popup` | `fullpage` |
-| `data-mode` | Theme mode | `light` | `dark` |
-| `data-prefer-jsonp` | Force JSONP mode | `false` | `true` |
-
-## Communication Modes
-
-### CORS Mode (Default)
-Modern HTTP/HTTPS communication using fetch API:
-
+**Popup (default):**
 ```html
-<script 
+<script
   id="chat-widget"
-  src="path/to/chat-widget.js"
-  data-server-url="https://your-server.com">
-</script>
-```
-
-### WebSocket Mode
-Real-time bidirectional communication:
-
-```html
-<script 
-  id="chat-widget"
-  src="path/to/chat-widget.js"
-  data-server-url="wss://your-server.com/ws">
-</script>
-```
-
-### JSONP Mode (Legacy)
-For older servers that don't support CORS:
-
-```html
-<script 
-  id="chat-widget"
-  src="path/to/chat-widget.js"
-  data-server-url="http://your-server.com"
-  data-prefer-jsonp="true">
-</script>
-```
-
-## Programmatic API
-
-For more control, use the JavaScript API:
-
-```javascript
-// Initialize the widget
-const chat = ChatUI.init({
-  id: 'custom-chat',
-  title: 'Support Chat',
-  color: '#28a745',
-  position: 'bottom-left',
-  serverUrl: 'http://localhost:3000'
-});
-
-// Control the widget
-chat.open();
-chat.close();
-chat.toggle();
-chat.sendMessage('Hello from the API!');
-
-// Listen for events
-window.addEventListener('chatwidget:message', (event) => {
-  console.log('New message:', event.detail);
-});
-```
-
-## Display Modes
-
-### Popup Mode (Default)
-The widget appears as a floating bubble in the corner of the page:
-
-```html
-<script 
-  id="chat-widget"
-  src="path/to/chat-widget.js"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
   data-display="popup"
   data-position="bottom-right">
 </script>
 ```
 
-### Fullpage Mode
-The widget fills a container element:
-
+**Fullpage (embedded):**
 ```html
 <div id="chat-container"></div>
 
-<script 
+<script
   id="chat-widget"
-  src="path/to/chat-widget.js"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
   data-display="fullpage"
   data-target="#chat-container">
 </script>
 ```
 
-## CSS Customization
+---
 
-The widget uses scoped CSS to avoid conflicts with your site. Customize it with CSS:
+## 3) Programmatic Initialization
 
-```css
-/* Override header colors */
-#chat-widget .header {
-    background-color: #333;
-    color: #fff;
-}
+Use the global `ChatUI` API:
 
-/* Adjust message bubbles */
-#chat-widget .message {
-    font-size: 16px;
-}
+```javascript
+const chat = ChatUI.init({
+  id: "support-chat",
+  title: "Support Chat",
+  position: "bottom-left",
+  color: "#28a745",
+  serverUrl: "https://your-server.com"
+});
 
-/* Custom widget positioning */
-#chat-widget.chat-widget.bottom-right {
-    bottom: 20px;
-    right: 20px;
+chat.open();
+```
+
+---
+
+## Transport Selection
+
+ChatUI selects transport based on `serverUrl` protocol:
+
+- `wss://` or `ws://` → **WebSocket**
+- `https://` or `http://` → **CORS (fetch)** with **JSONP fallback** on CORS/network errors
+
+### Examples
+
+**WebSocket:**
+```html
+<script
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="wss://your-server.com/ws">
+</script>
+```
+
+**CORS (default):**
+```html
+<script
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com">
+</script>
+```
+
+---
+
+## Theme Basics
+
+ChatUI supports `default` and `branded` themes, with light/dark modes.
+
+```html
+<script
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
+  data-theme="default"
+  data-theme-mode="dark">
+</script>
+```
+
+### Custom Colors (Mode-Specific)
+
+```html
+<script
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
+  data-theme="default"
+  data-theme-mode="light"
+  data-color-light="#ff6b6b"
+  data-bg-color-light="#ffffff"
+  data-surface-color-light="#ffe5e5"
+  data-text-color-light="#2d2d2d"
+  data-border-color-light="#ffcccc">
+</script>
+```
+
+> `data-theme-mode` is preferred. `data-mode` is supported for legacy compatibility.
+
+---
+
+## Message Formats (Backend Responses)
+
+### Preferred: Composable Widgets
+
+```json
+{
+  "status": "success",
+  "widgets": [
+    {
+      "type": "card",
+      "children": [
+        { "type": "text", "props": { "content": "Welcome!", "format": "plain" } },
+        {
+          "type": "buttons",
+          "props": {
+            "options": [
+              { "id": "start", "text": "Get Started", "value": "start" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
 }
 ```
 
-## Testing the Integration
+### Legacy (Still Supported)
 
-### 1. Use the Demo Server
-
-Start the included demo server:
-
-```bash
-npm run start:demo
+```json
+{
+  "text": "Choose an option",
+  "sender": "bot",
+  "widget": {
+    "type": "buttons",
+    "options": [
+      { "id": "opt1", "text": "Option 1", "value": "opt1" }
+    ]
+  }
+}
 ```
 
-Then open `demo/demo.html` in your browser.
+---
 
-### 2. Check Browser Console
-
-Open your browser's developer console and look for:
-
-- Initialization messages
-- API request/response logs
-- Any error messages
-
-### 3. Verify Network Requests
-
-Check the Network tab to ensure:
-
-- Handshake requests are successful
-- Message requests are being sent
-- WebSocket connections (if applicable)
-
-## Troubleshooting
+## Quick Troubleshooting
 
 ### Widget Not Appearing
-- Check that the script tag has `id="chat-widget"`
-- Verify the script path is correct
-- Ensure no JavaScript errors in console
+- Ensure the script tag has an `id` (e.g., `chat-widget`)
+- Verify the bundle path is correct
+- Check the browser console for errors
 
-### API Connection Issues
-- Verify the `data-server-url` is correct
-- Check CORS headers on your server
-- Try JSONP mode for legacy servers
+### Connection Issues
+- Verify `data-server-url` is reachable
+- Ensure correct protocol (`wss://` for WebSocket, `https://` for CORS)
+- If CORS fails, JSONP fallback is attempted automatically
 
-### Styling Conflicts
-- Use scoped CSS with `#chat-widget` prefix
-- Check for CSS specificity issues
-- Verify CSS reset isn't interfering
+### Theme Not Applying
+- Use `data-theme` (`default` or `branded`)
+- Use `data-theme-mode` (`light` or `dark`)
+
+---
 
 ## Next Steps
 
-- Read the [Architecture](architecture.md) guide for system design
-- Review the [API Reference](api_reference.md) for complete documentation
-- Check [Configuration](configuration.md) for all options
-- See [Development](development.md) for advanced customization
-
-## See Also
-
-- [Architecture](architecture.md) - System design overview
-- [API Reference](api_reference.md) - Complete API documentation
-- [Configuration](configuration.md) - All configuration options
-- [Troubleshooting](troubleshooting.md) - Common issues and solutions
+- **Configuration**: `docs/livewiki/configuration.md`
+- **API Reference**: `docs/livewiki/api_reference.md`
+- **Architecture**: `docs/livewiki/architecture.md`
+- **Widget System**: `docs/widget-system.md`

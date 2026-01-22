@@ -2,230 +2,368 @@
 
 ![Tests](https://github.com/lesichkovm/chatui/workflows/Tests/badge.svg)
 
-A professional, **ultra-lightweight (~12KB)**, API-agnostic chat UI widget built with **pure Vanilla JavaScript**. Zero framework lock-in (no React/Vue/jQuery), zero external dependencies, with **CORS-first communication** and automatic JSONP fallback for seamless cross-domain integration.
+A professional, ultra-lightweight, API-agnostic chat UI widget built with **pure Vanilla JavaScript**. No framework lock‑in, no external dependencies, and a transport layer that works over **WebSocket**, **CORS (fetch)**, and **JSONP fallback**.
 
-## URL
+---
 
-https://chatui.lesichkov.co.uk/
+## Quick Links
 
-## Strategic Position
+- **Website**: https://chatui.lesichkov.co.uk/
+- **Build Output**: `dist/chat-widget.js`, `dist/chat-widget.min.js`
+- **Source**: `src/`
 
-ChatUI provides the interactive power of a modern conversational UI without the performance overhead or technical complexity of framework-bound libraries. It is designed to be "live in 30 seconds" while remaining extensible enough for complex enterprise requirements.
+---
 
-## Target Markets
+## Highlights
 
-- **SMBs**: Professional chat with zero dev overhead.
-- **Enterprise Legacy Systems**: Modern interactivity without framework migrations.
-- **SaaS Platforms**: A lean, white-label frontend for proprietary backends.
+- **Pure Vanilla JS** (no React/Vue/jQuery)
+- **Composable Widget System** (nested widget trees, forms, cards, lists)
+- **Hybrid Transport** (WebSocket → CORS → JSONP fallback)
+- **Popup + Fullpage** display modes
+- **Theme System** with light/dark + CSS variables
+- **Security & Sanitization** for widget data and message rendering
+- **Programmatic API** for lifecycle and theme control
 
-## Features
+---
 
-- **Ultra-Lightweight**: ~12KB core footprint, minimal impact on host performance.
-- **Interactive Widget System**: Support for 15+ specialized UI components (Rating, Date Picker, File Upload, etc.).
-- **Zero Dependencies**: Pure vanilla JS, works with any stack.
-- **CORS-First Communication**: Modern fetch-based API with automatic JSONP fallback for legacy compatibility.
-- **Real-Time WebSocket Support**: Live typing indicators, read receipts, and streaming responses.
-- **Protocol-Based Transport**: Automatically uses WebSocket (ws/wss) or CORS/JSONP (http/https) based on server URL.
-- **Dual Modes**: Supports both `popup` and `fullpage` embedded modes.
-- **Modular Architecture**: Built with modern ES6 classes and a dedicated `WidgetFactory`.
-- **Accessible & Secure**: ARIA-compliant focus management and robust XSS prevention.
+## Installation
 
-## Installation & Usage
+### 1) Include the bundle
 
-### 1. HTML Integration (Auto-initialize)
-Add the script tag to your HTML. The widget will automatically initialize based on the data attributes.
-
-**CORS Mode (HTTP/HTTPS) - Default:**
 ```html
-<script 
+<script src="dist/chat-widget.min.js"></script>
+```
+
+### 2) Auto‑initialize via script tag
+
+```html
+<script
   id="chat-widget"
-  src="path/to/chat-widget.js"
+  src="dist/chat-widget.min.js"
   data-server-url="https://your-server.com"
   data-position="bottom-right"
-  data-color="#007bff"
   data-title="Chat with us">
 </script>
 ```
 
-**JSONP Mode (Legacy Fallback):**
-```html
-<script 
-  id="chat-widget"
-  src="path/to/chat-widget.js"
-  data-server-url="http://your-server.com"
-  data-prefer-jsonp="true"
-  data-position="bottom-right"
-  data-color="#007bff"
-  data-title="Chat with us">
-</script>
-
-**WebSocket Mode (WS/WSS):**
-```html
-<script 
-  id="chat-widget"
-  src="path/to/chat-widget.js"
-  data-server-url="wss://your-server.com/ws"
-  data-position="bottom-right"
-  data-color="#007bff"
-  data-title="Chat with us">
-</script>
-```
-
-### 2. Programmatic API
-You can initialize and control the widget manually using the global `ChatUI` object.
+### 3) Programmatic initialization
 
 ```javascript
-// Initialize the widget
 const chat = ChatUI.init({
-  id: 'custom-chat',
-  title: 'Support Chat',
-  color: '#28a745',
-  position: 'bottom-left',
-  serverUrl: 'http://localhost:3000'
+  id: "support-chat",
+  title: "Support Chat",
+  position: "bottom-left",
+  color: "#28a745",
+  serverUrl: "https://your-server.com"
 });
 
-// Control the widget
 chat.open();
-chat.close();
-chat.toggle();
-chat.sendMessage('Hello from the API!');
 ```
 
-## Configuration Options
+---
 
-| Attribute | JS Option | Description | Default |
-|-----------|-----------|-------------|---------|
-| `data-server-url` | `serverUrl` | Base URL for the chat backend API | `http://localhost:3000` |
-| `data-display` | `displayMode` | Display mode: `popup` or `fullpage` | `popup` |
-| `data-mode` | `themeMode` | Theme mode: `light` or `dark` | `light` |
-| `data-position` | `position` | Corner position: `bottom-right`, `bottom-left`, `top-right`, `top-left` | `bottom-right` |
-| `data-color` | `primaryColor` | Primary theme color (Hex code) | `#007bff` |
-| `data-title` | `title` | Title text displayed in the header | `Chat with us` |
-| `data-target` | `targetSelector` | Selector for container element (fullpage mode only) | `null` |
-| `data-prefer-jsonp` | `preferJsonP` | Force JSONP instead of CORS (legacy) | `false` |
-| `data-force-jsonp` | `forceJsonP` | Force JSONP only, no CORS fallback | `false` |
-| `data-timeout` | `timeout` | CORS request timeout in milliseconds | `5000` |
+## Configuration
 
-## CSS Customization
+### HTML Data Attributes
 
-The widget uses strictly ID-rooted CSS selectors to prevent affecting your site's styles. You can easily theme it by targeting its classes in your own CSS:
+| Attribute | Description | Default |
+|---|---|---|
+| `data-server-url` | Base URL for the backend API | `http://localhost:3000` |
+| `data-display` | `popup` or `fullpage` | `popup` |
+| `data-position` | `bottom-right`, `bottom-left`, `top-right`, `top-left` | `bottom-right` |
+| `data-title` | Header title | `Chat with us` |
+| `data-color` | Primary color (legacy/light mode) | `#007bff` |
+| `data-target` | Container selector for fullpage mode | `null` |
+| `data-theme` | Theme name: `default` or `branded` | `default` |
+| `data-mode` | Theme mode (legacy): `light` or `dark` | `light` |
+| `data-theme-mode` | Theme mode (preferred) | `light` |
+
+### JavaScript Options
+
+| Option | Description | Default |
+|---|---|---|
+| `id` | Widget ID | auto‑generated |
+| `displayMode` | `popup` or `fullpage` | `popup` |
+| `position` | Corner position | `bottom-right` |
+| `primaryColor` / `color` | Primary color | Theme primary |
+| `title` | Header title | `Chat with us` |
+| `targetSelector` / `target` | Container selector (fullpage) | `null` |
+| `serverUrl` | Backend URL | `http://localhost:3000` |
+
+> **Note:** `data-prefer-jsonp` and `data-force-jsonp` are parsed but not currently passed through the widget config. JSONP is still used automatically when CORS fails.
+
+---
+
+## Theme System
+
+ChatUI supports **Light/Dark** modes with **Default** and **Branded** themes, plus optional per‑mode overrides.
+
+### Basic usage
+
+```html
+<script
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
+  data-theme="default"
+  data-theme-mode="dark">
+</script>
+```
+
+### Custom colors (mode-specific)
+
+```html
+<script
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
+  data-theme="default"
+  data-theme-mode="light"
+  data-color-light="#ff6b6b"
+  data-bg-color-light="#ffffff"
+  data-surface-color-light="#ffe5e5"
+  data-text-color-light="#2d2d2d"
+  data-border-color-light="#ffcccc">
+</script>
+```
+
+### CSS variable override
 
 ```css
-/* Override the widget header color */
-#chat-widget .header {
-    background-color: #333;
-    color: #fff;
-}
-
-/* Adjust message bubble styles */
-#chat-widget .message {
-    font-size: 16px;
+#chat-widget {
+  --chat-primary: #0d6efd;
+  --chat-bg: #ffffff;
+  --chat-surface: #f8f9fa;
+  --chat-text: #212529;
+  --chat-border: #e9ecef;
 }
 ```
 
-## API Integration
+### Theme API
 
-The widget supports multiple transport protocols with automatic fallback:
+```javascript
+const widget = ChatUI.init({ serverUrl: "https://your-server.com" });
 
-### CORS Mode (Default) - HTTP/HTTPS
-The widget uses modern fetch API with proper CORS headers. This is the default and recommended approach for modern web applications.
+widget.setTheme("branded");
+widget.setThemeMode("dark");
+widget.toggleThemeMode();
+const themeConfig = widget.getThemeConfig();
+```
 
-#### Handshake
+---
+
+## Transport & Protocols
+
+ChatUI chooses transport based on `serverUrl`:
+
+- `wss://` or `ws://` → **WebSocket**
+- `https://` or `http://` → **CORS (fetch)** with **JSONP fallback**
+
+### CORS Endpoints
+
+**Handshake**
+
 `POST /api/handshake`  
-Request body: `{ type: 'handshake', timestamp: 1234567890 }`  
-Response: `{ status: "success", session_key: "..." }`
+Body: `{ "type": "handshake", "timestamp": 1234567890 }`  
+Response: `{ "status": "success", "session_key": "..." }`
 
-#### Send/Receive Messages
+**Connect**
+
 `POST /api/messages`  
-Request body: `{ type: 'message', message: "...", session_key: "...", timestamp: 1234567890 }`  
-Response: `{ text: "Response message", sender: "bot" }`
+Body: `{ "type": "connect", "session_key": "...", "timestamp": 1234567890 }`
 
-#### Connect
+**Send Message**
+
 `POST /api/messages`  
-Request body: `{ type: 'connect', session_key: "...", timestamp: 1234567890 }`  
-Response: `{ text: "Welcome message", sender: "bot" }`
+Body: `{ "type": "message", "message": "Hello", "session_key": "...", "timestamp": 1234567890 }`
 
-### JSONP Mode (Legacy Fallback)
-If CORS fails or is explicitly configured, the widget automatically falls back to JSONP for compatibility with older servers.
+### JSONP (Legacy Fallback)
 
-#### Handshake
+**Handshake**
+
 `GET /api/handshake?callback=cb`  
-Response: `{ status: "success", session_key: "..." }`
+Response: `cb({ status: "success", session_key: "..." })`
 
-#### Send/Receive Messages
-`GET /api/messages?callback=cb&message=...&session_key=...`  
-Response: `{ text: "Response message", sender: "bot" }`
+**Message**
 
-### WebSocket Mode (WS/WSS)
-For real-time features, use a WebSocket endpoint. The widget will automatically detect the protocol and establish a WebSocket connection.
+`GET /api/messages?callback=cb&message=...&session_key=...`
 
-#### WebSocket Message Format
-The widget sends and receives JSON messages with the following structure:
+### WebSocket
 
-**Client → Server:**
+**Client → Server**
+
 ```json
 {
   "type": "handshake|connect|message|typing|read_receipt",
-  "payload": { ... },
+  "payload": "...",
   "session_key": "...",
   "timestamp": 1234567890
 }
 ```
 
-**Server → Client:**
+**Server → Client**
+
 ```json
 {
   "type": "handshake|message|message:stream|typing|read_receipt",
   "text": "...",
-  "widget": { ... },
-  "payload": { ... },
+  "widgets": [ ... ],
   "session_key": "...",
   "timestamp": 1234567890
 }
 ```
 
-#### Real-Time Features
-- **Typing Indicators**: Send `{ type: "typing", payload: { typing: true } }` to show/hide typing indicators
-- **Read Receipts**: Send `{ type: "read_receipt", payload: { message_id: "..." } }` to confirm message reads
-- **Streaming Responses**: Send `{ type: "message:stream", text: "partial..." }` for character-by-character AI responses
-- **Custom Events**: Listen for `chatwidget:typing` and `chatwidget:read_receipt` events on the window object
+---
+
+## Message Formats
+
+ChatUI supports both **legacy** and **composable** message formats:
+
+### Legacy
+
+```json
+{
+  "text": "Choose an option",
+  "sender": "bot",
+  "widget": {
+    "type": "buttons",
+    "options": [
+      { "id": "opt1", "text": "Option 1", "value": "opt1" }
+    ]
+  }
+}
+```
+
+### Composable Widgets (Preferred)
+
+```json
+{
+  "status": "success",
+  "widgets": [
+    {
+      "type": "card",
+      "children": [
+        { "type": "text", "props": { "content": "Welcome!", "format": "plain" } },
+        {
+          "type": "buttons",
+          "props": {
+            "options": [
+              { "id": "start", "text": "Get Started", "value": "start" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## Widget System
+
+ChatUI ships a composable widget system with recursive rendering.
+
+### Core types
+
+- **Content/Layout**: `text`, `container`, `card`, `row`, `column`
+- **Actions**: `button`, `buttons`, `confirmation`
+- **Inputs**: `input`, `password`, `textarea`
+- **Selection**: `select`, `radio`, `checkbox`, `toggle`
+- **Interactive**: `rating`, `slider`, `date`, `tags`, `color_picker`
+- **Data**: `file_upload`, `progress`, `list`, `conditional`, `form`
+
+> `image` and `icon` types exist as placeholders and map to container behavior.
+
+### Widget interaction events
+
+Listen for widget submissions:
+
+```javascript
+document.addEventListener("widgetInteraction", (event) => {
+  console.log("Widget interaction:", event.detail);
+});
+```
+
+### Form widget
+
+Use a `form` container to collect values and submit them through a button:
+
+```json
+{
+  "type": "form",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    { "type": "input", "props": { "placeholder": "Your name" } },
+    { "type": "input", "props": { "placeholder": "Your email" } },
+    {
+      "type": "buttons",
+      "props": { "options": [{ "id": "submit", "text": "Submit" }] }
+    }
+  ]
+}
+```
+
+---
+
+## Events
+
+ChatUI emits a few global events:
+
+- **Errors**: `chatwidget:error`
+- **WebSocket typing**: `chatwidget:typing`
+- **WebSocket read receipts**: `chatwidget:read_receipt`
+
+```javascript
+window.addEventListener("chatwidget:error", (event) => {
+  console.log("ChatUI error:", event.detail);
+});
+```
+
+---
 
 ## Development
 
 ### Build
-To build the distribution file (`dist/chat-widget.js`):
+
 ```bash
 npm run build
 ```
 
-### Testing
-Run the Playwright end-to-end tests:
+### Tests
+
 ```bash
 npm test
 ```
 
-## Running the Demo
+### Demo
 
-To see the widget in action with a live backend:
+```bash
+npm run start:demo
+# Then open demo/demo.html
+```
 
-1. Start the demo API server:
-   ```bash
-   npm run start:demo
-   ```
-2. Open `demo/demo.html` in your browser.
+---
 
-## Architecture
+## Architecture Overview
 
-- `src/modules/`: Individual source modules (API, UI, Utils, Class)
-- `src/entry.js`: Entry point for the bundler
-- `dist/chat-widget.js`: Final distribution bundle
-- `dist/chat-widget.min.js`: Minified distribution bundle
-- `tests/`: Playwright test suites
+- `src/entry.js` → global API + auto‑init
+- `src/modules/chat-widget.class.js` → main orchestrator
+- `src/modules/api.js` → hybrid transport (WS/CORS/JSONP)
+- `src/modules/ui.js` → DOM rendering + styles
+- `src/modules/theme.js` → theme system
+- `src/modules/widgets/` → composable widgets
 
-## Security Features
+---
 
-- **CORS-First Security**: Uses modern CORS headers by default, falling back to JSONP only when necessary.
-- **JSONP Security**: Callback validation to prevent XSS when JSONP fallback is used.
-- **Scoped Reset**: Internal CSS reset prevents host styles from breaking the UI.
-- **Message Sanitization**: Proper handling of user-generated content.
-- **Timeout Protection**: Configurable request timeouts prevent hanging connections.
+## Security Notes
+
+- Input sanitization and widget data validation are built in.
+- JSONP callbacks are randomized and validated.
+- CORS requests use `Content-Type: application/json`.
+
+---
+
+## License
+
+MIT (or project-specific license if you have one).

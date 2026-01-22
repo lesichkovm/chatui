@@ -1,415 +1,180 @@
 ---
 path: configuration.md
 page-type: reference
-summary: Complete configuration reference for ChatUI widget including all options and customization.
+summary: Configuration reference for the ChatUI widget (supported options only).
 tags: [configuration, options, customization, settings]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.0.0
+version: 2.0.0
 ---
 
 # Configuration
 
-Complete reference for all ChatUI configuration options, including HTML data attributes, JavaScript configuration, and advanced customization.
+This reference lists **only the options currently supported by the runtime**. Options not listed here should be treated as unsupported or reserved.
+
+---
 
 ## Configuration Methods
 
-### 1. HTML Data Attributes (Recommended)
+### 1) HTML Data Attributes (Recommended)
 
 ```html
-<script 
+<script
   id="chat-widget"
-  src="path/to/chat-widget.js"
+  src="dist/chat-widget.min.js"
   data-server-url="https://your-server.com"
   data-position="bottom-right"
-  data-color="#007bff"
   data-title="Chat with us">
 </script>
 ```
 
-### 2. JavaScript Configuration
+### 2) JavaScript Initialization
 
 ```javascript
 const chat = ChatUI.init({
-  serverUrl: 'https://your-server.com',
-  position: 'bottom-right',
-  color: '#007bff',
-  title: 'Chat with us'
+  id: "support-chat",
+  title: "Support Chat",
+  position: "bottom-left",
+  color: "#28a745",
+  serverUrl: "https://your-server.com"
 });
 ```
 
-### 3. Mixed Configuration
+---
 
-You can combine both methods - JavaScript configuration takes precedence over HTML attributes.
+## Supported Options
 
-## Core Configuration Options
+### Required
 
-### Required Options
+| HTML Attribute | JS Option | Type | Default | Description |
+|---|---|---|---|---|
+| `data-server-url` | `serverUrl` | string | `http://localhost:3000` | Backend base URL. Protocol determines transport. |
 
-| Option | HTML Attribute | JS Option | Type | Default | Description |
-|--------|----------------|-----------|------|---------|-------------|
-| Server URL | `data-server-url` | `serverUrl` | string | `http://localhost:3000` | Base URL for chat backend API |
+### Display & Placement
 
-### Basic Options
+| HTML Attribute | JS Option | Type | Default | Description |
+|---|---|---|---|---|
+| `data-display` | `displayMode` | string | `popup` | `popup` or `fullpage`. |
+| `data-position` | `position` | string | `bottom-right` | Corner position for popup mode. |
+| `data-target` | `targetSelector` / `target` | string | `null` | Container selector for fullpage mode. |
+| `data-title` | `title` | string | `Chat with us` | Header title text. |
 
-| Option | HTML Attribute | JS Option | Type | Default | Description |
-|--------|----------------|-----------|------|---------|-------------|
-| Widget ID | `data-id` | `id` | string | `chat-widget` | Unique widget identifier |
-| Title | `data-title` | `title` | string | `Chat with us` | Header title text |
-| Color | `data-color` | `color` | string | `#007bff` | Primary theme color (hex) |
-| Position | `data-position` | `position` | string | `bottom-right` | Corner position |
+### Theme & Colors
 
-### Display Options
+| HTML Attribute | JS Option | Type | Default | Description |
+|---|---|---|---|---|
+| `data-theme` | (theme manager) | string | `default` | Theme name: `default` or `branded`. |
+| `data-theme-mode` | `themeMode` | string | `light` | Preferred mode attribute (`light` or `dark`). |
+| `data-mode` | `themeMode` (legacy) | string | `light` | Legacy mode attribute (fallback). |
+| `data-color` | `primaryColor` / `color` | string | theme primary | Legacy primary color override (mode fallback). |
 
-| Option | HTML Attribute | JS Option | Type | Default | Description |
-|--------|----------------|-----------|------|---------|-------------|
-| Display Mode | `data-display` | `displayMode` | string | `popup` | `popup` or `fullpage` |
-| Theme Mode | `data-mode` | `themeMode` | string | `light` | `light` or `dark` |
-| Target | `data-target` | `targetSelector` | string | `null` | Container selector (fullpage mode) |
-| Width | `data-width` | `width` | string | `380px` | Widget width |
-| Height | `data-height` | `height` | string | `600px` | Widget height |
+#### Mode-Specific Color Overrides
 
-### Communication Options
+The theme manager and widget apply CSS variables from these attributes (preferred):
 
-| Option | HTML Attribute | JS Option | Type | Default | Description |
-|--------|----------------|-----------|------|---------|-------------|
-| Prefer JSONP | `data-prefer-jsonp` | `preferJsonP` | boolean | `false` | Prefer JSONP over CORS |
-| Force JSONP | `data-force-jsonp` | `forceJsonP` | boolean | `false` | Force JSONP only, no CORS fallback |
-| Timeout | `data-timeout` | `timeout` | number | `5000` | CORS request timeout (ms) |
-| Auto Reconnect | `data-auto-reconnect` | `autoReconnect` | boolean | `true` | Auto-reconnect WebSocket |
-| Reconnect Delay | `data-reconnect-delay` | `reconnectDelay` | number | `1000` | Reconnection delay (ms) |
+| Attribute | Maps To |
+|---|---|
+| `data-color-light` / `data-color-dark` | `--chat-primary` |
+| `data-bg-color-light` / `data-bg-color-dark` | `--chat-bg` |
+| `data-surface-color-light` / `data-surface-color-dark` | `--chat-surface` |
+| `data-text-color-light` / `data-text-color-dark` | `--chat-text` |
+| `data-border-color-light` / `data-border-color-dark` | `--chat-border` |
 
-### UI Options
+> Legacy fallbacks without `-light`/`-dark` are still supported:
+> `data-color`, `data-bg-color`, `data-surface-color`, `data-text-color`, `data-border-color`.
 
-| Option | HTML Attribute | JS Option | Type | Default | Description |
-|--------|----------------|-----------|------|---------|-------------|
-| Z-Index | `data-z-index` | `zIndex` | number | `9999` | Widget z-index |
-| Show Header | `data-show-header` | `showHeader` | boolean | `true` | Show header bar |
-| Show Footer | `data-show-footer` | `showFooter` | boolean | `true` | Show footer area |
-| Auto Open | `data-auto-open` | `autoOpen` | boolean | `false` | Auto-open on load |
-| Placeholder | `data-placeholder` | `placeholder` | string | `Type a message...` | Input placeholder text |
+### Transport Notes
 
-## Position Options
+ChatUI selects transport from `serverUrl`:
 
-### Corner Positions
+- `wss://` or `ws://` → WebSocket
+- `https://` or `http://` → CORS (fetch) with JSONP fallback
 
-| Value | Description | CSS Position |
-|-------|-------------|--------------|
-| `bottom-right` | Bottom right corner (default) | `bottom: 20px; right: 20px` |
-| `bottom-left` | Bottom left corner | `bottom: 20px; left: 20px` |
-| `top-right` | Top right corner | `top: 20px; right: 20px` |
-| `top-left` | Top left corner | `top: 20px; left: 20px` |
+---
 
-### Custom Positioning
+## Programmatic API Options (Supported)
 
-```javascript
-const chat = ChatUI.init({
-  position: 'custom',
-  customPosition: {
-    bottom: '30px',
-    right: '30px'
-  }
-});
-```
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `id` | string | auto-generated | Widget ID. |
+| `displayMode` | string | `popup` | `popup` or `fullpage`. |
+| `position` | string | `bottom-right` | Corner position for popup. |
+| `primaryColor` / `color` | string | theme primary | Primary color override. |
+| `title` | string | `Chat with us` | Header title text. |
+| `targetSelector` / `target` | string | `null` | Container selector for fullpage mode. |
+| `serverUrl` | string | `http://localhost:3000` | Backend URL for transport selection. |
 
-## Theme Configuration
+---
 
-### Color Schemes
+## Reserved / Not Yet Wired
 
-```javascript
-// Light theme (default)
-const chat = ChatUI.init({
-  themeMode: 'light',
-  color: '#007bff',
-  backgroundColor: '#ffffff',
-  textColor: '#333333'
-});
+The following attributes are parsed but **not currently forwarded** to the transport layer:
 
-// Dark theme
-const chat = ChatUI.init({
-  themeMode: 'dark',
-  color: '#0d6efd',
-  backgroundColor: '#1a1a1a',
-  textColor: '#ffffff'
-});
-```
+- `data-prefer-jsonp`
+- `data-force-jsonp`
 
-### Custom CSS Variables
+They are reserved for future wiring and should not be relied on today.
 
-```css
-#chat-widget {
-  --chatui-primary-color: #007bff;
-  --chatui-background-color: #ffffff;
-  --chatui-text-color: #333333;
-  --chatui-border-color: #dee2e6;
-  --chatui-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-```
+---
 
-## Advanced Configuration
+## Examples
 
-### Custom Headers
-
-```javascript
-const chat = ChatUI.init({
-  serverUrl: 'https://api.example.com',
-  headers: {
-    'Authorization': 'Bearer token123',
-    'X-Custom-Header': 'custom-value'
-  }
-});
-```
-
-### Custom Event Handlers
-
-```javascript
-const chat = ChatUI.init({
-  onOpen: () => console.log('Widget opened'),
-  onClose: () => console.log('Widget closed'),
-  onMessage: (message) => console.log('New message:', message),
-  onError: (error) => console.error('Error:', error)
-});
-```
-
-### Widget Configuration
-
-```javascript
-const chat = ChatUI.init({
-  widgets: {
-    rating: {
-      max: 5,
-      required: true,
-      icon: 'star'
-    },
-    date: {
-      format: 'YYYY-MM-DD',
-      min: '2024-01-01',
-      max: '2024-12-31'
-    }
-  }
-});
-```
-
-## Environment-Specific Configuration
-
-### Development
-
-```javascript
-const chat = ChatUI.init({
-  serverUrl: 'http://localhost:3000',
-  debug: true,
-  logLevel: 'debug',
-  timeout: 10000
-});
-```
-
-### Production
-
-```javascript
-const chat = ChatUI.init({
-  serverUrl: 'https://api.example.com',
-  debug: false,
-  logLevel: 'error',
-  timeout: 5000,
-  autoReconnect: true
-});
-```
-
-### Testing
-
-```javascript
-const chat = ChatUI.init({
-  serverUrl: 'http://test-server.com',
-  mockMode: true,
-  debug: true,
-  autoOpen: true
-});
-```
-
-## Configuration Validation
-
-### Built-in Validation
-
-ChatUI automatically validates configuration options:
-
-```javascript
-// Valid colors
-color: '#007bff'     // ✅ Valid hex
-color: 'blue'        // ❌ Invalid, will use default
-color: '#gggggg'     // ❌ Invalid hex, will use default
-
-// Valid positions
-position: 'bottom-right'  // ✅ Valid
-position: 'center'        // ❌ Invalid, will use default
-
-// Valid URLs
-serverUrl: 'https://api.example.com'  // ✅ Valid
-serverUrl: 'not-a-url'                // ❌ Invalid, will use default
-```
-
-### Custom Validation
-
-```javascript
-const chat = ChatUI.init({
-  serverUrl: 'https://api.example.com',
-  customValidator: (config) => {
-    if (config.color && !config.color.startsWith('#')) {
-      throw new Error('Color must start with #');
-    }
-    return true;
-  }
-});
-```
-
-## Configuration Examples
-
-### Basic Customer Support Chat
-
-```html
-<script 
-  id="chat-widget"
-  src="chat-widget.js"
-  data-server-url="https://support.example.com"
-  data-title="Customer Support"
-  data-color="#28a745"
-  data-position="bottom-right">
-</script>
-```
-
-### Sales Chat with Custom Styling
-
-```javascript
-const chat = ChatUI.init({
-  serverUrl: 'https://sales.example.com',
-  title: 'Sales Team',
-  color: '#fd7e14',
-  position: 'bottom-left',
-  themeMode: 'light',
-  width: '400px',
-  height: '650px',
-  customCSS: `
-    #chat-widget .header {
-      background: linear-gradient(45deg, #fd7e14, #e67e22);
-    }
-  `
-});
-```
-
-### Embedded Fullpage Chat
+### Fullpage Embed
 
 ```html
 <div id="chat-container"></div>
-
-<script 
+<script
   id="chat-widget"
-  src="chat-widget.js"
-  data-server-url="https://api.example.com"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
   data-display="fullpage"
-  data-target="#chat-container"
-  data-show-header="false"
-  data-width="100%"
-  data-height="500px">
+  data-target="#chat-container">
 </script>
 ```
 
-### WebSocket Real-time Chat
+### Branded Dark Theme
 
-```javascript
-const chat = ChatUI.init({
-  serverUrl: 'wss://chat.example.com/ws',
-  title: 'Live Chat',
-  color: '#6f42c1',
-  autoReconnect: true,
-  reconnectDelay: 2000,
-  onConnected: () => console.log('Connected to chat server'),
-  onDisconnected: () => console.log('Disconnected from chat server')
-});
+```html
+<script
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
+  data-theme="branded"
+  data-theme-mode="dark">
+</script>
 ```
 
-## Configuration Best Practices
+### Mode-Specific Color Overrides
 
-### 1. Use Environment Variables
-
-```javascript
-const chat = ChatUI.init({
-  serverUrl: process.env.CHAT_SERVER_URL || 'http://localhost:3000',
-  debug: process.env.NODE_ENV === 'development',
-  color: process.env.CHAT_COLOR || '#007bff'
-});
+```html
+<script
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
+  data-theme="default"
+  data-theme-mode="light"
+  data-color-light="#ff6b6b"
+  data-bg-color-light="#ffffff"
+  data-surface-color-light="#ffe5e5"
+  data-text-color-light="#2d2d2d"
+  data-border-color-light="#ffcccc">
+</script>
 ```
 
-### 2. Validate Configuration
+---
 
-```javascript
-function validateConfig(config) {
-  const required = ['serverUrl'];
-  const missing = required.filter(key => !config[key]);
-  
-  if (missing.length > 0) {
-    throw new Error(`Missing required config: ${missing.join(', ')}`);
-  }
-  
-  return true;
-}
+## Notes & Best Practices
 
-const config = { serverUrl: 'https://api.example.com' };
-validateConfig(config);
-const chat = ChatUI.init(config);
-```
+- Always set `data-server-url` or `serverUrl`.
+- Prefer `data-theme-mode` over `data-mode`.
+- Use mode-specific color overrides for light/dark customization.
+- For fullpage mode, ensure `data-target` exists.
 
-### 3. Use Configuration Defaults
-
-```javascript
-const defaultConfig = {
-  serverUrl: 'http://localhost:3000',
-  title: 'Chat with us',
-  color: '#007bff',
-  position: 'bottom-right',
-  timeout: 5000
-};
-
-const userConfig = {
-  serverUrl: 'https://api.example.com',
-  color: '#28a745'
-};
-
-const finalConfig = { ...defaultConfig, ...userConfig };
-const chat = ChatUI.init(finalConfig);
-```
-
-## Troubleshooting Configuration
-
-### Common Issues
-
-1. **Widget Not Appearing**
-   - Check `id="chat-widget"` is present
-   - Verify script path is correct
-   - Ensure no JavaScript errors
-
-2. **Connection Issues**
-   - Verify `serverUrl` is correct and accessible
-   - Check CORS headers on server
-   - Try JSONP mode for legacy servers
-
-3. **Styling Issues**
-   - Use scoped CSS with `#chat-widget` prefix
-   - Check CSS specificity
-   - Verify color format (hex codes)
-
-### Debug Mode
-
-```javascript
-// Enable debug mode
-window.ChatUI.debug = true;
-
-// Check current configuration
-const chat = ChatUI.init(config);
-console.log('Current config:', chat.getConfig());
-```
+---
 
 ## See Also
 
-- [Getting Started](getting_started.md) - Setup and integration guide
-- [API Reference](api_reference.md) - Complete API documentation
-- [Architecture](architecture.md) - System design overview
-- [Development](development.md) - Development workflow and guidelines
+- `docs/livewiki/getting_started.md`
+- `docs/livewiki/api_reference.md`
+- `docs/theme-system.md`
+- `docs/backend-integration-guide.md`

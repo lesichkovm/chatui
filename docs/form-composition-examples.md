@@ -1,50 +1,68 @@
+---
+path: form-composition-examples.md
+page-type: tutorial
+summary: Practical form examples using the current composable widget schema.
+tags: [forms, composition, widgets, examples]
+created: 2026-01-22
+updated: 2026-01-22
+version: 2.0.0
+---
+
 # Form Composition Examples
 
-This document provides practical examples of how to use the new composable widget system to create sophisticated forms and multi-widget interactions.
+This document provides practical examples for building forms using the **composable widget schema**. All widgets are defined with `type`, configured via `props`, and composed through `children`.
+
+> **Schema Reminder**
+```json
+{
+  "type": "container",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    { "type": "text", "props": { "content": "Hello", "format": "plain" } }
+  ]
+}
+```
+
+---
 
 ## Basic Form Example
 
 ### Simple Contact Form
-```javascript
+
+```json
 {
-  type: 'form',
-  props: {
-    layout: 'vertical',
-    gap: 'medium'
-  },
-  children: [
+  "type": "form",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
     {
-      type: 'input',
-      props: {
-        placeholder: 'Enter your name',
-        showSubmitButton: false,
-        required: true
+      "type": "input",
+      "props": {
+        "placeholder": "Enter your name",
+        "required": true
       }
     },
     {
-      type: 'input',
-      props: {
-        type: 'email',
-        placeholder: 'Enter your email',
-        showSubmitButton: false,
-        required: true
+      "type": "input",
+      "props": {
+        "type": "email",
+        "placeholder": "Enter your email",
+        "required": true
       }
     },
     {
-      type: 'textarea',
-      props: {
-        placeholder: 'Enter your message',
-        showSubmitButton: false,
-        rows: 4,
-        required: true
+      "type": "textarea",
+      "props": {
+        "placeholder": "Enter your message",
+        "rows": 4,
+        "required": true
       }
     },
     {
-      type: 'buttons',
-      props: {
-        options: [
-          { id: 'submit', text: 'Send Message', variant: 'primary' },
-          { id: 'cancel', text: 'Cancel', variant: 'secondary' }
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "submit", "text": "Send Message", "value": "submit" },
+          { "id": "cancel", "text": "Cancel", "value": "cancel" }
         ]
       }
     }
@@ -52,85 +70,68 @@ This document provides practical examples of how to use the new composable widge
 }
 ```
 
-**Result**: A clean contact form where all inputs are collected and submitted together when the user clicks "Send Message".
+---
 
 ## Advanced Form Examples
 
-### User Registration Form with Validation
-```javascript
+### User Registration Form
+
+```json
 {
-  type: 'form',
-  props: {
-    layout: 'vertical',
-    gap: 'large'
-  },
-  children: [
+  "type": "form",
+  "props": { "layout": "vertical", "gap": "large" },
+  "children": [
     {
-      type: 'container',
-      props: {
-        layout: 'horizontal',
-        gap: 'medium'
-      },
-      children: [
+      "type": "container",
+      "props": { "layout": "horizontal", "gap": "medium" },
+      "children": [
         {
-          type: 'input',
-          props: {
-            placeholder: 'First Name',
-            showSubmitButton: false,
-            required: true
-          }
+          "type": "input",
+          "props": { "placeholder": "First Name", "required": true }
         },
         {
-          type: 'input',
-          props: {
-            placeholder: 'Last Name',
-            showSubmitButton: false,
-            required: true
-          }
+          "type": "input",
+          "props": { "placeholder": "Last Name", "required": true }
         }
       ]
     },
     {
-      type: 'input',
-      props: {
-        type: 'email',
-        placeholder: 'Email Address',
-        showSubmitButton: false,
-        required: true
+      "type": "input",
+      "props": {
+        "type": "email",
+        "placeholder": "Email Address",
+        "required": true
       }
     },
     {
-      type: 'password',
-      props: {
-        placeholder: 'Password',
-        showSubmitButton: false,
-        required: true
+      "type": "password",
+      "props": {
+        "placeholder": "Password",
+        "required": true
       }
     },
     {
-      type: 'password',
-      props: {
-        placeholder: 'Confirm Password',
-        showSubmitButton: false,
-        required: true
+      "type": "password",
+      "props": {
+        "placeholder": "Confirm Password",
+        "required": true
       }
     },
     {
-      type: 'checkbox',
-      props: {
-        options: [
-          { id: 'terms', text: 'I agree to the Terms and Conditions' }
+      "type": "checkbox",
+      "props": {
+        "options": [
+          { "id": "terms", "text": "I agree to the Terms and Conditions", "value": "accepted" }
         ],
-        showSubmitButton: false,
-        required: true
+        "required": true
       }
     },
     {
-      type: 'buttons',
-      props: {
-        options: [
-          { id: 'register', text: 'Create Account', variant: 'primary' },
-          { id: 'reset', text: 'Reset Form', variant: 'secondary' }
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "register", "text": "Create Account", "value": "register" },
+          { "id": "reset", "text": "Reset Form", "value": "reset" }
         ]
       }
     }
@@ -138,71 +139,64 @@ This document provides practical examples of how to use the new composable widge
 }
 ```
 
-### Survey Form with Multiple Question Types
-```javascript
+### Customer Survey Form
+
+```json
 {
-  type: 'form',
-  props: {
-    layout: 'vertical',
-    gap: 'large'
-  },
-  children: [
+  "type": "form",
+  "props": { "layout": "vertical", "gap": "large" },
+  "children": [
     {
-      type: 'text',
-      props: {
-        text: 'Customer Satisfaction Survey',
-        style: { fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }
+      "type": "text",
+      "props": {
+        "content": "Customer Satisfaction Survey",
+        "format": "plain"
       }
     },
     {
-      type: 'radio',
-      props: {
-        question: 'How satisfied are you with our service?',
-        options: [
-          { id: 'very-satisfied', text: 'Very Satisfied' },
-          { id: 'satisfied', text: 'Satisfied' },
-          { id: 'neutral', text: 'Neutral' },
-          { id: 'dissatisfied', text: 'Dissatisfied' },
-          { id: 'very-dissatisfied', text: 'Very Dissatisfied' }
-        ],
-        showSubmitButton: false
+      "type": "radio",
+      "props": {
+        "question": "How satisfied are you with our service?",
+        "options": [
+          { "id": "very-satisfied", "text": "Very Satisfied", "value": "very" },
+          { "id": "satisfied", "text": "Satisfied", "value": "satisfied" },
+          { "id": "neutral", "text": "Neutral", "value": "neutral" },
+          { "id": "dissatisfied", "text": "Dissatisfied", "value": "dissatisfied" }
+        ]
       }
     },
     {
-      type: 'rating',
-      props: {
-        question: 'Rate our product quality',
-        maxRating: 5,
-        showSubmitButton: false
+      "type": "rating",
+      "props": {
+        "label": "Rate our product quality",
+        "maxRating": 5,
+        "showSubmitButton": true
       }
     },
     {
-      type: 'checkbox',
-      props: {
-        question: 'Which features do you use most? (Select all that apply)',
-        options: [
-          { id: 'feature-a', text: 'Feature A' },
-          { id: 'feature-b', text: 'Feature B' },
-          { id: 'feature-c', text: 'Feature C' },
-          { id: 'feature-d', text: 'Feature D' }
-        ],
-        showSubmitButton: false
+      "type": "checkbox",
+      "props": {
+        "question": "Which features do you use most? (Select all that apply)",
+        "options": [
+          { "id": "feature-a", "text": "Feature A", "value": "feature_a" },
+          { "id": "feature-b", "text": "Feature B", "value": "feature_b" },
+          { "id": "feature-c", "text": "Feature C", "value": "feature_c" }
+        ]
       }
     },
     {
-      type: 'textarea',
-      props: {
-        placeholder: 'Additional comments or suggestions...',
-        showSubmitButton: false,
-        rows: 4
+      "type": "textarea",
+      "props": {
+        "placeholder": "Additional comments or suggestions...",
+        "rows": 4
       }
     },
     {
-      type: 'buttons',
-      props: {
-        options: [
-          { id: 'submit-survey', text: 'Submit Survey', variant: 'primary' },
-          { id: 'skip', text: 'Skip Survey', variant: 'secondary' }
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "submit-survey", "text": "Submit Survey", "value": "submit" },
+          { "id": "skip", "text": "Skip Survey", "value": "skip" }
         ]
       }
     }
@@ -210,38 +204,41 @@ This document provides practical examples of how to use the new composable widge
 }
 ```
 
-## Container Widget Form Mode
+---
 
-### Using Container Widget as Form
-```javascript
+## Container Widget in Form Mode
+
+### Container Coordinating Inputs
+
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'medium',
-    formMode: true  // Enable form coordination
+  "type": "container",
+  "props": {
+    "layout": "vertical",
+    "gap": "medium",
+    "formMode": true
   },
-  children: [
+  "children": [
     {
-      type: 'input',
-      props: {
-        placeholder: 'Username',
-        showSubmitButton: false
+      "type": "input",
+      "props": {
+        "placeholder": "Username",
+        "required": true
       }
     },
     {
-      type: 'password',
-      props: {
-        placeholder: 'Password',
-        showSubmitButton: false
+      "type": "password",
+      "props": {
+        "placeholder": "Password",
+        "required": true
       }
     },
     {
-      type: 'buttons',
-      props: {
-        options: [
-          { id: 'login', text: 'Login', variant: 'primary' },
-          { id: 'forgot', text: 'Forgot Password?', variant: 'link' }
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "login", "text": "Login", "value": "login" },
+          { "id": "forgot", "text": "Forgot Password?", "value": "forgot" }
         ]
       }
     }
@@ -249,57 +246,51 @@ This document provides practical examples of how to use the new composable widge
 }
 ```
 
-## Complex Multi-Step Forms
+---
+
+## Multi-Step Forms
 
 ### Product Configuration Wizard
-```javascript
+
+```json
 {
-  type: 'container',
-  props: {
-    layout: 'vertical',
-    gap: 'large'
-  },
-  children: [
+  "type": "container",
+  "props": { "layout": "vertical", "gap": "large" },
+  "children": [
     {
-      type: 'text',
-      props: {
-        text: 'Step 1: Basic Information',
-        style: { fontSize: '16px', fontWeight: 'bold' }
+      "type": "text",
+      "props": {
+        "content": "Step 1: Basic Information",
+        "format": "plain"
       }
     },
     {
-      type: 'form',
-      props: {
-        layout: 'vertical',
-        gap: 'medium'
-      },
-      children: [
+      "type": "form",
+      "props": { "layout": "vertical", "gap": "medium" },
+      "children": [
         {
-          type: 'input',
-          props: {
-            placeholder: 'Product Name',
-            showSubmitButton: false,
-            required: true
+          "type": "input",
+          "props": {
+            "placeholder": "Product Name",
+            "required": true
           }
         },
         {
-          type: 'select',
-          props: {
-            question: 'Product Category',
-            options: [
-              { id: 'electronics', text: 'Electronics' },
-              { id: 'clothing', text: 'Clothing' },
-              { id: 'books', text: 'Books' },
-              { id: 'home', text: 'Home & Garden' }
-            ],
-            showSubmitButton: false
+          "type": "select",
+          "props": {
+            "placeholder": "Product Category",
+            "options": [
+              { "id": "electronics", "text": "Electronics", "value": "electronics" },
+              { "id": "clothing", "text": "Clothing", "value": "clothing" },
+              { "id": "books", "text": "Books", "value": "books" }
+            ]
           }
         },
         {
-          type: 'buttons',
-          props: {
-            options: [
-              { id: 'next-step', text: 'Next Step →', variant: 'primary' }
+          "type": "buttons",
+          "props": {
+            "options": [
+              { "id": "next-step", "text": "Next Step →", "value": "next" }
             ]
           }
         }
@@ -309,58 +300,55 @@ This document provides practical examples of how to use the new composable widge
 }
 ```
 
-## Interactive Forms with Conditional Logic
+---
 
-### Dynamic Form with Conditional Fields
-```javascript
+## Conditional Logic in Forms
+
+### Dynamic Form Based on Selection
+
+```json
 {
-  type: 'form',
-  props: {
-    layout: 'vertical',
-    gap: 'medium'
-  },
-  children: [
+  "type": "form",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
     {
-      type: 'select',
-      props: {
-        question: 'Account Type',
-        options: [
-          { id: 'personal', text: 'Personal Account' },
-          { id: 'business', text: 'Business Account' }
-        ],
-        showSubmitButton: false
+      "type": "select",
+      "props": {
+        "placeholder": "Account Type",
+        "options": [
+          { "id": "personal", "text": "Personal Account", "value": "personal" },
+          { "id": "business", "text": "Business Account", "value": "business" }
+        ]
       }
     },
     {
-      type: 'conditional',
-      props: {
-        condition: 'account-type === "business"',
-        children: [
+      "type": "conditional",
+      "props": {
+        "condition": "account-type === \"business\"",
+        "children": [
           {
-            type: 'input',
-            props: {
-              placeholder: 'Company Name',
-              showSubmitButton: false,
-              required: true
+            "type": "input",
+            "props": {
+              "placeholder": "Company Name",
+              "required": true
             }
           },
           {
-            type: 'input',
-            props: {
-              placeholder: 'Tax ID',
-              showSubmitButton: false,
-              required: true
+            "type": "input",
+            "props": {
+              "placeholder": "Tax ID",
+              "required": true
             }
           }
         ]
       }
     },
     {
-      type: 'buttons',
-      props: {
-        options: [
-          { id: 'create-account', text: 'Create Account', variant: 'primary' },
-          { id: 'cancel', text: 'Cancel', variant: 'secondary' }
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "create-account", "text": "Create Account", "value": "create" },
+          { "id": "cancel", "text": "Cancel", "value": "cancel" }
         ]
       }
     }
@@ -368,228 +356,19 @@ This document provides practical examples of how to use the new composable widge
 }
 ```
 
-## Data Collection Forms
+---
 
-### Event Registration Form
-```javascript
-{
-  type: 'form',
-  props: {
-    layout: 'vertical',
-    gap: 'medium'
-  },
-  children: [
-    {
-      type: 'container',
-      props: {
-        layout: 'horizontal',
-        gap: 'medium'
-      },
-      children: [
-        {
-          type: 'input',
-          props: {
-            placeholder: 'First Name',
-            showSubmitButton: false,
-            required: true
-          }
-        },
-        {
-          type: 'input',
-          props: {
-            placeholder: 'Last Name',
-            showSubmitButton: false,
-            required: true
-          }
-        }
-      ]
-    },
-    {
-      type: 'input',
-      props: {
-        type: 'email',
-        placeholder: 'Email Address',
-        showSubmitButton: false,
-        required: true
-      }
-    },
-    {
-      type: 'date',
-      props: {
-        question: 'Date of Birth',
-        showSubmitButton: false
-      }
-    },
-    {
-      type: 'select',
-      props: {
-        question: 'T-Shirt Size',
-        options: [
-          { id: 'xs', text: 'XS' },
-          { id: 's', text: 'S' },
-          { id: 'm', text: 'M' },
-          { id: 'l', text: 'L' },
-          { id: 'xl', text: 'XL' },
-          { id: 'xxl', text: 'XXL' }
-        ],
-        showSubmitButton: false
-      }
-    },
-    {
-      type: 'checkbox',
-      props: {
-        question: 'Dietary Restrictions',
-        options: [
-          { id: 'vegetarian', text: 'Vegetarian' },
-          { id: 'vegan', text: 'Vegan' },
-          { id: 'gluten-free', text: 'Gluten-Free' },
-          { id: 'none', text: 'None' }
-        ],
-        showSubmitButton: false
-      }
-    },
-    {
-      type: 'buttons',
-      props: {
-        options: [
-          { id: 'register', text: 'Register for Event', variant: 'primary' },
-          { id: 'save-later', text: 'Save for Later', variant: 'secondary' }
-        ]
-      }
-    }
-  ]
-}
-```
+## Notes & Best Practices
 
-## Best Practices
+- Put all widget configuration in `props`.
+- Use `children` to compose multiple widgets into a form.
+- Prefer `form` when you want **one submission** that includes multiple fields.
+- Use `buttons` inside `form` to trigger submission.
 
-### 1. Always Set `showSubmitButton: false` for Composable Forms
-```javascript
-// ❌ Wrong - Individual widgets will submit separately
-{
-  type: 'input',
-  props: {
-    placeholder: 'Name'
-    // Missing showSubmitButton: false
-  }
-}
+---
 
-// ✅ Correct - Widget participates in form submission
-{
-  type: 'input',
-  props: {
-    placeholder: 'Name',
-    showSubmitButton: false
-  }
-}
-```
+## See Also
 
-### 2. Use Container Widgets for Layout
-```javascript
-{
-  type: 'form',
-  props: {
-    layout: 'vertical',
-    gap: 'medium'
-  },
-  children: [
-    {
-      type: 'container',
-      props: {
-        layout: 'horizontal',
-        gap: 'small'
-      },
-      children: [
-        // Multiple fields in same row
-      ]
-    }
-  ]
-}
-```
-
-### 3. Provide Clear Action Buttons
-```javascript
-{
-  type: 'buttons',
-  props: {
-    options: [
-      { id: 'submit', text: 'Submit Form', variant: 'primary' },
-      { id: 'cancel', text: 'Cancel', variant: 'secondary' },
-      { id: 'save-draft', text: 'Save Draft', variant: 'tertiary' }
-    ]
-  }
-}
-```
-
-### 4. Handle Form Data on Backend
-The form will submit all widget values in a structured format:
-
-```javascript
-// Example form submission data
-{
-  action: 'submit',
-  formData: {
-    'widget-1': 'John Doe',
-    'widget-2': 'john@example.com',
-    'widget-3': 'This is the message content',
-    'widget-4': ['option1', 'option2'], // Checkbox values
-    'widget-5': 4 // Rating value
-  },
-  widgetType: 'form'
-}
-```
-
-## Migration from Legacy Format
-
-### Before (Legacy)
-```javascript
-{
-  text: "Please enter your information:",
-  widget: {
-    type: "input",
-    props: {
-      placeholder: "Your name"
-    }
-  }
-}
-```
-
-### After (Composable)
-```javascript
-{
-  widgets: [
-    {
-      type: "text",
-      props: {
-        text: "Please enter your information:"
-      }
-    },
-    {
-      type: "form",
-      props: {
-        layout: "vertical",
-        gap: "medium"
-      },
-      children: [
-        {
-          type: "input",
-          props: {
-            placeholder: "Your name",
-            showSubmitButton: false
-          }
-        },
-        {
-          type: "buttons",
-          props: {
-            options: [
-              { id: "submit", text: "Submit", variant: "primary" }
-            ]
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
-These examples demonstrate the full power of the composable widget system, enabling complex form interactions while maintaining clean, maintainable code structure.
+- `docs/widget-system.md`
+- `docs/composition-recipes.md`
+- `docs/backend-integration-guide.md`

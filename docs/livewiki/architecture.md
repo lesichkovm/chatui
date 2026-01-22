@@ -1,16 +1,18 @@
 ---
 path: architecture.md
 page-type: overview
-summary: System architecture, design patterns, and key technical decisions.
+summary: System architecture, design patterns, and key technical decisions aligned with the current codebase.
 tags: [architecture, design, patterns, technical]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.0.0
+version: 2.0.0
 ---
 
 # Architecture
 
-ChatUI follows a modular, event-driven architecture with clear separation of concerns. The design prioritizes performance, maintainability, and extensibility.
+ChatUI uses a modular, event-driven architecture with strict separation of concerns. The design prioritizes performance, maintainability, and extensibility, while remaining framework‑agnostic and dependency‑free.
+
+---
 
 ## High-Level Architecture
 
@@ -21,340 +23,194 @@ graph TB
         B[Programmatic API]
         C[Auto-Initialization]
     end
-    
+
     subgraph "Core System"
         D[ChatWidget Class]
-        E[Event System]
-        F[State Management]
+        E[State + Events]
     end
-    
+
     subgraph "Communication Layer"
-        G[API Module]
-        H[CORS Transport]
-        I[JSONP Transport]
-        J[WebSocket Transport]
+        F[HybridChatAPI]
+        G[CORS Transport]
+        H[JSONP Transport]
+        I[WebSocket Transport]
     end
-    
+
     subgraph "Presentation Layer"
-        K[UI Module]
-        L[Theme System]
-        M[DOM Management]
+        J[UI Module]
+        K[Theme System]
+        L[DOM Management]
     end
-    
+
     subgraph "Widget System"
-        N[Widget Factory]
-        O[Base Widget]
-        P[Component Widgets]
+        M[Widget Factory]
+        N[Base Widget]
+        O[Composable Widgets]
     end
-    
+
     A --> D
     B --> D
     C --> D
-    D --> G
+
+    D --> F
+    D --> J
     D --> K
-    D --> N
-    G --> H
-    G --> I
-    G --> J
-    K --> L
-    K --> M
+    D --> M
+
+    F --> G
+    F --> H
+    F --> I
+
+    J --> L
+    K --> J
+
+    M --> N
     N --> O
-    O --> P
 ```
 
-## Core Design Principles
+---
 
-### 1. Zero Dependencies
-- Pure vanilla JavaScript implementation
-- No external libraries or frameworks
-- Compatible with any web environment
-
-### 2. Transport Agnostic
-- Abstract API layer supports multiple protocols
-- Automatic fallback between WebSocket, CORS, and JSONP
-- Protocol detection based on URL scheme
-
-### 3. Scoped Styling
-- All CSS scoped to `#chat-widget` ID
-- Prevents conflicts with host application
-- Theme system for customization
-
-### 4. Event-Driven Communication
-- Custom events for widget lifecycle
-- Message passing between components
-- Extensible event system
-
-## Module Architecture
+## Module Structure
 
 ### Entry Point (`src/entry.js`)
-Handles initialization and global API exposure:
+- Exposes `window.ChatUI.init()` for programmatic usage.
+- Exposes legacy `window.createChatWidget()`.
+- Auto-initializes script tags with `id` starting with `chat-widget`.
+- Observes DOM for dynamically inserted script tags.
 
-```javascript
-// Global factory function
-window.createChatWidget = function(scriptElement) {
-    return new ChatWidget(scriptElement);
-};
+### Core Orchestrator (`src/modules/chat-widget.class.js`)
+- Parses configuration (script element or JS object).
+- Initializes theme manager, UI, and transport layer.
+- Manages open/close state, message flow, and error handling.
+- Handles widget interaction events and forwards to API.
 
-// Programmatic API
-window.ChatUI = {
-    init: function(config) {
-        return new ChatWidget(config);
-    }
-};
-```
-
-**Responsibilities:**
-- Auto-initialization from script tags
-- Global API exposure
-- MutationObserver for dynamic script tags
-
-### ChatWidget Class (`src/modules/chat-widget.class.js`)
-Main orchestrator class that coordinates all subsystems:
-
-```javascript
-class ChatWidget {
-    constructor(config) {
-        this.config = this.parseConfig(config);
-        this.api = new API(this.config);
-        this.ui = new UI(this.config);
-        this.theme = new Theme(this.config);
-        this.init();
-    }
-}
-```
-
-**Responsibilities:**
-- Configuration parsing and validation
-- Component coordination
-- Event management
-- Lifecycle management
-
-### API Layer (`src/modules/api.js`)
-Transport abstraction layer:
-
-```javascript
-class API {
-    constructor(config) {
-        this.transport = this.detectTransport(config.serverUrl);
-        this.sessionKey = null;
-    }
-    
-    async handshake() {
-        return this.transport.handshake();
-    }
-}
-```
-
-**Transport Classes:**
-- **CORS API** (`api-cors.js`): Modern fetch-based communication
-- **Legacy API** (`api-legacy.js`): JSONP fallback for older servers
-- **WebSocket API**: Real-time bidirectional communication
+### Communication Layer (`src/modules/api.js`, `api-cors.js`, `api-legacy.js`)
+- `HybridChatAPI` selects transport based on `serverUrl` protocol:
+  - `wss://` or `ws://` → WebSocket
+  - `https://` or `http://` → CORS with JSONP fallback
+- CORS transport uses `fetch` with timeouts and error classification.
+- JSONP transport remains for legacy environments.
 
 ### UI Layer (`src/modules/ui.js`)
-Handles all DOM manipulation and user interactions:
-
-```javascript
-class UI {
-    constructor(config) {
-        this.container = this.createContainer();
-        this.messages = [];
-        this.setupEventHandlers();
-    }
-    
-    renderMessage(message) {
-        // Message rendering logic
-    }
-}
-```
-
-**Responsibilities:**
-- DOM creation and management
-- Event handling
-- Message rendering
-- User interaction management
+- Injects scoped CSS per widget instance.
+- Renders messages and widgets.
+- Manages message list, input area, and layout.
 
 ### Theme System (`src/modules/theme.js`)
-Manages styling and visual customization:
+- Data-attributes-first theming with CSS variables.
+- Supports themes: `default`, `branded`.
+- Supports modes: `light`, `dark`.
+- Persists preference via `localStorage`.
+- Respects `prefers-color-scheme` when no explicit mode is set.
 
-```javascript
-class Theme {
-    constructor(config) {
-        this.primaryColor = config.color || '#007bff';
-        this.mode = config.themeMode || 'light';
-        this.applyTheme();
+### Widget System (`src/modules/widgets/`)
+- `WidgetFactory` creates widgets by type and supports nested children.
+- `BaseWidget` provides validation and event dispatch helpers.
+- Widgets are composable via `children`.
+
+---
+
+## Transport Selection
+
+```mermaid
+flowchart LR
+    A[serverUrl] --> B{Protocol}
+    B -->|wss/ws| C[WebSocket]
+    B -->|https/http| D[CORS fetch]
+    D -->|CORS Error| E[JSONP Fallback]
+```
+
+---
+
+## Widget System (Composable)
+
+Widgets are defined as a tree. Each widget may include `props` and `children`.
+
+```json
+{
+  "type": "container",
+  "props": { "layout": "vertical", "gap": "medium" },
+  "children": [
+    { "type": "text", "props": { "content": "Welcome!", "format": "plain" } },
+    {
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "start", "text": "Get Started", "value": "start" }
+        ]
+      }
     }
+  ]
 }
 ```
 
-**Features:**
-- Dynamic CSS generation
-- Color scheme management
-- Light/dark mode support
-- Custom CSS injection
+### Supported Widget Categories
+- **Content/Layout**: `text`, `container`, `card`, `row`, `column`
+- **Actions**: `button`, `buttons`, `confirmation`
+- **Inputs**: `input`, `password`, `textarea`
+- **Selection**: `select`, `radio`, `checkbox`, `toggle`
+- **Interactive**: `rating`, `slider`, `date`, `tags`, `color_picker`
+- **Data/Advanced**: `file_upload`, `progress`, `list`, `conditional`, `form`
 
-## Widget System Architecture
+> `image` and `icon` are placeholders mapped to container behavior.
 
-### Widget Factory (`src/modules/widgets/widget-factory.js`)
-Creates and manages widget instances:
+---
 
-```javascript
-class WidgetFactory {
-    static create(type, config) {
-        const WidgetClass = widgetRegistry[type];
-        return new WidgetClass(config);
-    }
-}
-```
-
-### Base Widget (`src/modules/widgets/base-widget.js`)
-Abstract base class for all widgets:
-
-```javascript
-class BaseWidget {
-    constructor(config) {
-        this.config = config;
-        this.element = this.createElement();
-    }
-    
-    render() {
-        // Abstract method
-    }
-    
-    validate() {
-        // Common validation logic
-    }
-}
-```
-
-### Component Widgets
-Specialized widgets for different interaction types:
-
-- **Input Widgets**: Text, textarea, password
-- **Selection Widgets**: Select, radio, checkbox
-- **Interactive Widgets**: Rating, date picker, color picker
-- **Action Widgets**: Buttons, confirmation, file upload
-
-## Data Flow Architecture
+## Event Flow
 
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant W as ChatWidget
-    participant A as API Layer
-    participant S as Server
     participant UI as UI Layer
-    
-    U->>W: Send Message
-    W->>A: API.sendMessage()
-    A->>S: HTTP/WebSocket Request
-    S->>A: Response
-    A->>W: Process Response
-    W->>UI: UI.renderMessage()
-    UI->>U: Display Response
+    participant W as ChatWidget
+    participant API as HybridChatAPI
+    participant S as Server
+
+    U->>UI: Type or interact
+    UI->>W: sendMessage / widgetInteraction
+    W->>API: sendMessage()
+    API->>S: HTTP/WebSocket message
+    S->>API: Response
+    API->>W: Process response
+    W->>UI: appendMessage()
+    UI->>U: Render
 ```
 
-## State Management
+### Key Events
+- `widgetInteraction` (document): emitted by widgets when user interacts.
+- `widgetValueChanged` (document): emitted on input value changes for forms.
+- `chatwidget:error` (window): emitted when errors are surfaced to the user.
+- `chatwidget:typing` (window): emitted on WebSocket typing indicators.
+- `chatwidget:read_receipt` (window): emitted on WebSocket read receipts.
 
-ChatUI uses a simple state management approach:
+---
 
-### Configuration State
-```javascript
-this.config = {
-    serverUrl: string,
-    position: string,
-    color: string,
-    // ... other options
-};
-```
+## Security & Reliability
 
-### Session State
-```javascript
-this.session = {
-    sessionKey: string,
-    isOpen: boolean,
-    messages: Array,
-    typing: boolean
-};
-```
+- Input validation and sanitization for messages and widgets.
+- JSONP callback names are randomized and validated.
+- CORS requests enforce JSON responses and timeouts.
+- Scoped CSS prevents style leakage.
+- WebSocket URL validation to avoid insecure protocols in production.
 
-### UI State
-```javascript
-this.uiState = {
-    currentWidget: Widget,
-    focusElement: HTMLElement,
-    scrollPosition: number
-};
-```
-
-## Security Architecture
-
-### XSS Prevention
-- Input sanitization for all user content
-- Safe HTML generation
-- Scoped CSS prevents style injection
-
-### CORS Security
-- Proper header validation
-- Origin checking
-- Timeout protection
-
-### JSONP Security
-- Callback name validation
-- Response parsing safety
-- Fallback mechanisms
-
-## Performance Optimizations
-
-### Bundle Size Optimization
-- Tree-shaking for unused widgets
-- Minimal core footprint (~12KB)
-- Conditional loading of components
-
-### Runtime Optimizations
-- Event delegation
-- DOM batching
-- Lazy loading of widgets
-
-### Memory Management
-- Proper cleanup on widget destruction
-- Event listener removal
-- Reference management
+---
 
 ## Extensibility Points
 
 ### Custom Widgets
-```javascript
-class CustomWidget extends BaseWidget {
-    render() {
-        // Custom implementation
-    }
-}
+- Implement a `BaseWidget` subclass.
+- Register via `WidgetFactory.registerWidget("custom", CustomWidget)`.
 
-WidgetFactory.register('custom', CustomWidget);
-```
+### Theming
+- Override CSS variables per widget ID:
+  - `--chat-primary`, `--chat-bg`, `--chat-surface`, `--chat-text`, `--chat-border`
 
-### Custom Transports
-```javascript
-class CustomTransport extends BaseTransport {
-    async send(data) {
-        // Custom transport logic
-    }
-}
-
-API.registerTransport('custom', CustomTransport);
-```
-
-### Theme Extensions
-```css
-#chat-widget.custom-theme {
-    --primary-color: #custom;
-    --background: #custom-bg;
-}
-```
+---
 
 ## See Also
 
-- [API Reference](api_reference.md) - Complete API documentation
-- [Data Flow](data_flow.md) - Detailed data flow analysis
-- [Configuration](configuration.md) - All configuration options
-- [Development](development.md) - Development workflow and guidelines
+- `docs/livewiki/getting_started.md`
+- `docs/livewiki/configuration.md`
+- `docs/livewiki/api_reference.md`
+- `docs/overview.md`
+- `docs/widget-system.md`

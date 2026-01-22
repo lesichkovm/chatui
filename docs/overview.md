@@ -1,76 +1,173 @@
+---
+path: overview.md
+page-type: overview
+summary: High-level introduction and architectural overview of the ChatUI widget system.
+tags: [overview, introduction, architecture, widgets]
+created: 2026-01-22
+updated: 2026-01-22
+version: 1.5.0
+---
+
 # ChatUI Project Overview
 
-## What This Project Is
+ChatUI is a professional, ultra-lightweight, **frontend-only** chat widget built with **pure Vanilla JavaScript**. It provides a modern conversational UI without framework dependencies, and supports multiple transport protocols with automatic fallback.
 
-ChatUI is a **frontend-only, API-agnostic embeddable chat widget** designed for lightning-fast integration across any web environment. While competitors often require heavy frameworks, ChatUI is built on **pure Vanilla JavaScript**, offering an ultra-lightweight footprint (~12KB core) with zero external dependencies.
+## Strategic Position
 
-It distinguishes itself through a **Rich Interactive Widget System**, enabling backends to deliver complex UI components (forms, ratings, file uploads) directly into the chat stream, making it a powerful tool for lead generation and customer support.
+ChatUI delivers interactive chat capabilities with minimal performance overhead, designed to be “live in 30 seconds” while remaining extensible for enterprise requirements.
 
-## Strategic Positioning & Vision
+## Key Features
 
-ChatUI is positioned as a **"Low-Friction, High-Performance"** alternative to comprehensive but heavy libraries like Alibaba's ChatUI. 
+- **Zero dependencies**: No React/Vue/jQuery required.
+- **Composable widget system**: Nested widget trees with containers, cards, forms, lists, and conditionals.
+- **Hybrid transport**: WebSocket (`ws/wss`) with HTTP fallback via CORS and JSONP.
+- **Dual display modes**: `popup` or `fullpage`.
+- **Theme system**: Light/Dark modes, Default/Branded themes, CSS variable overrides.
+- **Security & sanitization**: Widget data sanitization and safe message rendering.
+- **Programmatic API**: `ChatUI.init()` plus theme controls and lifecycle management.
 
-- **The Vision**: To provide the flexibility of a framework-based conversational UI without the framework lock-in or performance overhead.
-- **Competitive Advantage**: Works where others can't—legacy systems, performance-critical sites, and across diverse technical stacks without a build step.
+## Target Markets
 
-## Target Market Segments
+- **SMBs**: Professional chat with minimal dev overhead.
+- **Enterprise legacy systems**: Modern UI without framework migration.
+- **SaaS platforms**: White-label frontend for proprietary backends.
 
-1. **Small to Medium Businesses (SMBs)**: Who need a professional chat solution that can be "live in 30 seconds" with zero development overhead.
-2. **Enterprises with Legacy Systems**: Organizations that cannot easily adopt modern frameworks (React/Vue) but require sophisticated, interactive chat capabilities.
-3. **Agencies & SaaS Providers**: Developers looking for a white-label, API-agnostic frontend that they can plug into their own proprietary backends.
+## Architecture Overview
 
-## Key Features & Unique Value Propositions
+```mermaid
+graph TB
+    A[ChatUI Widget] --> B[Entry Point]
+    A --> C[Core Modules]
+    A --> D[Widget System]
+    
+    B --> E[Auto-Initialization]
+    B --> F[Programmatic API]
+    
+    C --> G[ChatWidget Class]
+    C --> H[API Layer]
+    C --> I[UI Layer]
+    C --> J[Theme System]
+    
+    H --> K[WebSocket]
+    H --> L[CORS (Fetch)]
+    H --> M[JSONP Fallback]
+    
+    I --> N[Message Rendering]
+    I --> O[DOM Management]
+    
+    D --> P[Widget Factory]
+    D --> Q[Composable Widgets]
+```
 
-### Rich Interactive Widgets
-A self-contained library of 15+ specialized components (managed via `WidgetFactory`):
-- **Data Collection**: Star ratings, sliders, date/time pickers, and color pickers.
-- **Selection & Forms**: Multi-line textareas, searchable select menus, checkboxes, and radio buttons.
-- **Advanced Interaction**: Multi-file uploads, tags input, confirmation dialogs, and real-time progress bars.
+## Transport Selection
 
-### Universal Compatibility & Performance
-- **Zero Dependencies**: No React, Vue, or jQuery required.
-- **Ultra-Lightweight**: Core widget is ~12KB; full bundle with all 15+ widgets is ~70KB.
-- **Cross-Domain Freedom**: Native JSONP support bypasses CORS restrictions for seamless multi-domain deployments.
-- **Real-Time Communication**: Hybrid WebSocket/JSONP transport with automatic protocol detection, live typing indicators, and read receipts.
-- **Dual Display Modes**: Supports both a sleek **Popup** (bottom-right/left) and a **Full-page/Embedded** mode for dedicated support pages.
+ChatUI chooses the transport based on the `serverUrl` protocol:
 
-### Developer-Centric Design
-- **Single-Script Integration**: Configuration via standard HTML `data-` attributes.
-- **Programmatic API**: Full control via `ChatUI.init()`, allowing dynamic open/close and message sending.
-- **Scoped & Secure**: ID-rooted CSS (`#chat-widget-container`) prevents style bleeding; robust XSS prevention and callback validation.
+- **`wss://` or `ws://`** → WebSocket
+- **`https://` or `http://`** → CORS (fetch) with JSONP fallback when needed
 
-### Recommended CSP Headers
-To complement the widget's built-in security features, host applications should implement the following Content Security Policy (CSP) headers:
-- `script-src`: `'self' https://your-cdn.com`
-- `style-src`: `'self' 'unsafe-inline'` (required for widget styling)
-- `connect-src`: `'self' wss://your-chat-server.com`
-- `default-src`: `'self'`
+## Theme System
 
-## Technical Architecture
+ChatUI uses data-attributes-first theming with CSS variables:
 
-### Core Modules
-- **`src/modules/chat-widget.class.js`**: Central controller managing state, lifecycle, and event coordination.
-- **`src/modules/ui.js`**: Lean rendering engine with an internal CSS reset.
-- **`src/modules/api.js`**: Base JSONP communication layer handling the Handshake and Message protocols.
-- **`src/modules/hybrid-api.js`**: Hybrid WebSocket/JSONP adapter with automatic protocol detection and real-time features.
-- **`src/modules/widgets/`**: Modular registry of interactive UI components.
+- **Themes**: `default` and `branded`
+- **Modes**: `light` and `dark`
+- **Custom overrides**: `data-color-light`, `data-bg-color-dark`, etc.
 
-### Communication Protocol
-1. **Handshake**: Establishes session persistence via `/api/handshake`.
-2. **State Management**: Reactive state-driven UI updates using a predictable `setState` pattern.
-3. **Widget Interaction**: Centralized event bus (`widgetInteraction`) for capturing and relaying structured user data from widgets back to the server.
+Theme mode can be set via `data-theme-mode` (preferred) or `data-mode` (legacy).
 
-## Modernization Roadmap (Ongoing)
+## Widget System
 
-We are currently executing a **Product Modernization Phase** to bring core conversational features to the vanilla ecosystem:
-- [x] **Modular Widget System**: 15+ interactive components.
-- [x] **Modern Theme System**: CSS Variables for deep, runtime-switchable branding (Light/Dark/Corporate).
-- [x] **Real-time Pipeline**: Hybrid WebSocket/JSONP support with live typing indicators, read receipts, and streaming responses.
-- [ ] **Rich Content**: Native support for Markdown parsing and image/card message types.
+ChatUI implements a **composable widget tree**. Every message can contain a nested structure of widgets.
 
-## Development & Testing
+### Core Widget Categories
 
-- **Testing**: Industrial-grade E2E coverage using **Playwright**.
-- **Build System**: Parallelized `esbuild` pipeline for rapid development cycles.
-- **Demos**: Full suite of widget demonstrations available in the `demo/` directory.
+- **Content/Layout**: `text`, `container`, `card`, `row`, `column`
+- **Actions**: `button`, `buttons`, `confirmation`
+- **Inputs**: `input`, `password`, `textarea`
+- **Selection**: `select`, `radio`, `checkbox`, `toggle`
+- **Interactive**: `rating`, `slider`, `date`, `tags`, `color_picker`
+- **Data/Advanced**: `file_upload`, `progress`, `list`, `conditional`, `form`
 
+> `image` and `icon` types currently map to container behavior as placeholders.
+
+### Composable Message Format (Preferred)
+
+```json
+{
+  "status": "success",
+  "widgets": [
+    {
+      "type": "card",
+      "children": [
+        { "type": "text", "props": { "content": "Welcome!", "format": "plain" } },
+        {
+          "type": "buttons",
+          "props": {
+            "options": [
+              { "id": "start", "text": "Get Started", "value": "start" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Legacy Message Format (Supported)
+
+```json
+{
+  "text": "Choose an option",
+  "sender": "bot",
+  "widget": {
+    "type": "buttons",
+    "options": [
+      { "id": "opt1", "text": "Option 1", "value": "opt1" }
+    ]
+  }
+}
+```
+
+## Integration Patterns
+
+### HTML Integration
+
+```html
+<script 
+  id="chat-widget"
+  src="dist/chat-widget.min.js"
+  data-server-url="https://your-server.com"
+  data-position="bottom-right"
+  data-title="Chat with us">
+</script>
+```
+
+### Programmatic API
+
+```javascript
+const chat = ChatUI.init({
+  id: 'support-chat',
+  title: 'Support Chat',
+  position: 'bottom-left',
+  color: '#28a745',
+  serverUrl: 'https://your-server.com'
+});
+```
+
+## Module Structure
+
+- `src/entry.js` → global API + auto-init
+- `src/modules/chat-widget.class.js` → main orchestrator
+- `src/modules/api.js` → hybrid transport (WS/CORS/JSONP)
+- `src/modules/ui.js` → DOM rendering + styles
+- `src/modules/theme.js` → theme system
+- `src/modules/widgets/` → composable widgets
+
+## See Also
+
+- `docs/theme-system.md`
+- `docs/widget-system.md`
+- `docs/backend-integration-guide.md`
+- `docs/composition-recipes.md`

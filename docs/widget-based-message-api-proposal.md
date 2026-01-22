@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document proposes an architectural shift to a **Composable Widget-Based Message System**. By treating all message content as a tree of widgets, we enable infinite flexibility, deep nesting (e.g., cards containing multiple buttons), and a future-proof interface that simplifies both bot and human-driven interactions.
+This document describes the **Composable Widget-Based Message System** that is now implemented. By treating all message content as a tree of widgets, we enable deep nesting (e.g., cards containing multiple buttons) and a future-proof interface that simplifies both bot and human-driven interactions.
 
 ## Current State Analysis
 
@@ -25,7 +25,7 @@ This document proposes an architectural shift to a **Composable Widget-Based Mes
 3. **Limited Composition**: Cannot easily combine multiple content types (e.g., a card with text, an image, and a row of buttons).
 4. **Extensibility Issues**: Adding new content types requires specific API handling logic.
 
-## Proposed Architecture: Composable Widgets
+## Composable Widgets (Current Architecture)
 
 We move from a flat list of widgets to a **recursive widget tree**. Every element in a message is a widget, and some widgets (Containers) can host other widgets.
 
@@ -175,10 +175,10 @@ export class ContainerWidget extends BaseWidget {
 - ✅ Update documentation with "Composition Recipes".
 
 ---
-*Document Version: 3.1 (Phase 3 Complete)*  
+*Document Version: 4.0 (Implemented)*  
 *Last Updated: January 22, 2026*  
 *Author: ChatUI Development Team*
 *Phase 1 Status: ✅ COMPLETED*
 *Phase 2 Status: ✅ COMPLETED (Clean composable system)*
 *Phase 3 Status: ✅ COMPLETED (Advanced composition)*
-*Legacy Compatibility: ❌ REMOVED*
+*Legacy Compatibility: ✅ Supported (legacy `text` + `widget` responses still accepted)*
