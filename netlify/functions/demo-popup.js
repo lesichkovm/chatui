@@ -31,7 +31,26 @@ const handler = async (event, context) => {
           responseData = {
             status: "success",
             session_key: "demo_popup_" + Date.now(),
-            message: "Welcome to Popup Chat Demo! This is the floating chat widget demo."
+            widgets: [
+              {
+                type: "text",
+                props: { 
+                  content: "Welcome to Popup Chat Demo! This is the floating chat widget demo.", 
+                  format: "plain" 
+                }
+              },
+              {
+                type: "buttons",
+                props: {
+                  options: [
+                    { id: "btn1", text: "🎨 Change Color", value: "color" },
+                    { id: "btn2", text: "📍 Move Position", value: "position" },
+                    { id: "btn3", text: "🔔 Toggle Sound", value: "sound" },
+                    { id: "btn4", text: "❓ Help", value: "help" }
+                  ]
+                }
+              }
+            ]
           };
         }
         
@@ -232,6 +251,9 @@ const handler = async (event, context) => {
       const body = JSON.parse(event.body || '{}');
       const { type, payload, session_key } = body;
       
+      // Debug logging
+      console.log('Popup demo POST request:', { type, payload, session_key, body });
+      
       let responseData = {};
       
       switch (type) {
@@ -245,13 +267,123 @@ const handler = async (event, context) => {
           break;
           
         case 'message':
-          responseData = {
-            type: 'message',
-            text: "Popup chat received: " + (payload?.text || "your message"),
-            sender: 'bot',
-            timestamp: Date.now(),
-            session_key: session_key
-          };
+          // Handle CORS API format (message at top level) and WebSocket format (payload.text)
+          const messageText = body.message || payload?.text || "your message";
+          const lowerMessage = messageText.toLowerCase().trim();
+          
+          // Handle special commands that trigger widgets (new format)
+          if (lowerMessage === 'menu' || lowerMessage === 'options') {
+            responseData = {
+              type: 'message',
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Popup Chat Options:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "btn1", text: "🎨 Change Color", value: "color" },
+                      { id: "btn2", text: "📍 Move Position", value: "position" },
+                      { id: "btn3", text: "🔔 Toggle Sound", value: "sound" },
+                      { id: "btn4", text: "❓ Help", value: "help" }
+                    ]
+                  }
+                }
+              ],
+              sender: 'bot',
+              timestamp: Date.now(),
+              session_key: session_key
+            };
+          } else if (lowerMessage === 'color') {
+            responseData = {
+              type: 'message',
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose a color for the popup:", format: "plain" }
+                },
+                {
+                  type: "color_picker",
+                  props: {
+                    defaultColor: "#007bff",
+                    presetColors: ["#007bff", "#28a745", "#dc3545", "#ffc107", "#6610f2", "#e83e8c"],
+                    showSubmitButton: true,
+                    buttonText: "Apply"
+                  }
+                }
+              ],
+              sender: 'bot',
+              timestamp: Date.now(),
+              session_key: session_key
+            };
+          } else if (lowerMessage === 'position') {
+            responseData = {
+              type: 'message',
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose popup position:", format: "plain" }
+                },
+                {
+                  type: "select",
+                  props: {
+                    options: [
+                      { value: "bottom-right", text: "Bottom Right (Default)" },
+                      { value: "bottom-left", text: "Bottom Left" },
+                      { value: "top-right", text: "Top Right" },
+                      { value: "top-left", text: "Top Left" }
+                    ],
+                    placeholder: "Select position...",
+                    showSubmitButton: true
+                  }
+                }
+              ],
+              sender: 'bot',
+              timestamp: Date.now(),
+              session_key: session_key
+            };
+          } else if (lowerMessage === 'sound') {
+            responseData = {
+              type: 'message',
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Enable notification sounds?", format: "plain" }
+                },
+                {
+                  type: "toggle",
+                  props: {
+                    defaultValue: false,
+                    label: "Notification Sounds",
+                    showSubmitButton: true,
+                    buttonText: "Save"
+                  }
+                }
+              ],
+              sender: 'bot',
+              timestamp: Date.now(),
+              session_key: session_key
+            };
+          } else {
+            // Default text response (old format for backward compatibility)
+            const responses = [
+              "This is the popup chat demo! Try typing 'menu' to see options.",
+              "I'm the popup widget assistant. How can I help you?",
+              "This demo shows the floating chat widget functionality.",
+              "Try 'color' to change the popup color or 'position' to move it!",
+              "The popup chat can be customized in many ways. Ask me how!"
+            ];
+            
+            responseData = {
+              type: 'message',
+              text: responses[Math.floor(Math.random() * responses.length)],
+              sender: 'bot',
+              timestamp: Date.now(),
+              session_key: session_key
+            };
+          }
           break;
           
         case 'typing':
@@ -263,6 +395,7 @@ const handler = async (event, context) => {
           break;
           
         default:
+          console.log('Popup demo: Unknown message type:', type);
           responseData = {
             type: 'error',
             message: 'Popup Chat Demo: Unknown message type',
