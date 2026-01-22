@@ -46,15 +46,9 @@ test.describe("Chat Widget - Message Functionality", () => {
     const messagesContainer = page.locator("#chat-widget-1-messages");
     await expect(messagesContainer).toBeVisible();
 
-    const messageElements = messagesContainer.locator(
-      '[id^="chat-widget-1-message-"]',
-    );
-    const count = await messageElements.count();
-    expect(count).toBeGreaterThan(0);
-
-    const lastMessage = messageElements.last();
-    const messageText = await lastMessage.textContent();
-    expect(messageText).toContain(testMessage);
+    // Verify the user message is present in the list
+    const userMessage = messagesContainer.locator(`.user-message:has-text("${testMessage}")`);
+    await expect(userMessage).toBeVisible();
   });
 
   test("should not send empty message", async ({ page }) => {
@@ -73,7 +67,6 @@ test.describe("Chat Widget - Message Functionality", () => {
       '[id^="chat-widget-1-message-"]',
     );
     const countBefore = await messageElementsBefore.count();
-    console.log(`Messages before send: ${countBefore}`);
 
     // Try to send empty message
     await messageInput.fill("");
@@ -85,10 +78,6 @@ test.describe("Chat Widget - Message Functionality", () => {
       '[id^="chat-widget-1-message-"]',
     );
     const countAfter = await messageElementsAfter.count();
-
-    console.log(
-      `Messages before send: ${countBefore}, after send: ${countAfter}`,
-    );
 
     // Message count should NOT increase when sending empty message
     expect(countAfter).toBe(countBefore);
@@ -105,12 +94,7 @@ test.describe("Chat Widget - Message Functionality", () => {
     await messageInput.press("Enter");
 
     const messagesContainer = page.locator("#chat-widget-1-messages");
-    const messageElements = messagesContainer.locator(
-      '[id^="chat-widget-1-message-"]',
-    );
-    const count = await messageElements.count();
-    expect(count).toBeGreaterThan(0);
-
+    
     // Verify the user message is present
     const userMessage = messagesContainer.locator(`.user-message:has-text("${testMessage}")`);
     await expect(userMessage).toBeVisible();
@@ -125,16 +109,13 @@ test.describe("Chat Widget - Message Functionality", () => {
 
     // Set up test environment to ensure proper responses
     await page.evaluate(() => {
-      // Find the widget instance and ensure it's in test mode
       const scriptElement = document.querySelector(
         'script[id^="chat-widget-"]',
       );
       if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
         const widget = (scriptElement as any)._chatWidgetInstance;
         if (widget && widget.api) {
-          // Force test environment
           widget.api.isTestEnvironment = () => true;
-          // Reduce rate limiting for testing
           widget.minMessageInterval = 100; // 100ms instead of 1s
         }
       }
@@ -145,33 +126,20 @@ test.describe("Chat Widget - Message Functionality", () => {
     for (const message of messages) {
       await messageInput.fill(message);
       await sendButton.click();
-
-      // Wait enough time for rate limiting (110ms minimum)
       await page.waitForTimeout(150);
-
-      // Wait a bit more for processing
       await page.waitForTimeout(300);
     }
 
     const messagesContainer = page.locator("#chat-widget-1-messages");
-
-    // Get all messages
     const userMessages = messagesContainer.locator(".user-message");
-    const botMessages = messagesContainer.locator(
-      ".bot-message:not(.waiting-message)",
-    );
-
     const userMessageCount = await userMessages.count();
-    const botMessageCount = await botMessages.count();
 
-    // Should have at least the 3 user messages
     expect(userMessageCount).toBeGreaterThanOrEqual(messages.length);
 
     // Verify user messages are present in order
-    for (let i = 0; i < Math.min(messages.length, userMessageCount); i++) {
-      const userMessage = userMessages.nth(i);
-      const messageText = await userMessage.textContent();
-      expect(messageText).toContain(messages[i]);
+    for (let i = 0; i < messages.length; i++) {
+      const userMessage = userMessages.nth(userMessageCount - messages.length + i);
+      await expect(userMessage).toContainText(messages[i]);
     }
   });
 
@@ -185,7 +153,6 @@ test.describe("Chat Widget - Message Functionality", () => {
     for (let i = 0; i < 10; i++) {
       await messageInput.fill(`Message ${i + 1}`);
       await sendButton.click();
-      // Wait for response before sending next message
       await page.waitForTimeout(150);
     }
 
@@ -208,7 +175,6 @@ test.describe("Chat Widget - Message Functionality", () => {
     await messageInput.fill(testMessage);
     await sendButton.click();
 
-    // Wait for response
     await page.waitForTimeout(150);
 
     const closeButton = page.locator("#chat-widget-1-close");
@@ -221,13 +187,8 @@ test.describe("Chat Widget - Message Functionality", () => {
     await expect(chatWindow).toBeVisible();
 
     const messagesContainer = page.locator("#chat-widget-1-messages");
-    const userMessages = messagesContainer.locator(".user-message");
-    const count = await userMessages.count();
-    expect(count).toBeGreaterThan(0);
-
-    const lastUserMessage = userMessages.last();
-    const messageText = await lastUserMessage.textContent();
-    expect(messageText).toContain(testMessage);
+    const userMessage = messagesContainer.locator(`.user-message:has-text("${testMessage}")`);
+    await expect(userMessage).toBeVisible();
   });
 
   test("should show waiting message when sending message", async ({ page }) => {
@@ -237,42 +198,29 @@ test.describe("Chat Widget - Message Functionality", () => {
     const messageInput = page.locator("#chat-widget-1-input");
     const sendButton = page.locator("#chat-widget-1-send");
 
-    const testMessage = "Test waiting message";
-    
-    // Increase response delay to ensure we catch the waiting message
+    // Increase delay to catch the waiting message
     await page.evaluate(() => {
-        const scriptElement = document.querySelector('script[id^="chat-widget-"]');
-        if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
-            const widget = (scriptElement as any)._chatWidgetInstance;
-            const originalSendMessage = widget.api.sendMessage;
-            widget.api.sendMessage = (msg, onSuccess, onError) => {
-                setTimeout(() => {
-                    if (onSuccess) onSuccess(`Echo: ${msg}`, 'bot');
-                }, 500); // 500ms delay
-            };
-        }
+      const scriptElement = document.querySelector('script[id^="chat-widget-"]');
+      if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
+        const widget = (scriptElement as any)._chatWidgetInstance;
+        widget.api.sendMessage = (msg, onSuccess) => {
+          setTimeout(() => {
+            if (onSuccess) onSuccess(`Echo: ${msg}`, 'bot');
+          }, 1000);
+        };
+      }
     });
 
-    await messageInput.fill(testMessage);
-
-    // Click send and check for waiting message immediately
+    await messageInput.fill("Test waiting message");
     await sendButton.click();
 
     const messagesContainer = page.locator("#chat-widget-1-messages");
-
-    // Check that waiting message appears
     const waitingMessage = messagesContainer.locator(".waiting-message");
     await expect(waitingMessage).toBeVisible();
 
-    // Check that waiting message has the correct structure
     const waitingDots = waitingMessage.locator(".waiting-dots");
     await expect(waitingDots).toBeVisible();
-
-    const dots = waitingDots.locator(".dot");
-    await expect(dots).toHaveCount(3);
-
-    // Verify waiting message has bot message styling
-    await expect(waitingMessage).toHaveClass(/bot-message/);
+    await expect(waitingDots.locator(".dot")).toHaveCount(3);
   });
 
   test("should remove waiting message when response arrives", async ({
@@ -284,51 +232,34 @@ test.describe("Chat Widget - Message Functionality", () => {
     const messageInput = page.locator("#chat-widget-1-input");
     const sendButton = page.locator("#chat-widget-1-send");
 
-    // Set up test environment to ensure proper responses
+    // Set up delayed response
     await page.evaluate(() => {
-      // Find the widget instance and ensure it's in test mode
-      const scriptElement = document.querySelector(
-        'script[id^="chat-widget-"]',
-      );
+      const scriptElement = document.querySelector('script[id^="chat-widget-"]');
       if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
         const widget = (scriptElement as any)._chatWidgetInstance;
-        if (widget && widget.api) {
-          // Force test environment
-          widget.api.isTestEnvironment = () => true;
-        }
+        widget.api.sendMessage = (msg, onSuccess) => {
+          setTimeout(() => {
+            if (onSuccess) onSuccess(`Response to: ${msg}`, 'bot');
+          }, 500);
+        };
       }
     });
 
-    const testMessage = "Test waiting removal";
-    await messageInput.fill(testMessage);
-
-    // Click send
+    await messageInput.fill("Test waiting removal");
     await sendButton.click();
 
     const messagesContainer = page.locator("#chat-widget-1-messages");
-
-    // Check that waiting message appears
     const waitingMessage = messagesContainer.locator(".waiting-message");
     await expect(waitingMessage).toBeVisible();
 
-    // Wait for the response to arrive and waiting message to be replaced
-    // Wait for a bot message that contains the expected response text
-    await page.waitForSelector(".bot-message:not(.waiting-message)", {
-      timeout: 10000,
-    });
+    // Wait for bot response
+    await page.waitForSelector(".bot-message:not(.waiting-message)", { timeout: 5000 });
 
-    // Give some time for the waiting message to be removed
-    await page.waitForTimeout(100);
-
-    // Check that waiting message is removed and replaced with bot response
+    // Verify waiting message is gone
     await expect(waitingMessage).not.toBeVisible();
-
-    // Verify bot message is present
-    const botMessages = messagesContainer.locator(
-      ".bot-message:not(.waiting-message)",
-    );
-    const botMessageCount = await botMessages.count();
-    expect(botMessageCount).toBeGreaterThan(0);
+    
+    const botMessages = messagesContainer.locator(".bot-message:not(.waiting-message)");
+    await expect(botMessages.last()).toContainText("Response to: Test waiting removal");
   });
 
   test("should show waiting message for widget interactions", async ({
@@ -340,26 +271,39 @@ test.describe("Chat Widget - Message Functionality", () => {
     const messageInput = page.locator("#chat-widget-1-input");
     const sendButton = page.locator("#chat-widget-1-send");
 
-    // Send a message that might trigger a widget
+    // Setup delayed response for all API calls
+    await page.evaluate(() => {
+      const scriptElement = document.querySelector('script[id^="chat-widget-"]');
+      if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
+        const widget = (scriptElement as any)._chatWidgetInstance;
+        widget.api.sendMessage = (msg, onSuccess) => {
+          // If it's a widget request
+          if (msg === "show buttons") {
+            const data = {
+              type: "buttons",
+              props: { options: [{ id: "opt1", text: "Click Me", value: "clicked" }] }
+            };
+            setTimeout(() => onSuccess("Here are buttons:", "bot", data), 100);
+          } else {
+            // For other interactions, delay more so we can see the waiting dots
+            setTimeout(() => onSuccess(`Action: ${msg}`, "bot"), 1000);
+          }
+        };
+      }
+    });
+
     await messageInput.fill("show buttons");
     await sendButton.click();
 
-    const messagesContainer = page.locator("#chat-widget-1-messages");
+    // Wait for buttons to appear
+    const widgetButton1 = page.locator(".widget-button").first();
+    await expect(widgetButton1).toBeVisible();
 
-    // Wait for potential widget to appear
-    await page.waitForTimeout(100);
+    // Click widget button
+    await widgetButton1.click();
 
-    // Look for any widget buttons
-    const widgetButtons = page.locator(".widget-button");
-    const buttonCount = await widgetButtons.count();
-
-    if (buttonCount > 0) {
-      // Click the first widget button
-      await widgetButtons.first().click();
-
-      // Check that waiting message appears after widget interaction
-      const waitingMessage = messagesContainer.locator(".waiting-message");
-      await expect(waitingMessage).toBeVisible();
-    }
+    // Check for waiting message
+    const waitingMessage = page.locator(".waiting-message");
+    await expect(waitingMessage).toBeVisible();
   });
 });

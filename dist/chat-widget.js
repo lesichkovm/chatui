@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-22T20:18:33.774Z
+ * Generated on: 2026-01-22T20:26:22.342Z
  */
 
 
@@ -7490,9 +7490,10 @@
       };
       this.api = new HybridChatAPI({ serverUrl: this.config.serverUrl });
       this.state = {
-        isOpen: false,
+        isOpen: this.config.displayMode === "fullpage",
         messages: []
       };
+      this.hasConnected = false;
       this.init();
       if (this.scriptElement) {
         this.scriptElement._chatWidgetInstance = this;
@@ -7519,6 +7520,25 @@
       this.sendButton = this.chatWindow.querySelector(".send");
       this.closeButton = this.chatWindow.querySelector(".close");
       this.bindEvents();
+      document.addEventListener("widgetInteraction", (event) => {
+        if (event.detail.widgetId === this.widgetId) {
+          this.handleWidgetInteraction(event.detail);
+        }
+      });
+      this.themeManager.watchSystemTheme((newMode) => {
+        this.setThemeMode(newMode);
+      });
+      if (this.state.isOpen) {
+        this.initializeConnection();
+      }
+    }
+    /**
+     * Initialize connection to the server
+     * @private
+     */
+    initializeConnection() {
+      if (this.hasConnected) return;
+      this.hasConnected = true;
       this.api.performHandshake(
         // Success callback
         () => {
@@ -7542,14 +7562,6 @@
           this.showError("Connection to server lost. Attempting to reconnect...");
         }
       );
-      document.addEventListener("widgetInteraction", (event) => {
-        if (event.detail.widgetId === this.widgetId) {
-          this.handleWidgetInteraction(event.detail);
-        }
-      });
-      this.themeManager.watchSystemTheme((newMode) => {
-        this.setThemeMode(newMode);
-      });
     }
     /**
      * Apply custom colors from data attributes via inline styles
@@ -7682,13 +7694,20 @@
      * Toggle widget open/closed state
      */
     toggle() {
-      this.setState({ isOpen: !this.state.isOpen });
+      if (this.state.isOpen) {
+        this.close();
+      } else {
+        this.open();
+      }
     }
     /**
      * Open the chat widget
      */
     open() {
       this.setState({ isOpen: true });
+      if (!this.hasConnected) {
+        this.initializeConnection();
+      }
       setTimeout(() => {
         if (this.textarea) this.textarea.focus();
       }, 100);

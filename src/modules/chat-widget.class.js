@@ -85,9 +85,11 @@ export class ChatWidget {
 
     // State initialization
     this.state = {
-      isOpen: false,
+      isOpen: this.config.displayMode === "fullpage",
       messages: [],
     };
+
+    this.hasConnected = false;
 
     this.init();
 
@@ -127,6 +129,32 @@ export class ChatWidget {
 
     this.bindEvents();
 
+    // Listen for widget interactions
+    document.addEventListener("widgetInteraction", (event) => {
+      if (event.detail.widgetId === this.widgetId) {
+        this.handleWidgetInteraction(event.detail);
+      }
+    });
+
+    // Watch for system theme changes
+    this.themeManager.watchSystemTheme((newMode) => {
+      this.setThemeMode(newMode);
+    });
+
+    // Connect immediately if widget is open (e.g. fullpage mode)
+    if (this.state.isOpen) {
+      this.initializeConnection();
+    }
+  }
+
+  /**
+   * Initialize connection to the server
+   * @private
+   */
+  initializeConnection() {
+    if (this.hasConnected) return;
+    this.hasConnected = true;
+
     // Perform handshake with error handling
     this.api.performHandshake(
       // Success callback
@@ -153,18 +181,6 @@ export class ChatWidget {
         this.showError("Connection to server lost. Attempting to reconnect...");
       },
     );
-
-    // Listen for widget interactions
-    document.addEventListener("widgetInteraction", (event) => {
-      if (event.detail.widgetId === this.widgetId) {
-        this.handleWidgetInteraction(event.detail);
-      }
-    });
-
-    // Watch for system theme changes
-    this.themeManager.watchSystemTheme((newMode) => {
-      this.setThemeMode(newMode);
-    });
   }
 
   /**
@@ -328,7 +344,11 @@ export class ChatWidget {
    * Toggle widget open/closed state
    */
   toggle() {
-    this.setState({ isOpen: !this.state.isOpen });
+    if (this.state.isOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
   }
 
   /**
@@ -336,6 +356,12 @@ export class ChatWidget {
    */
   open() {
     this.setState({ isOpen: true });
+    
+    // Connect if not already connected
+    if (!this.hasConnected) {
+      this.initializeConnection();
+    }
+
     // Focus input after opening
     setTimeout(() => {
       if (this.textarea) this.textarea.focus();
