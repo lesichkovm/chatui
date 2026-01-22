@@ -41,60 +41,93 @@ const handler = async (event, context) => {
           
           if (lowerMessage === 'menu' || lowerMessage === 'options') {
             responseData = {
-              text: "Popup Chat Options:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_popup_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "btn1", text: "🎨 Change Color", value: "color" },
-                  { id: "btn2", text: "📍 Move Position", value: "position" },
-                  { id: "btn3", text: "🔔 Toggle Sound", value: "sound" },
-                  { id: "btn4", text: "❓ Help", value: "help" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Popup Chat Options:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "btn1", text: "🎨 Change Color", value: "color" },
+                      { id: "btn2", text: "📍 Move Position", value: "position" },
+                      { id: "btn3", text: "🔔 Toggle Sound", value: "sound" },
+                      { id: "btn4", text: "❓ Help", value: "help" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'color') {
             responseData = {
-              text: "Choose a color for the popup:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_popup_" + Date.now(),
-              widget: {
-                type: "color_picker",
-                defaultColor: "#007bff",
-                presetColors: ["#007bff", "#28a745", "#dc3545", "#ffc107", "#6610f2", "#e83e8c"]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose a color for the popup:", format: "plain" }
+                },
+                {
+                  type: "color_picker",
+                  props: {
+                    defaultColor: "#007bff",
+                    presetColors: ["#007bff", "#28a745", "#dc3545", "#ffc107", "#6610f2", "#e83e8c"],
+                    showSubmitButton: true,
+                    buttonText: "Apply"
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'position') {
             responseData = {
-              text: "Choose popup position:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_popup_" + Date.now(),
-              widget: {
-                type: "select",
-                options: [
-                  { value: "bottom-right", text: "Bottom Right (Default)" },
-                  { value: "bottom-left", text: "Bottom Left" },
-                  { value: "top-right", text: "Top Right" },
-                  { value: "top-left", text: "Top Left" }
-                ],
-                placeholder: "Select position..."
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose popup position:", format: "plain" }
+                },
+                {
+                  type: "select",
+                  props: {
+                    options: [
+                      { value: "bottom-right", text: "Bottom Right (Default)" },
+                      { value: "bottom-left", text: "Bottom Left" },
+                      { value: "top-right", text: "Top Right" },
+                      { value: "top-left", text: "Top Left" }
+                    ],
+                    placeholder: "Select position...",
+                    showSubmitButton: true
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'sound') {
             responseData = {
-              text: "Enable notification sounds?",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_popup_" + Date.now(),
-              widget: {
-                type: "toggle",
-                defaultValue: false,
-                label: "Notification Sounds"
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Enable notification sounds?", format: "plain" }
+                },
+                {
+                  type: "toggle",
+                  props: {
+                    defaultValue: false,
+                    label: "Notification Sounds",
+                    showSubmitButton: true,
+                    buttonText: "Save"
+                  }
+                }
+              ]
             };
           } else {
             const responses = [

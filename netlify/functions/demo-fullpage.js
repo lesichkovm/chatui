@@ -41,73 +41,112 @@ const handler = async (event, context) => {
           
           if (lowerMessage === 'menu' || lowerMessage === 'options') {
             responseData = {
-              text: "Full Page Chat Features:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_fullpage_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "btn1", text: "📊 View Statistics", value: "stats" },
-                  { id: "btn2", text: "🎨 Customize Theme", value: "theme" },
-                  { id: "btn3", text: "📝 Start Survey", value: "survey" },
-                  { id: "btn4", text: "💾 Save Conversation", value: "save" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Full Page Chat Features:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "btn1", text: "📊 View Statistics", value: "stats" },
+                      { id: "btn2", text: "🎨 Customize Theme", value: "theme" },
+                      { id: "btn3", text: "📝 Start Survey", value: "survey" },
+                      { id: "btn4", text: "💾 Save Conversation", value: "save" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'stats') {
             responseData = {
-              text: "Chat Statistics:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_fullpage_" + Date.now(),
-              widget: {
-                type: "progress",
-                value: 75,
-                max: 100,
-                show_percentage: true
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Chat Statistics:", format: "plain" }
+                },
+                {
+                  type: "progress",
+                  props: {
+                    value: 75,
+                    max: 100,
+                    showPercentage: true,
+                    label: "Completion"
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'theme') {
             responseData = {
-              text: "Choose your theme preference:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_fullpage_" + Date.now(),
-              widget: {
-                type: "radio",
-                options: [
-                  { id: "light", text: "Light Theme", value: "light" },
-                  { id: "dark", text: "Dark Theme", value: "dark" },
-                  { id: "auto", text: "Auto (System)", value: "auto" }
-                ],
-                name: "theme_choice"
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose your theme preference:", format: "plain" }
+                },
+                {
+                  type: "radio",
+                  props: {
+                    options: [
+                      { id: "light", text: "Light Theme", value: "light" },
+                      { id: "dark", text: "Dark Theme", value: "dark" },
+                      { id: "auto", text: "Auto (System)", value: "auto" }
+                    ],
+                    name: "theme_choice",
+                    showSubmitButton: true,
+                    buttonText: "Apply Theme"
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'survey') {
             responseData = {
-              text: "Please rate your experience:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_fullpage_" + Date.now(),
-              widget: {
-                type: "rating",
-                maxRating: 5,
-                iconType: "stars"
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Please rate your experience:", format: "plain" }
+                },
+                {
+                  type: "rating",
+                  props: {
+                    maxRating: 5,
+                    iconType: "stars"
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'save') {
             responseData = {
-              text: "Enter a name for this conversation:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_fullpage_" + Date.now(),
-              widget: {
-                type: "input",
-                placeholder: "Conversation name...",
-                inputType: "text",
-                buttonText: "Save"
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Enter a name for this conversation:", format: "plain" }
+                },
+                {
+                  type: "input",
+                  props: {
+                    placeholder: "Conversation name...",
+                    inputType: "text",
+                    buttonText: "Save",
+                    showSubmitButton: true
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'light' || lowerMessage === 'dark' || lowerMessage === 'auto') {
             responseData = {

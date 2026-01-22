@@ -42,28 +42,20 @@ const handler = async (event, context) => {
           
           if (lowerMessage === 'menu' || lowerMessage === 'options') {
             responseData = {
-              text: `${widget.charAt(0).toUpperCase() + widget.slice(1)} Widget Options:`,
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_widget_" + widget + "_" + Date.now(),
-              widget: {
-                type: widget === 'buttons' ? "buttons" : 
-                      widget === 'rating' ? "rating" :
-                      widget === 'input' ? "input" :
-                      widget === 'select' ? "select" :
-                      widget === 'checkbox' ? "checkbox" :
-                      widget === 'radio' ? "radio" :
-                      widget === 'textarea' ? "textarea" :
-                      widget === 'slider' ? "slider" :
-                      widget === 'toggle' ? "toggle" :
-                      widget === 'date' ? "date" :
-                      widget === 'color_picker' ? "color_picker" :
-                      widget === 'file_upload' ? "file_upload" :
-                      widget === 'tags' ? "tags" :
-                      widget === 'confirmation' ? "confirmation" :
-                      widget === 'progress' ? "progress" : "buttons",
-                data: getWidgetData(widget)
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: `${widget.charAt(0).toUpperCase() + widget.slice(1)} Widget Options:`, format: "plain" }
+                },
+                {
+                  type: widget === 'color_picker' ? "color_picker" : 
+                        widget === 'file_upload' ? "file_upload" : widget,
+                  props: getWidgetProps(widget)
+                }
+              ]
             };
           } else {
             const responses = [
@@ -235,12 +227,12 @@ const handler = async (event, context) => {
   }
 };
 
-// Helper function to get widget data based on type
-function getWidgetData(widgetType) {
+// Helper function to get widget props based on type
+function getWidgetProps(widgetType) {
   switch (widgetType) {
     case 'buttons':
       return {
-        buttons: [
+        options: [
           { id: "btn1", text: "🚀 Action 1", value: "action1" },
           { id: "btn2", text: "⭐ Action 2", value: "action2" },
           { id: "btn3", text: "💎 Action 3", value: "action3" }
@@ -249,16 +241,16 @@ function getWidgetData(widgetType) {
     
     case 'rating':
       return {
-        max: 5,
-        initial: 0,
-        icon: "star"
+        maxRating: 5,
+        iconType: "star"
       };
     
     case 'input':
       return {
         placeholder: "Enter your text here...",
-        type: "text",
-        required: true
+        inputType: "text",
+        required: true,
+        showSubmitButton: true
       };
     
     case 'select':
@@ -268,7 +260,8 @@ function getWidgetData(widgetType) {
           { value: "option2", text: "Second Option" },
           { value: "option3", text: "Third Option" }
         ],
-        placeholder: "Choose an option..."
+        placeholder: "Choose an option...",
+        showSubmitButton: true
       };
     
     case 'checkbox':
@@ -277,7 +270,8 @@ function getWidgetData(widgetType) {
           { id: "chk1", text: "Option A", value: "option_a" },
           { id: "chk2", text: "Option B", value: "option_b" },
           { id: "chk3", text: "Option C", value: "option_c" }
-        ]
+        ],
+        showSubmitButton: true
       };
     
     case 'radio':
@@ -287,73 +281,81 @@ function getWidgetData(widgetType) {
           { id: "rad2", text: "Choice B", value: "choice_b" },
           { id: "rad3", text: "Choice C", value: "choice_c" }
         ],
-        name: "demo_radio"
+        name: "demo_radio",
+        showSubmitButton: true
       };
     
     case 'textarea':
       return {
         placeholder: "Enter your detailed feedback...",
         rows: 4,
-        required: true
+        required: true,
+        showSubmitButton: true
       };
     
     case 'slider':
       return {
         min: 0,
         max: 100,
-        value: 50,
-        step: 1
+        defaultValue: 50,
+        step: 1,
+        showSubmitButton: true
       };
     
     case 'toggle':
       return {
-        checked: false,
-        label: "Enable feature"
+        defaultValue: false,
+        label: "Enable feature",
+        showSubmitButton: true
       };
     
     case 'date':
       return {
         value: new Date().toISOString().split('T')[0],
-        required: false
+        required: false,
+        showSubmitButton: true
       };
     
     case 'color_picker':
       return {
-        value: "#667eea",
-        preset_colors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"]
+        defaultColor: "#667eea",
+        presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"],
+        showSubmitButton: true
       };
     
     case 'file_upload':
       return {
         accept: ".jpg,.png,.pdf,.doc,.txt",
         multiple: false,
-        max_size: "5MB"
+        maxSize: 5242880,
+        showSubmitButton: true
       };
     
     case 'tags':
       return {
         placeholder: "Add tags...",
-        suggestions: ["javascript", "widgets", "demo", "chat", "ui", "interactive"]
+        suggestions: ["javascript", "widgets", "demo", "chat", "ui", "interactive"],
+        showSubmitButton: true
       };
     
     case 'confirmation':
       return {
         title: "Confirm Action",
         message: "Are you sure you want to proceed?",
-        confirm_text: "Yes",
-        cancel_text: "No"
+        confirmText: "Yes",
+        cancelText: "No"
       };
     
     case 'progress':
       return {
         value: 75,
         max: 100,
-        show_percentage: true
+        showPercentage: true
       };
     
     default:
       return {
-        buttons: [
+        options: [
           { id: "default1", text: "Option 1", value: "default1" },
           { id: "default2", text: "Option 2", value: "default2" }
         ]

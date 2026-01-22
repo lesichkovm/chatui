@@ -34,71 +34,90 @@ const handler = async (event, context) => {
             case WIDGET_TYPES.BUTTONS:
               responseData = {
                 type: WIDGET_TYPES.BUTTONS,
-                options: [
-                  { id: 'btn1', text: 'Option 1', value: 'option1' },
-                  { id: 'btn2', text: 'Option 2', value: 'option2' },
-                  { id: 'btn3', text: 'Option 3', value: 'option3' }
-                ]
+                props: {
+                  options: [
+                    { id: 'btn1', text: 'Option 1', value: 'option1' },
+                    { id: 'btn2', text: 'Option 2', value: 'option2' },
+                    { id: 'btn3', text: 'Option 3', value: 'option3' }
+                  ]
+                }
               };
               break;
               
             case WIDGET_TYPES.RATING:
               responseData = {
                 type: WIDGET_TYPES.RATING,
-                maxRating: 5,
-                iconType: 'star'
+                props: {
+                  maxRating: 5,
+                  iconType: 'star'
+                }
               };
               break;
               
             case WIDGET_TYPES.INPUT:
               responseData = {
                 type: WIDGET_TYPES.INPUT,
-                placeholder: 'Enter your message...',
-                inputType: 'text',
-                required: true
+                props: {
+                  placeholder: 'Enter your message...',
+                  inputType: 'text',
+                  required: true,
+                  showSubmitButton: true
+                }
               };
               break;
               
             case WIDGET_TYPES.SELECT:
               responseData = {
                 type: WIDGET_TYPES.SELECT,
-                options: [
-                  { value: 'option1', text: 'First Option' },
-                  { value: 'option2', text: 'Second Option' },
-                  { value: 'option3', text: 'Third Option' }
-                ],
-                placeholder: 'Choose an option...'
+                props: {
+                  options: [
+                    { value: 'option1', text: 'First Option' },
+                    { value: 'option2', text: 'Second Option' },
+                    { value: 'option3', text: 'Third Option' }
+                  ],
+                  placeholder: 'Choose an option...',
+                  showSubmitButton: true
+                }
               };
               break;
               
             case 'checkbox':
               responseData = {
                 type: WIDGET_TYPES.CHECKBOX,
-                options: [
-                  { id: 'chk1', text: 'Feature A', value: 'feature_a' },
-                  { id: 'chk2', text: 'Feature B', value: 'feature_b' },
-                  { id: 'chk3', text: 'Feature C', value: 'feature_c' }
-                ],
-                buttonText: 'Submit Selection'
+                props: {
+                  options: [
+                    { id: 'chk1', text: 'Feature A', value: 'feature_a' },
+                    { id: 'chk2', text: 'Feature B', value: 'feature_b' },
+                    { id: 'chk3', text: 'Feature C', value: 'feature_c' }
+                  ],
+                  buttonText: 'Submit Selection',
+                  showSubmitButton: true
+                }
               };
               break;
               
             case 'textarea':
               responseData = {
                 type: WIDGET_TYPES.TEXTAREA,
-                placeholder: 'Enter your detailed feedback...',
-                rows: 4,
-                required: true
+                props: {
+                  placeholder: 'Enter your detailed feedback...',
+                  rows: 4,
+                  required: true,
+                  showSubmitButton: true
+                }
               };
               break;
               
             case 'slider':
               responseData = {
                 type: WIDGET_TYPES.SLIDER,
-                min: 0,
-                max: 100,
-                defaultValue: 50,
-                step: 1
+                props: {
+                  min: 0,
+                  max: 100,
+                  defaultValue: 50,
+                  step: 1,
+                  showSubmitButton: true
+                }
               };
               break;
               

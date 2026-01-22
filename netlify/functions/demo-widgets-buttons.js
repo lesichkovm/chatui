@@ -41,83 +41,118 @@ const handler = async (event, context) => {
           
           if (lowerMessage === 'menu' || lowerMessage === 'options') {
             responseData = {
-              text: "Button Widget Options:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_buttons_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "btn1", text: "🚀 Quick Actions", value: "quick" },
-                  { id: "btn2", text: "🎨 Style Options", value: "style" },
-                  { id: "btn3", text: "⚙️ Settings", value: "settings" },
-                  { id: "btn4", text: "📊 Analytics", value: "analytics" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Button Widget Options:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "btn1", text: "🚀 Quick Actions", value: "quick" },
+                      { id: "btn2", text: "🎨 Style Options", value: "style" },
+                      { id: "btn3", text: "⚙️ Settings", value: "settings" },
+                      { id: "btn4", text: "📊 Analytics", value: "analytics" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'quick') {
             responseData = {
-              text: "Quick Actions:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_buttons_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "save", text: "💾 Save", value: "save_action" },
-                  { id: "cancel", text: "❌ Cancel", value: "cancel_action" },
-                  { id: "submit", text: "✅ Submit", value: "submit_action" },
-                  { id: "reset", text: "🔄 Reset", value: "reset_action" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Quick Actions:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "save", text: "💾 Save", value: "save_action" },
+                      { id: "cancel", text: "❌ Cancel", value: "cancel_action" },
+                      { id: "submit", text: "✅ Submit", value: "submit_action" },
+                      { id: "reset", text: "🔄 Reset", value: "reset_action" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'style') {
             responseData = {
-              text: "Button Style Options:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_buttons_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "primary", text: "🔵 Primary", value: "primary_style" },
-                  { id: "secondary", text: "⚪ Secondary", value: "secondary_style" },
-                  { id: "success", text: "🟢 Success", value: "success_style" },
-                  { id: "danger", text: "🔴 Danger", value: "danger_style" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Button Style Options:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "primary", text: "🔵 Primary", value: "primary_style" },
+                      { id: "secondary", text: "⚪ Secondary", value: "secondary_style" },
+                      { id: "success", text: "🟢 Success", value: "success_style" },
+                      { id: "danger", text: "🔴 Danger", value: "danger_style" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'types') {
             responseData = {
-              text: "Different Button Types:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_buttons_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "icon", text: "🎨 Icon Button", value: "icon_button" },
-                  { id: "text", text: "📝 Text Only", value: "text_button" },
-                  { id: "emoji", text: "😀 Emoji Button", value: "emoji_button" },
-                  { id: "mixed", text: "🎯 Mixed Content", value: "mixed_button" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Different Button Types:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "icon", text: "🎨 Icon Button", value: "icon_button" },
+                      { id: "text", text: "📝 Text Only", value: "text_button" },
+                      { id: "emoji", text: "😀 Emoji Button", value: "emoji_button" },
+                      { id: "mixed", text: "🎯 Mixed Content", value: "mixed_button" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'interactive') {
             responseData = {
-              text: "Interactive Button Demo:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_buttons_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "click1", text: "👆 Click Me!", value: "click_demo_1" },
-                  { id: "click2", text: "🎯 Try This", value: "click_demo_2" },
-                  { id: "click3", text: "⚡ Quick Action", value: "click_demo_3" },
-                  { id: "click4", text: "🔄 Refresh", value: "click_demo_4" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Interactive Button Demo:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "click1", text: "👆 Click Me!", value: "click_demo_1" },
+                      { id: "click2", text: "🎯 Try This", value: "click_demo_2" },
+                      { id: "click3", text: "⚡ Quick Action", value: "click_demo_3" },
+                      { id: "click4", text: "🔄 Refresh", value: "click_demo_4" }
+                    ]
+                  }
+                }
+              ]
             };
           } else {
             const responses = [

@@ -42,68 +42,109 @@ const handler = async (event, context) => {
           
           if (lowerMessage === 'menu' || lowerMessage === 'options') {
             responseData = {
-              text: "Choose an option below:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_session_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "btn1", text: "📝 Rate Service", value: "rate" },
-                  { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
-                  { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
-                  { id: "btn4", text: "📋 View Options", value: "more_options" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose an option below:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "btn1", text: "📝 Rate Service", value: "rate" },
+                      { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
+                      { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
+                      { id: "btn4", text: "📋 View Options", value: "more_options" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'rate' || lowerMessage === 'rating') {
             responseData = {
-              text: "How would you rate our service?",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_session_" + Date.now(),
-              widget: {
-                type: "rating",
-                maxRating: 5,
-                iconType: "star"
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "How would you rate our service?", format: "plain" }
+                },
+                {
+                  type: "rating",
+                  props: {
+                    maxRating: 5,
+                    iconType: "star"
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'feedback' || lowerMessage === 'comment') {
             responseData = {
-              text: "Please share your feedback:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_session_" + Date.now(),
-              widget: {
-                type: "textarea",
-                placeholder: "Please share your feedback:",
-                rows: 4,
-                required: true
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Please share your feedback:", format: "plain" }
+                },
+                {
+                  type: "textarea",
+                  props: {
+                    placeholder: "Please share your feedback:",
+                    rows: 4,
+                    required: true,
+                    showSubmitButton: true,
+                    buttonText: "Submit Feedback"
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'schedule' || lowerMessage === 'date') {
             responseData = {
-              text: "When would you like to schedule?",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_session_" + Date.now(),
-              widget: {
-                type: "date",
-                value: new Date().toISOString().split('T')[0],
-                required: true
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "When would you like to schedule?", format: "plain" }
+                },
+                {
+                  type: "date",
+                  props: {
+                    value: new Date().toISOString().split('T')[0],
+                    required: true,
+                    showSubmitButton: true,
+                    buttonText: "Schedule"
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'color' || lowerMessage === 'theme') {
             responseData = {
-              text: "Choose your preferred color:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_session_" + Date.now(),
-              widget: {
-                type: "color_picker",
-                defaultColor: "#667eea",
-                presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose your preferred color:", format: "plain" }
+                },
+                {
+                  type: "color_picker",
+                  props: {
+                    defaultColor: "#667eea",
+                    presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"],
+                    showSubmitButton: true,
+                    buttonText: "Apply Color"
+                  }
+                }
+              ]
             };
           } else {
             // Default responses for regular messages

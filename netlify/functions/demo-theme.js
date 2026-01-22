@@ -41,143 +41,216 @@ const handler = async (event, context) => {
           
           if (lowerMessage === 'menu' || lowerMessage === 'options') {
             responseData = {
-              text: "Theme Options:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "btn1", text: "", value: "switch" },
-                  { id: "btn2", text: "", value: "colors" },
-                  { id: "btn3", text: "", value: "typography" },
-                  { id: "btn4", text: "", value: "effects" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Theme Options:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "btn1", text: "🔄 Switch Mode", value: "switch" },
+                      { id: "btn2", text: "🎨 Custom Colors", value: "colors" },
+                      { id: "btn3", text: "📝 Typography", value: "typography" },
+                      { id: "btn4", text: "✨ Effects", value: "effects" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'switch' || lowerMessage === 'toggle') {
             responseData = {
-              text: "Choose theme mode:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "radio",
-                options: [
-                  { id: "light", text: "", value: "light" },
-                  { id: "dark", text: "", value: "dark" },
-                  { id: "auto", text: "", value: "auto" }
-                ],
-                name: "theme_selection"
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose theme mode:", format: "plain" }
+                },
+                {
+                  type: "radio",
+                  props: {
+                    options: [
+                      { id: "light", text: "Light Mode", value: "light" },
+                      { id: "dark", text: "Dark Mode", value: "dark" },
+                      { id: "auto", text: "Auto (System)", value: "auto" }
+                    ],
+                    name: "theme_selection",
+                    showSubmitButton: true,
+                    buttonText: "Apply Mode"
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'colors' || lowerMessage === 'custom') {
             responseData = {
-              text: "Customize theme colors:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "select",
-                options: [
-                  { value: "default", text: "Default (Blue)" },
-                  { value: "branded", text: "Branded (Purple)" },
-                  { value: "nature", text: "Nature (Green)" },
-                  { value: "sunset", text: "Sunset (Orange)" }
-                ],
-                placeholder: "Select color scheme..."
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Customize theme colors:", format: "plain" }
+                },
+                {
+                  type: "select",
+                  props: {
+                    options: [
+                      { value: "default", text: "Default (Blue)" },
+                      { value: "branded", text: "Branded (Purple)" },
+                      { value: "nature", text: "Nature (Green)" },
+                      { value: "sunset", text: "Sunset (Orange)" }
+                    ],
+                    placeholder: "Select color scheme...",
+                    showSubmitButton: true
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'presets') {
             responseData = {
-              text: "Choose a theme preset:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "select",
-                options: [
-                  { value: "default", text: "Default (Blue)" },
-                  { value: "branded", text: "Branded (Purple)" },
-                  { value: "nature", text: "Nature (Green)" },
-                  { value: "sunset", text: "Sunset (Orange)" },
-                  { value: "monochrome", text: "Monochrome (Gray)" }
-                ],
-                placeholder: "Select a preset theme..."
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Choose a theme preset:", format: "plain" }
+                },
+                {
+                  type: "select",
+                  props: {
+                    options: [
+                      { value: "default", text: "Default (Blue)" },
+                      { value: "branded", text: "Branded (Purple)" },
+                      { value: "nature", text: "Nature (Green)" },
+                      { value: "sunset", text: "Sunset (Orange)" },
+                      { value: "monochrome", text: "Monochrome (Gray)" }
+                    ],
+                    placeholder: "Select a preset theme...",
+                    showSubmitButton: true
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'advanced') {
             responseData = {
-              text: "Advanced theme settings:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "buttons",
-                options: [
-                  { id: "border", text: "🔲 Border Radius", value: "border" },
-                  { id: "shadow", text: "🌑 Shadows", value: "shadow" },
-                  { id: "animation", text: "✨ Animations", value: "animation" },
-                  { id: "typography", text: "📝 Typography", value: "typography" }
-                ]
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Advanced theme settings:", format: "plain" }
+                },
+                {
+                  type: "buttons",
+                  props: {
+                    options: [
+                      { id: "border", text: "🔲 Border Radius", value: "border" },
+                      { id: "shadow", text: "🌑 Shadows", value: "shadow" },
+                      { id: "animation", text: "✨ Animations", value: "animation" },
+                      { id: "typography", text: "📝 Typography", value: "typography" }
+                    ]
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'border') {
             responseData = {
-              text: "Adjust border radius:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "slider",
-                min: 0,
-                max: 20,
-                defaultValue: 8,
-                step: 1
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Adjust border radius:", format: "plain" }
+                },
+                {
+                  type: "slider",
+                  props: {
+                    min: 0,
+                    max: 20,
+                    defaultValue: 8,
+                    step: 1,
+                    label: "Radius (px)",
+                    showSubmitButton: true
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'shadow') {
             responseData = {
-              text: "Shadow intensity:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "slider",
-                min: 0,
-                max: 50,
-                defaultValue: 15,
-                step: 5
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Shadow intensity:", format: "plain" }
+                },
+                {
+                  type: "slider",
+                  props: {
+                    min: 0,
+                    max: 50,
+                    defaultValue: 15,
+                    step: 5,
+                    label: "Intensity",
+                    showSubmitButton: true
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'animation') {
             responseData = {
-              text: "Enable theme animations:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "toggle",
-                defaultValue: true,
-                label: "Smooth Transitions"
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Enable theme animations:", format: "plain" }
+                },
+                {
+                  type: "toggle",
+                  props: {
+                    defaultValue: true,
+                    label: "Smooth Transitions",
+                    showSubmitButton: true
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'typography') {
             responseData = {
-              text: "Font style preference:",
               sender: "bot",
               timestamp: Date.now(),
               session_key: session_key || "demo_theme_" + Date.now(),
-              widget: {
-                type: "radio",
-                options: [
-                  { id: "system", text: "System Default", value: "system" },
-                  { id: "modern", text: "Modern (Sans-serif)", value: "modern" },
-                  { id: "classic", text: "Classic (Serif)", value: "classic" },
-                  { id: "mono", text: "Monospace", value: "mono" }
-                ],
-                name: "font_style"
-              }
+              widgets: [
+                {
+                  type: "text",
+                  props: { content: "Font style preference:", format: "plain" }
+                },
+                {
+                  type: "radio",
+                  props: {
+                    options: [
+                      { id: "system", text: "System Default", value: "system" },
+                      { id: "modern", text: "Modern (Sans-serif)", value: "modern" },
+                      { id: "classic", text: "Classic (Serif)", value: "classic" },
+                      { id: "mono", text: "Monospace", value: "mono" }
+                    ],
+                    name: "font_style",
+                    showSubmitButton: true
+                  }
+                }
+              ]
             };
           } else if (lowerMessage === 'light') {
             responseData = {
