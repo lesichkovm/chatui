@@ -524,22 +524,24 @@ window.addEventListener('chatwidget:widget:submitted', (e) => {
 });
 ```
 
-## Recent Enhancements (v1.2.0)
+## Recent Enhancements (v1.3.0)
 
-### Widget Composition System
-- **Phase 2 Extended Widgets**: Advanced composition capabilities
-- **Cross-Environment Storage**: Fallback support for various environments  
-- **API Configuration Validation**: Enhanced error handling and validation
-- **26+ Widget Components**: Expanded from 15+ to 26+ interactive components
-- **Widget Categories**: Organized into Input, Selection, Interactive, Action, and Display widgets
+### Widget Validation and Security
+- **HTML Sanitization**: Enhanced security with tag whitelist and content sanitization
+- **Widget Validation**: Improved validation with explicit boolean coercion
+- **Security Features**: Enhanced XSS prevention and input validation
+- **Migration Tools**: Widget composition migration and debugging utilities
+
+### Complete Widget Documentation
+- **26+ Widget Components**: Full documentation coverage for all widget types
+- **Comprehensive Guides**: Detailed usage examples and integration patterns
+- **API Documentation**: Complete method and event documentation
+- **Accessibility**: Full accessibility support documentation
 
 ### New Widget Types Added
-- **Toggle Widget**: Binary on/off switch with animations
-- **Rating Widget**: Star/emoji/heart rating with hover effects
-- **Date Widget**: Advanced date picker with formatting options
-- **Checkbox Widget**: Multi-select with flexible layouts
-- **Radio Widget**: Single selection with descriptions
-- **Input Widget**: Enhanced text input with validation
+- **Color Picker Widget**: Advanced color selection with palette and hex input
+- **Form Widget**: Advanced form container with validation and grouping
+- **Widget Types System**: Comprehensive type registry and management
 
 ### Enhanced Features
 - **Widget Composition**: Nested widget support and complex form building
