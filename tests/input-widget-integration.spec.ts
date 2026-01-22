@@ -33,9 +33,11 @@ test.describe('Input Widget Integration Tests (Mocked API)', () => {
                 setTimeout(() => {
                   onResponse("Please enter your email", "bot", {
                     type: "input",
-                    inputType: "email",
-                    placeholder: "Enter your email...",
-                    buttonText: "Submit"
+                    props: {
+                      type: "email",
+                      placeholder: "Enter your email...",
+                      buttonText: "Submit"
+                    }
                   });
                 }, 100);
               }

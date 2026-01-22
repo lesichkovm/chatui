@@ -1,11 +1,11 @@
 ---
 path: overview.md
 page-type: overview
-summary: High-level introduction and architectural overview of the ChatUI widget system.
-tags: [overview, introduction, architecture]
+summary: High-level introduction and architectural overview of the ChatUI widget system with 26+ interactive components.
+tags: [overview, introduction, architecture, widgets]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.1.0
+version: 1.2.0
 ---
 
 # ChatUI Widget Overview
@@ -24,7 +24,10 @@ ChatUI delivers interactive chat capabilities with minimal performance overhead,
 - **CORS-First Communication**: Modern fetch API with JSONP fallback
 - **Real-Time Support**: WebSocket integration for live features
 - **Dual Modes**: Popup and fullpage embedding
-- **Interactive Widgets**: 15+ specialized UI components
+- **26+ Interactive Widgets**: Comprehensive UI component library
+- **Widget Composition**: Advanced Phase 2 composable widget system
+- **Cross-Environment Storage**: Fallback support for various environments
+- **API Configuration Validation**: Enhanced error handling and validation
 - **Accessible**: ARIA-compliant focus management
 - **Secure**: XSS prevention and scoped CSS
 
@@ -61,7 +64,7 @@ graph TB
     
     D --> R[Widget Factory]
     D --> S[Base Widget]
-    D --> T[15+ Component Widgets]
+    D --> T[26+ Component Widgets]
 ```
 
 ## Module Structure
@@ -109,9 +112,48 @@ const chat = ChatUI.init({
 });
 ```
 
+## Widget Composition System
+
+ChatUI features an advanced widget composition system allowing complex UI combinations:
+
+### Basic Widget Categories
+- **Input Widgets**: Input, Textarea, Password, Text
+- **Selection Widgets**: Select, Radio, Checkbox, Toggle
+- **Interactive Widgets**: Rating, Date, Color Picker, Slider, Tags
+- **Action Widgets**: Button, Buttons, Confirmation, File Upload
+- **Display Widgets**: Card, Progress, Container, List, Conditional
+
+### Composition Examples
+```javascript
+// Multi-step form with validation
+const formWidget = {
+  type: 'container',
+  children: [
+    { type: 'input', label: 'Name', required: true },
+    { type: 'email', label: 'Email', validation: 'email' },
+    { type: 'buttons', buttons: ['Submit', 'Cancel'] }
+  ]
+};
+
+// Interactive rating with feedback
+const ratingWidget = {
+  type: 'container',
+  children: [
+    { type: 'rating', max: 5 },
+    { type: 'textarea', label: 'Feedback (optional)' },
+    { type: 'button', text: 'Submit Rating' }
+  ]
+};
+```
+
 ## See Also
 
 - [Getting Started](getting_started.md) - Quick setup guide
 - [Architecture](architecture.md) - Detailed system design
 - [API Reference](api_reference.md) - Complete API documentation
 - [Configuration](configuration.md) - All configuration options
+
+## Changelog
+- **v1.2.0** (2026-01-22): Enhanced widget system with 26+ components, composition capabilities, cross-environment storage, and API validation improvements
+- **v1.1.0** (2026-01-22): Initial documentation with 15+ widget components
+- **v1.0.0** (2026-01-22): Base overview creation

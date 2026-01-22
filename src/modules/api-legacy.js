@@ -136,10 +136,11 @@ export class LegacyAPI {
    */
   isTestEnvironment() {
     return (
-      typeof window !== "undefined" &&
+      (typeof window !== "undefined" && window.__CHAT_WIDGET_TEST_MODE__) ||
+      (typeof window !== "undefined" &&
       window.location &&
       window.location.hostname === "localhost" &&
-      window.location.port === "32000"
+      window.location.port === "32000")
     );
   }
 

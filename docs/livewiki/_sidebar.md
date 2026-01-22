@@ -22,29 +22,43 @@
 * [Base Widget](modules/base-widget.md)
 
 ## Widget Components
-* [Base Widget](modules/base-widget.md)
-* [Widget Factory](modules/widget-factory.md)
-* [Container Widget](modules/container-widget.md)
-* [Card Widget](modules/card-widget.md)
-* [Buttons Widget](modules/buttons-widget.md)
-* [Conditional Widget](modules/conditional-widget.md)
-* [List Widget](modules/list-widget.md)
+
+### Input Widgets
 * [Input Widget](modules/input-widget.md)
 * [Textarea Widget](modules/textarea-widget.md)
 * [Password Widget](modules/password-widget.md)
+* [Text Widget](modules/text-widget.md)
+
+### Selection Widgets
 * [Select Widget](modules/select-widget.md)
 * [Radio Widget](modules/radio-widget.md)
 * [Checkbox Widget](modules/checkbox-widget.md)
 * [Toggle Widget](modules/toggle-widget.md)
+
+### Interactive Widgets
 * [Rating Widget](modules/rating-widget.md)
 * [Date Widget](modules/date-widget.md)
 * [Color Picker Widget](modules/color-picker-widget.md)
 * [Slider Widget](modules/slider-widget.md)
 * [Tags Widget](modules/tags-widget.md)
-* [Text Widget](modules/text-widget.md)
-* [Progress Widget](modules/progress-widget.md)
+
+### Action Widgets
+* [Button Widget](modules/button-widget.md)
+* [Buttons Widget](modules/buttons-widget.md)
 * [Confirmation Widget](modules/confirmation-widget.md)
 * [File Upload Widget](modules/file-upload-widget.md)
+
+### Display & Layout Widgets
+* [Card Widget](modules/card-widget.md)
+* [Progress Widget](modules/progress-widget.md)
+* [Container Widget](modules/container-widget.md)
+* [List Widget](modules/list-widget.md)
+* [Conditional Widget](modules/conditional-widget.md)
+
+### Core Widget System
+* [Base Widget](modules/base-widget.md)
+* [Widget Factory](modules/widget-factory.md)
+* [Widget Types](modules/widget-types.md)
 
 ## Reference
 * [LLM Context](llm-context.md)

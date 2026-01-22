@@ -28,7 +28,7 @@ export class InputWidget extends BaseWidget {
     // Create input element
     const input = document.createElement('input');
     input.type = inputType;
-    input.className = 'widget-input';
+    input.className = 'widget-input-element';
     input.placeholder = placeholder;
     
     // Apply variant and size classes

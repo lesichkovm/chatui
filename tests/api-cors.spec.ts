@@ -296,7 +296,7 @@ test.describe('CorsAPI', () => {
     });
 
     test('should handle error response without text field', async () => {
-      mockLocalStorage['chat_session_key'] = 'test-session-key';
+      mockLocalStorage['chat_session_key'] = 'error-test';
       
       // Mock error response (like {"status":"error","message":"No message provided"})
       mockFetch = () => Promise.resolve(

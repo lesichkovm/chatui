@@ -365,12 +365,6 @@
 
     // Function to send a message to the server
     function sendMessage(message) {
-      // For testing purposes, if no server is available, don't add bot response to avoid interfering with test counts
-      if (serverUrl === "http://localhost:3000" && typeof window !== 'undefined' && window.location && window.location.hostname === 'localhost') {
-        // Don't add bot response for testing
-        return;
-      }
-
       // Get session key from localStorage
       const sessionKey = localStorage.getItem("chat_session_key");
 

@@ -5,14 +5,14 @@ summary: Complete codebase summary optimized for LLM consumption and understandi
 tags: [llm, context, summary, codebase]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.0.0
+version: 1.2.0
 ---
 
 # LLM Context: ChatUI
 
 ## Project Summary
 
-ChatUI is a professional, ultra-lightweight (~12KB) chat UI widget built with pure Vanilla JavaScript. It provides a modern conversational interface without framework dependencies or technical complexity, designed for easy integration into any web application with support for multiple transport protocols (WebSocket, CORS, JSONP) and 15+ interactive widget components.
+ChatUI is a professional, ultra-lightweight (~12KB) chat UI widget built with pure Vanilla JavaScript. It provides a modern conversational interface without framework dependencies or technical complexity, designed for easy integration into any web application with support for multiple transport protocols (WebSocket, CORS, JSONP), advanced widget composition system, cross-environment storage fallback, and 26+ interactive widget components.
 
 ## Key Technologies
 
@@ -44,7 +44,7 @@ chatui/
 │           ├── base-widget.js    # Abstract base widget class
 │           ├── widget-factory.js  # Widget factory and registry
 │           ├── widget-types.js    # Widget type definitions
-│           └── [20+ component widgets]
+│           └── [26+ component widgets]
 ├── demo/                  # Demo files and server
 ├── dist/                  # Built distribution files
 ├── tests/                 # Playwright test suites
@@ -168,11 +168,43 @@ class ChatWidget {
 - **`src/modules/widgets/base-widget.js`** - Abstract base class for all widgets
 
 ### Widget Component Files
-- **`src/modules/widgets/rating-widget.js`** - Star rating component
-- **`src/modules/widgets/date-widget.js`** - Date picker component
-- **`src/modules/widgets/file-upload-widget.js`** - File upload with preview
-- **`src/modules/widgets/input-widget.js`** - Text input with validation
+
+#### Input Widgets
+- **`src/modules/widgets/input-widget.js`** - Text input with validation and submit
+- **`src/modules/widgets/textarea-widget.js`** - Multi-line text input
+- **`src/modules/widgets/password-widget.js`** - Secure password input
+- **`src/modules/widgets/text-widget.js`** - Static text display
+
+#### Selection Widgets  
 - **`src/modules/widgets/select-widget.js`** - Dropdown selection component
+- **`src/modules/widgets/radio-widget.js`** - Single selection radio group
+- **`src/modules/widgets/checkbox-widget.js`** - Multiple selection checkbox group
+- **`src/modules/widgets/toggle-widget.js`** - Binary on/off toggle switch
+
+#### Interactive Widgets
+- **`src/modules/widgets/rating-widget.js`** - Star/emoji/heart rating component
+- **`src/modules/widgets/date-widget.js`** - Date picker with validation
+- **`src/modules/widgets/color-picker-widget.js`** - Color selection tool
+- **`src/modules/widgets/slider-widget.js`** - Numeric range slider
+- **`src/modules/widgets/tags-widget.js`** - Tag input and management
+
+#### Action Widgets
+- **`src/modules/widgets/button-widget.js`** - Interactive button component
+- **`src/modules/widgets/buttons-widget.js`** - Enhanced button group
+- **`src/modules/widgets/confirmation-widget.js`** - Yes/No confirmation dialog
+- **`src/modules/widgets/file-upload-widget.js`** - File upload with preview
+
+#### Display & Layout Widgets
+- **`src/modules/widgets/card-widget.js`** - Content display card
+- **`src/modules/widgets/progress-widget.js`** - Progress indicator
+- **`src/modules/widgets/container-widget.js`** - Generic container for grouping
+- **`src/modules/widgets/list-widget.js`** - Dynamic list component
+- **`src/modules/widgets/conditional-widget.js`** - Dynamic content rendering
+
+#### Core Widget System
+- **`src/modules/widgets/widget-factory.js`** - Widget creation and management
+- **`src/modules/widgets/base-widget.js`** - Abstract base class for all widgets
+- **`src/modules/widgets/widget-types.js`** - Widget type definitions and registry
 
 ### Build and Test Files
 - **`scripts/build.js`** - ESBuild configuration for bundling
@@ -491,6 +523,29 @@ window.addEventListener('chatwidget:widget:submitted', (e) => {
     console.log(`Widget ${widgetId} submitted:`, data);
 });
 ```
+
+## Recent Enhancements (v1.2.0)
+
+### Widget Composition System
+- **Phase 2 Extended Widgets**: Advanced composition capabilities
+- **Cross-Environment Storage**: Fallback support for various environments  
+- **API Configuration Validation**: Enhanced error handling and validation
+- **26+ Widget Components**: Expanded from 15+ to 26+ interactive components
+- **Widget Categories**: Organized into Input, Selection, Interactive, Action, and Display widgets
+
+### New Widget Types Added
+- **Toggle Widget**: Binary on/off switch with animations
+- **Rating Widget**: Star/emoji/heart rating with hover effects
+- **Date Widget**: Advanced date picker with formatting options
+- **Checkbox Widget**: Multi-select with flexible layouts
+- **Radio Widget**: Single selection with descriptions
+- **Input Widget**: Enhanced text input with validation
+
+### Enhanced Features
+- **Widget Composition**: Nested widget support and complex form building
+- **Improved Validation**: Better error handling and user feedback
+- **Enhanced Styling**: More variants, sizes, and customization options
+- **Better Accessibility**: Improved keyboard navigation and screen reader support
 
 ## Troubleshooting Common Issues
 

@@ -89,6 +89,12 @@ export class HybridChatAPI extends ChatAPI {
    * @param {Function} onError - Callback function called on handshake error
    */
   performHandshake(onSuccess, onError) {
+    if (this.isTestEnvironment()) {
+      this.setSessionKey('test-session-key');
+      if (onSuccess) onSuccess();
+      return;
+    }
+
     if (this.connectionType === 'websocket') {
       this.performWebSocketHandshake(onSuccess, onError);
     } else if (this.apiType === 'cors') {

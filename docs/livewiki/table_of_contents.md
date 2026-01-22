@@ -5,7 +5,7 @@ summary: Master index of all LiveWiki documentation pages with descriptions and 
 tags: [contents, index, navigation, overview]
 created: 2026-01-22
 updated: 2026-01-22
-version: 1.0.0
+version: 1.2.0
 ---
 
 # Table of Contents
@@ -43,29 +43,43 @@ Complete index of all ChatUI LiveWiki documentation pages with descriptions and 
 - **[Base Widget](modules/base-widget.md)** - Abstract base class for all widget components
 
 ### Widget Components
-- **[Base Widget](modules/base-widget.md)** - Abstract base class for all widget components
-- **[Widget Factory](modules/widget-factory.md)** - Widget creation and management system
-- **[Container Widget](modules/container-widget.md)** - Generic container for grouping widgets
-- **[Card Widget](modules/card-widget.md)** - Content display card component
-- **[Buttons Widget](modules/buttons-widget.md)** - Enhanced button component with variants
-- **[Conditional Widget](modules/conditional-widget.md)** - Dynamic content rendering based on conditions
-- **[List Widget](modules/list-widget.md)** - Dynamic list component for collections
-- **[Input Widget](modules/input-widget.md)** - Text input component
+
+#### Input Widgets
+- **[Input Widget](modules/input-widget.md)** - Interactive input with validation and submit functionality
 - **[Textarea Widget](modules/textarea-widget.md)** - Multi-line text input component
-- **[Password Widget](modules/password-widget.md)** - Secure password input component
-- **[Select Widget](modules/select-widget.md)** - Dropdown selection component
-- **[Radio Widget](modules/radio-widget.md)** - Single selection radio component
-- **[Checkbox Widget](modules/checkbox-widget.md)** - Multiple selection checkbox component
-- **[Toggle Widget](modules/toggle-widget.md)** - On/off toggle switch component
-- **[Rating Widget](modules/rating-widget.md)** - Star rating component
-- **[Date Widget](modules/date-widget.md)** - Date picker component
-- **[Color Picker Widget](modules/color-picker-widget.md)** - Color selection component
-- **[Slider Widget](modules/slider-widget.md)** - Numeric range slider component
-- **[Tags Widget](modules/tags-widget.md)** - Tag input and management component
+- **[Password Widget](modules/password-widget.md)** - Secure password input with masking
 - **[Text Widget](modules/text-widget.md)** - Static text display component
-- **[Progress Widget](modules/progress-widget.md)** - Progress indicator component
+
+#### Selection Widgets
+- **[Select Widget](modules/select-widget.md)** - Dropdown selection component
+- **[Radio Widget](modules/radio-widget.md)** - Single selection radio button group
+- **[Checkbox Widget](modules/checkbox-widget.md)** - Multiple selection checkbox group
+- **[Toggle Widget](modules/toggle-widget.md)** - Binary on/off toggle switch
+
+#### Interactive Widgets
+- **[Rating Widget](modules/rating-widget.md)** - Star/emoji/heart rating component
+- **[Date Widget](modules/date-widget.md)** - Date picker with validation and formatting
+- **[Color Picker Widget](modules/color-picker-widget.md)** - Color selection tool
+- **[Slider Widget](modules/slider-widget.md)** - Numeric range slider component
+- **[Tags Widget](modules/tags-widget.md)** - Tag input and management system
+
+#### Action Widgets
+- **[Button Widget](modules/button-widget.md)** - Interactive button component
+- **[Buttons Widget](modules/buttons-widget.md)** - Enhanced button group with variants
 - **[Confirmation Widget](modules/confirmation-widget.md)** - Yes/No confirmation dialog
 - **[File Upload Widget](modules/file-upload-widget.md)** - File upload with preview
+
+#### Display & Layout Widgets
+- **[Card Widget](modules/card-widget.md)** - Content display card component
+- **[Progress Widget](modules/progress-widget.md)** - Progress indicator component
+- **[Container Widget](modules/container-widget.md)** - Generic container for widget grouping
+- **[List Widget](modules/list-widget.md)** - Dynamic list component for collections
+- **[Conditional Widget](modules/conditional-widget.md)** - Dynamic content rendering
+
+#### Core Widget System
+- **[Base Widget](modules/base-widget.md)** - Abstract base class for all widget components
+- **[Widget Factory](modules/widget-factory.md)** - Widget creation and management system
+- **[Widget Types](modules/widget-types.md)** - Widget type definitions and registry
 
 ## 🤖 LLM & Developer Resources
 
@@ -201,7 +215,7 @@ Complete index of all ChatUI LiveWiki documentation pages with descriptions and 
 
 ### **Version Information**
 All documents are versioned with the ChatUI release version:
-- Current version: **1.0.0**
+- Current version: **1.2.0**
 - Last updated: **2026-01-22**
 - Format version: **LiveWiki v1.0**
 
@@ -232,9 +246,10 @@ All documents are versioned with the ChatUI release version:
 
 ## 📊 Documentation Statistics
 
-- **Total Pages**: 35+
-- **Core Documentation**: 8 pages
-- **Module Documentation**: 25+ pages
+- **Total Pages**: 45+
+- **Core Documentation**: 9 pages
+- **Module Documentation**: 30+ pages
+- **Widget Components**: 26+ widgets
 - **LLM Resources**: 3 pages
 - **Reference Materials**: 5 pages
 
@@ -242,8 +257,9 @@ All documents are versioned with the ChatUI release version:
 1. [Getting Started](getting_started.md) - Integration guide
 2. [API Reference](api_reference.md) - Complete API
 3. [Configuration](configuration.md) - Customization options
-4. [Cheatsheet](cheatsheet.md) - Quick reference
-5. [Troubleshooting](troubleshooting.md) - Problem solving
+4. [Widget Factory](modules/widget-factory.md) - Widget creation
+5. [Cheatsheet](cheatsheet.md) - Quick reference
+6. [Troubleshooting](troubleshooting.md) - Problem solving
 
 ## 🔗 External Links
 
@@ -263,5 +279,5 @@ All documents are versioned with the ChatUI release version:
 **Tip**: Use the sidebar navigation for quick access to any page, or use your browser's search function (Ctrl+F) to find specific topics within this documentation.
 
 **Last Updated**: 2026-01-22  
-**Version**: 1.0.0  
+**Version**: 1.2.0  
 **Format**: LiveWiki v1.0
