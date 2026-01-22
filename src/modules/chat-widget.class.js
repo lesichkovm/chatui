@@ -47,8 +47,7 @@ export class ChatWidget {
     }
 
     this.scriptElement = scriptElement;
-    this.widgetId =
-      config.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
+    this.widgetId = config.id || "chat-widget-" + crypto.randomUUID();
 
     // Rate limiting configuration
     this.lastMessageTime = 0;

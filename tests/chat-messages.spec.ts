@@ -238,6 +238,21 @@ test.describe("Chat Widget - Message Functionality", () => {
     const sendButton = page.locator("#chat-widget-1-send");
 
     const testMessage = "Test waiting message";
+    
+    // Increase response delay to ensure we catch the waiting message
+    await page.evaluate(() => {
+        const scriptElement = document.querySelector('script[id^="chat-widget-"]');
+        if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
+            const widget = (scriptElement as any)._chatWidgetInstance;
+            const originalSendMessage = widget.api.sendMessage;
+            widget.api.sendMessage = (msg, onSuccess, onError) => {
+                setTimeout(() => {
+                    if (onSuccess) onSuccess(`Echo: ${msg}`, 'bot');
+                }, 500); // 500ms delay
+            };
+        }
+    });
+
     await messageInput.fill(testMessage);
 
     // Click send and check for waiting message immediately

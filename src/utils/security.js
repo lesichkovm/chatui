@@ -3,6 +3,11 @@
  * Provides sanitization and validation functions for security
  */
 
+// Use a temporary div and DOMParser for robust sanitization if available
+// Fallback to simple regex for environments without full DOM (though widgets need DOM anyway)
+let template;
+let div;
+
 /**
  * Sanitize HTML content to prevent XSS attacks
  * Allows a whitelist of safe tags for formatting
@@ -12,10 +17,15 @@
 export function sanitizeHTML(text) {
   if (typeof text !== 'string') return '';
   
-  // Use a temporary div and DOMParser for robust sanitization if available
-  // Fallback to simple regex for environments without full DOM (though widgets need DOM anyway)
+  if (!template || !div) {
+    if (typeof document === 'undefined') {
+      // Fallback for non-browser environments
+      return text;
+    }
+    template = document.createElement('template');
+    div = document.createElement('div');
+  }
   
-  const template = document.createElement('template');
   template.innerHTML = text;
   const fragment = template.content;
   
@@ -58,7 +68,7 @@ export function sanitizeHTML(text) {
 
   Array.from(fragment.childNodes).forEach(sanitizeNode);
   
-  const div = document.createElement('div');
+  div.innerHTML = ''; // Clear previous content
   div.appendChild(fragment);
   return div.innerHTML;
 }
@@ -166,7 +176,7 @@ function isSafeStyleValue(property, value) {
     case 'backgroundImage':
     case 'listStyleImage':
       // Allow only safe image URLs
-      return /^url\s*\(\s*['"]?(https?:\/\/|\/|\.)[^'")]*\s*\)$/.test(value) ||
+      return /^url\s*\(\s*['"]?(https?:\/\/|\/|\.)[^'\"]*\s*\)$/.test(value) ||
              value === 'none' ||
              value === 'inherit' ||
              value === 'initial' ||

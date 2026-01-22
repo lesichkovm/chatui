@@ -39,6 +39,13 @@ A self-contained library of 15+ specialized components (managed via `WidgetFacto
 - **Programmatic API**: Full control via `ChatUI.init()`, allowing dynamic open/close and message sending.
 - **Scoped & Secure**: ID-rooted CSS (`#chat-widget-container`) prevents style bleeding; robust XSS prevention and callback validation.
 
+### Recommended CSP Headers
+To complement the widget's built-in security features, host applications should implement the following Content Security Policy (CSP) headers:
+- `script-src`: `'self' https://your-cdn.com`
+- `style-src`: `'self' 'unsafe-inline'` (required for widget styling)
+- `connect-src`: `'self' wss://your-chat-server.com`
+- `default-src`: `'self'`
+
 ## Technical Architecture
 
 ### Core Modules

@@ -568,8 +568,12 @@ export class HybridChatAPI extends ChatAPI {
           if (this.reconnectAttempts < this.maxReconnectAttempts) {
             setTimeout(() => {
               this.reconnectAttempts++;
-              this.initWebSocket();
+              this.initWebSocket().catch((error) => {
+                console.error("ChatWidget: WebSocket reconnection failed", error);
+              });
             }, this.reconnectDelay * this.reconnectAttempts);
+          } else {
+            console.error("ChatWidget: Max reconnection attempts reached");
           }
         };
       } catch (error) {

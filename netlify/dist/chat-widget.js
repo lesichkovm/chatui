@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-22T19:33:33.612Z
+ * Generated on: 2026-01-22T20:18:33.774Z
  */
 
 
@@ -451,7 +451,13 @@
   // src/utils/security.js
   function sanitizeHTML(text) {
     if (typeof text !== "string") return "";
-    const template = document.createElement("template");
+    if (!template || !div) {
+      if (typeof document === "undefined") {
+        return text;
+      }
+      template = document.createElement("template");
+      div = document.createElement("div");
+    }
     template.innerHTML = text;
     const fragment = template.content;
     const allowedTags = [
@@ -499,7 +505,7 @@
       }
     };
     Array.from(fragment.childNodes).forEach(sanitizeNode);
-    const div = document.createElement("div");
+    div.innerHTML = "";
     div.appendChild(fragment);
     return div.innerHTML;
   }
@@ -672,7 +678,7 @@
     switch (property) {
       case "backgroundImage":
       case "listStyleImage":
-        return /^url\s*\(\s*['"]?(https?:\/\/|\/|\.)[^'")]*\s*\)$/.test(value) || value === "none" || value === "inherit" || value === "initial" || value === "unset";
+        return /^url\s*\(\s*['"]?(https?:\/\/|\/|\.)[^'\"]*\s*\)$/.test(value) || value === "none" || value === "inherit" || value === "initial" || value === "unset";
       case "content":
         return !/(javascript|data|vbscript):/i.test(value);
       case "cursor":
@@ -760,6 +766,7 @@
     const escapedText = sanitizeHTML(text);
     return escapedText.replace(/\n/g, "<br>");
   }
+  var template, div;
   var init_security = __esm({
     "src/utils/security.js"() {
     }
@@ -4071,42 +4078,42 @@
          * @param {Object} template - Item template configuration
          * @returns {HTMLElement} Content element
          */
-        renderItemContent(item, template) {
+        renderItemContent(item, template2) {
           const content = document.createElement("div");
           content.className = "widget-list-item-content";
-          if (!template) {
+          if (!template2) {
             content.textContent = typeof item === "string" ? item : JSON.stringify(item);
             return content;
           }
-          if (template.type === "text") {
+          if (template2.type === "text") {
             const textElement = document.createElement("div");
             textElement.className = "widget-list-item-text";
-            textElement.textContent = this.interpolateTemplate(template.text, item);
+            textElement.textContent = this.interpolateTemplate(template2.text, item);
             content.appendChild(textElement);
           }
-          if (template.type === "card") {
+          if (template2.type === "card") {
             content.classList.add("widget-list-item-card");
-            if (template.title) {
+            if (template2.title) {
               const titleElement = document.createElement("div");
               titleElement.className = "widget-list-item-title";
-              titleElement.textContent = this.interpolateTemplate(template.title, item);
+              titleElement.textContent = this.interpolateTemplate(template2.title, item);
               content.appendChild(titleElement);
             }
-            if (template.subtitle) {
+            if (template2.subtitle) {
               const subtitleElement = document.createElement("div");
               subtitleElement.className = "widget-list-item-subtitle";
-              subtitleElement.textContent = this.interpolateTemplate(template.subtitle, item);
+              subtitleElement.textContent = this.interpolateTemplate(template2.subtitle, item);
               content.appendChild(subtitleElement);
             }
-            if (template.description) {
+            if (template2.description) {
               const descElement = document.createElement("div");
               descElement.className = "widget-list-item-description";
-              descElement.textContent = this.interpolateTemplate(template.description, item);
+              descElement.textContent = this.interpolateTemplate(template2.description, item);
               content.appendChild(descElement);
             }
           }
-          if (template.type === "custom" && template.render) {
-            const customContent = template.render(item);
+          if (template2.type === "custom" && template2.render) {
+            const customContent = template2.render(item);
             if (customContent instanceof HTMLElement) {
               content.appendChild(customContent);
             } else {
@@ -4121,9 +4128,9 @@
          * @param {*} item - Item data
          * @returns {string} Interpolated string
          */
-        interpolateTemplate(template, item) {
-          if (typeof template !== "string") return template;
-          return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+        interpolateTemplate(template2, item) {
+          if (typeof template2 !== "string") return template2;
+          return template2.replace(/\{\{(\w+)\}\}/g, (match, key) => {
             return item[key] !== void 0 ? item[key] : match;
           });
         }
@@ -5654,8 +5661,12 @@
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
               setTimeout(() => {
                 this.reconnectAttempts++;
-                this.initWebSocket();
+                this.initWebSocket().catch((error) => {
+                  console.error("ChatWidget: WebSocket reconnection failed", error);
+                });
               }, this.reconnectDelay * this.reconnectAttempts);
+            } else {
+              console.error("ChatWidget: Max reconnection attempts reached");
             }
           };
         } catch (error) {
@@ -7452,7 +7463,7 @@
         config = input || {};
       }
       this.scriptElement = scriptElement;
-      this.widgetId = config.id || "chat-widget-" + Math.random().toString(36).substr(2, 9);
+      this.widgetId = config.id || "chat-widget-" + crypto.randomUUID();
       this.lastMessageTime = 0;
       this.minMessageInterval = 1e3;
       this.maxMessageLength = 1e4;
