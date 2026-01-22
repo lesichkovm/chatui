@@ -246,12 +246,18 @@ export class CorsAPI {
       });
 
       if (onMessage) {
-        // Check if response is successful and has text field
-        if (response.status === "success" && response.text) {
-          if (response.widget) {
-            onMessage(response.text, "bot", response.widget);
-          } else {
-            onMessage(response.text, "bot");
+        // Check if response is successful and has widgets array or text field
+        if (response.status === "success") {
+          if (response.widgets && Array.isArray(response.widgets)) {
+            // New composable widget format
+            onMessage(response.widgets, "bot");
+          } else if (response.text) {
+            // Backward compatibility: old format with text field
+            if (response.widget) {
+              onMessage(response.text, "bot", response.widget);
+            } else {
+              onMessage(response.text, "bot");
+            }
           }
         } else if (response.status === "error") {
           // Don't call onMessage for error responses, let onError handle it

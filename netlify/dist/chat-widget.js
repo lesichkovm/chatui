@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-22T21:01:19.734Z
+ * Generated on: 2026-01-22T21:09:53.085Z
  */
 
 
@@ -5108,11 +5108,15 @@
           })
         });
         if (onMessage) {
-          if (response.status === "success" && response.text) {
-            if (response.widget) {
-              onMessage(response.text, "bot", response.widget);
-            } else {
-              onMessage(response.text, "bot");
+          if (response.status === "success") {
+            if (response.widgets && Array.isArray(response.widgets)) {
+              onMessage(response.widgets, "bot");
+            } else if (response.text) {
+              if (response.widget) {
+                onMessage(response.text, "bot", response.widget);
+              } else {
+                onMessage(response.text, "bot");
+              }
             }
           } else if (response.status === "error") {
             throw new Error(response.message || "Server returned error response");

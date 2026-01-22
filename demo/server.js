@@ -11,7 +11,21 @@ const server = http.createServer((req, res) => {
   // CORS headers (good practice, though JSONP bypasses)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Session-Key');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  // Only accept GET and POST methods
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    res.writeHead(405, { 'Content-Type': 'text/plain' });
+    res.end('Method Not Allowed');
+    return;
+  }
 
   if (pathname === '/api/handshake') {
     handleHandshake(req, res, query);
