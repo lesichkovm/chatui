@@ -33,12 +33,12 @@ test.describe('ChatWidget Input Integration', () => {
         const widget = window.ChatUI.init(config);
         
         // Mock the API to track sent messages
-        const messages = [];
+        const messages: string[] = [];
         // @ts-ignore
         window.sentMessages = messages;
         
         // Mock the sendMessage method to capture calls
-        widget.api.sendMessage = (message, onSuccess, onError) => {
+        widget.api.sendMessage = (message: string, onSuccess: (response: string, sender: string) => void, onError: (error: Error) => void) => {
             messages.push(message);
             // Call original to maintain behavior if needed, or just mock success
             if (typeof message !== 'string') {
