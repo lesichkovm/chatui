@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-22T21:09:53.085Z
+ * Generated on: 2026-01-22T21:48:59.003Z
  */
 
 
@@ -7797,11 +7797,14 @@
      * @param {Object} interaction - Interaction data from widget
      */
     handleWidgetInteraction(interaction) {
-      const messageText = interaction.optionText;
-      this.addMessage(messageText, "user");
+      const messageText = interaction.optionText || interaction.value || interaction.label || "";
+      if (messageText) {
+        this.addMessage(messageText, "user");
+      }
       const waitingMessageId = this.addWaitingMessage();
+      const messageToSend = interaction.value !== void 0 ? interaction.value : interaction.optionValue;
       this.api.sendMessage(
-        interaction.optionValue,
+        messageToSend,
         // Success callback
         (text, sender, widgetData) => {
           this.removeWaitingMessage(waitingMessageId);
@@ -7985,14 +7988,15 @@
       console.log("ChatWidget: addMessage called", {
         text,
         sender,
-        textLength: text.length,
         widgetData
       });
-      const messageObj = { text, sender, timestamp: Date.now(), widgetData };
+      const isWidgetConfig = Array.isArray(text) || typeof text === "object" && text !== null && text.widgets;
+      const messageContent = isWidgetConfig ? text : text === null || text === void 0 ? "" : String(text);
+      const messageObj = { text: messageContent, sender, timestamp: Date.now(), widgetData };
       this.state.messages.push(messageObj);
       appendMessage(
         this.messagesContainer,
-        text,
+        messageContent,
         sender,
         this.widgetId,
         widgetData

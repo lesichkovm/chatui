@@ -306,4 +306,55 @@ test.describe("Chat Widget - Message Functionality", () => {
     const waitingMessage = page.locator(".waiting-message");
     await expect(waitingMessage).toBeVisible();
   });
+
+  test("should render composable widget array from bot", async ({ page }) => {
+    const widgetButton = page.locator("#chat-widget-1-button");
+    await widgetButton.click();
+
+    const messageInput = page.locator("#chat-widget-1-input");
+    const sendButton = page.locator("#chat-widget-1-send");
+
+    // Set up mock to return a widget array (new format)
+    await page.evaluate(() => {
+      const scriptElement = document.querySelector('script[id^="chat-widget-"]');
+      if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
+        const widget = (scriptElement as any)._chatWidgetInstance;
+        widget.api.sendMessage = (msg, onSuccess) => {
+          const widgets = [
+            {
+              type: 'text',
+              props: { content: 'Dynamic Text', format: 'plain' }
+            },
+            {
+              type: 'input',
+              props: { placeholder: 'Dynamic Input' }
+            }
+          ];
+          // Simulate receiving widgets array as the first argument
+          setTimeout(() => onSuccess(widgets, 'bot'), 100);
+        };
+      }
+    });
+
+    await messageInput.fill("trigger widgets");
+    await sendButton.click();
+
+    const messagesContainer = page.locator("#chat-widget-1-messages");
+    
+    // Check that we DON'T see [object Object]
+    // Filter for bot messages that are NOT waiting messages
+    const lastBotMessage = messagesContainer.locator(".bot-message:not(.waiting-message)").last();
+    await expect(lastBotMessage).toBeVisible();
+    const content = await lastBotMessage.innerHTML();
+    
+    // This is the key check for the shortcoming: it should NOT be stringified objects
+    expect(content).not.toContain("[object Object]");
+
+    // Verify individual widgets are rendered
+    const widgetText = lastBotMessage.locator(".widget-text");
+    const widgetInput = lastBotMessage.locator(".widget-input-element");
+    
+    await expect(widgetText).toHaveText("Dynamic Text");
+    await expect(widgetInput).toHaveAttribute("placeholder", "Dynamic Input");
+  });
 });

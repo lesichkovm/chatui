@@ -470,15 +470,22 @@ export class ChatWidget {
    */
   handleWidgetInteraction(interaction) {
     // Send the selected option value as a message
-    const messageText = interaction.optionText;
-    this.addMessage(messageText, "user");
+    // Determine the display text based on available properties
+    const messageText = interaction.optionText || interaction.value || interaction.label || "";
+    
+    if (messageText) {
+      this.addMessage(messageText, "user");
+    }
 
     // Add waiting placeholder message
     const waitingMessageId = this.addWaitingMessage();
 
     // Send the option value to the API with error handling
+    // Use value (InputWidget) or optionValue (ButtonWidget/SelectWidget)
+    const messageToSend = interaction.value !== undefined ? interaction.value : interaction.optionValue;
+    
     this.api.sendMessage(
-      interaction.optionValue,
+      messageToSend,
       // Success callback
       (text, sender, widgetData) => {
         // Remove waiting message and add real response
@@ -716,15 +723,20 @@ export class ChatWidget {
     console.log("ChatWidget: addMessage called", {
       text,
       sender,
-      textLength: text.length,
       widgetData,
     });
 
-    const messageObj = { text, sender, timestamp: Date.now(), widgetData };
+    // Check if text is actually a widget configuration (Array or Object with widgets)
+    const isWidgetConfig = Array.isArray(text) || (typeof text === 'object' && text !== null && text.widgets);
+    
+    // Use text as-is if it's a widget config, otherwise ensure it's a string
+    const messageContent = isWidgetConfig ? text : (text === null || text === undefined ? "" : String(text));
+
+    const messageObj = { text: messageContent, sender, timestamp: Date.now(), widgetData };
     this.state.messages.push(messageObj);
     appendMessage(
       this.messagesContainer,
-      text,
+      messageContent,
       sender,
       this.widgetId,
       widgetData,
