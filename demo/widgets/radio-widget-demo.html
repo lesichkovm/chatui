@@ -85,15 +85,20 @@
             <p>To trigger a radio widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "What is your preferred contact method?",
-  "widget": {
-    "type": "radio",
-    "buttonText": "Submit",
-    "options": [
-      { "id": "1", "text": "Email", "value": "email" },
-      { "id": "2", "text": "Phone", "value": "phone" },
-      { "id": "3", "text": "SMS", "value": "sms" }
-    ]
-  }
+  "widgets": [
+    {
+      "type": "radio",
+      "props": {
+        "buttonText": "Submit",
+        "showSubmitButton": true,
+        "options": [
+          { "id": "1", "text": "Email", "value": "email" },
+          { "id": "2", "text": "Phone", "value": "phone" },
+          { "id": "3", "text": "SMS", "value": "sms" }
+        ]
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -101,26 +106,30 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "radio",
-  "buttonText": "Submit",
-  "options": [
-    {
-      "id": "unique-id",
-      "text": "Display text",
-      "value": "value",
-      "checked": false
-    }
-  ]
+  "props": {
+    "buttonText": "Submit",
+    "showSubmitButton": true,
+    "options": [
+      {
+        "id": "unique-id",
+        "text": "Display text",
+        "value": "value",
+        "checked": false
+      }
+    ]
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "radio"</li>
-                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
-                <li><strong>options:</strong> Array of radio options</li>
-                <li><strong>options[].id:</strong> Unique identifier for the option</li>
-                <li><strong>options[].text:</strong> Display text for the option</li>
-                <li><strong>options[].value:</strong> Value to send when selected</li>
-                <li><strong>options[].checked:</strong> Pre-select the option (default: false)</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
+                <li><strong>props.options:</strong> Array of radio options</li>
+                <li><strong>props.options[].id:</strong> Unique identifier for the option</li>
+                <li><strong>props.options[].text:</strong> Display text for the option</li>
+                <li><strong>props.options[].value:</strong> Value to send when selected</li>
+                <li><strong>props.options[].checked:</strong> Pre-select the option (default: false)</li>
             </ul>
         </div>
 
@@ -130,35 +139,44 @@
             <h3>Contact Method</h3>
             <div class="api-response">{
   "type": "radio",
-  "buttonText": "Save Preference",
-  "options": [
-    { "id": "email", "text": "Email", "value": "email" },
-    { "id": "phone", "text": "Phone", "value": "phone" },
-    { "id": "sms", "text": "SMS", "value": "sms" }
-  ]
+  "props": {
+    "buttonText": "Save Preference",
+    "showSubmitButton": true,
+    "options": [
+      { "id": "email", "text": "Email", "value": "email" },
+      { "id": "phone", "text": "Phone", "value": "phone" },
+      { "id": "sms", "text": "SMS", "value": "sms" }
+    ]
+  }
 }</div>
             
             <h3>Frequency Selection</h3>
             <div class="api-response">{
   "type": "radio",
-  "buttonText": "Set Frequency",
-  "options": [
-    { "id": "daily", "text": "Daily", "value": "daily" },
-    { "id": "weekly", "text": "Weekly", "value": "weekly", "checked": true },
-    { "id": "monthly", "text": "Monthly", "value": "monthly" }
-  ]
+  "props": {
+    "buttonText": "Set Frequency",
+    "showSubmitButton": true,
+    "options": [
+      { "id": "daily", "text": "Daily", "value": "daily" },
+      { "id": "weekly", "text": "Weekly", "value": "weekly", "checked": true },
+      { "id": "monthly", "text": "Monthly", "value": "monthly" }
+    ]
+  }
 }</div>
             
             <h3>Size Selection</h3>
             <div class="api-response">{
   "type": "radio",
-  "buttonText": "Select Size",
-  "options": [
-    { "id": "small", "text": "Small", "value": "S" },
-    { "id": "medium", "text": "Medium", "value": "M" },
-    { "id": "large", "text": "Large", "value": "L" },
-    { "id": "xlarge", "text": "Extra Large", "value": "XL" }
-  ]
+  "props": {
+    "buttonText": "Select Size",
+    "showSubmitButton": true,
+    "options": [
+      { "id": "small", "text": "Small", "value": "S" },
+      { "id": "medium", "text": "Medium", "value": "M" },
+      { "id": "large", "text": "Large", "value": "L" },
+      { "id": "xlarge", "text": "Extra Large", "value": "XL" }
+    ]
+  }
 }</div>
         </div>
 

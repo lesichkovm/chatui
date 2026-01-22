@@ -85,32 +85,20 @@
             <p>To trigger a select widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "Please choose your preferred department:",
-  "widget": {
-    "type": "select",
-    "placeholder": "Select a department...",
-    "options": [
-      { 
-        "id": "dept1", 
-        "text": "Customer Support", 
-        "value": "support" 
-      },
-      { 
-        "id": "dept2", 
-        "text": "Sales", 
-        "value": "sales" 
-      },
-      { 
-        "id": "dept3", 
-        "text": "Technical Support", 
-        "value": "tech" 
-      },
-      { 
-        "id": "dept4", 
-        "text": "Billing", 
-        "value": "billing" 
+  "widgets": [
+    {
+      "type": "select",
+      "props": {
+        "placeholder": "Select a department...",
+        "options": [
+          { "id": "dept1", "text": "Customer Support", "value": "support" },
+          { "id": "dept2", "text": "Sales", "value": "sales" },
+          { "id": "dept3", "text": "Technical Support", "value": "tech" },
+          { "id": "dept4", "text": "Billing", "value": "billing" }
+        ]
       }
-    ]
-  }
+    }
+  ]
 }</div>
         </div>
 
@@ -118,28 +106,30 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "select",
-  "placeholder": "Select an option...",
-  "options": [
-    {
-      "id": "unique_option_id",
-      "text": "Display text for option",
-      "value": "backend_value"
-    }
-  ]
+  "props": {
+    "placeholder": "Select an option...",
+    "options": [
+      {
+        "id": "unique_option_id",
+        "text": "Display text for option",
+        "value": "backend_value"
+      }
+    ]
+  }
 }</div>
             
             <h3>Required Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "select"</li>
-                <li><strong>options:</strong> Array of option objects</li>
-                <li><strong>options[].id:</strong> Unique identifier for the option</li>
-                <li><strong>options[].text:</strong> Text displayed in the dropdown</li>
-                <li><strong>options[].value:</strong> Value sent to backend</li>
+                <li><strong>props.options:</strong> Array of option objects</li>
+                <li><strong>props.options[].id:</strong> Unique identifier for the option</li>
+                <li><strong>props.options[].text:</strong> Text displayed in the dropdown</li>
+                <li><strong>props.options[].value:</strong> Value sent to backend</li>
             </ul>
             
             <h3>Optional Fields:</h3>
             <ul class="feature-list">
-                <li><strong>placeholder:</strong> Text for the default disabled option</li>
+                <li><strong>props.placeholder:</strong> Text for the default disabled option</li>
             </ul>
         </div>
 
@@ -149,36 +139,42 @@
             <h3>Department Selection</h3>
             <div class="api-response">{
   "type": "select",
-  "placeholder": "Choose department...",
-  "options": [
-    { "id": "support", "text": "Customer Support", "value": "support" },
-    { "id": "sales", "text": "Sales Team", "value": "sales" },
-    { "id": "tech", "text": "Technical Help", "value": "technical" }
-  ]
+  "props": {
+    "placeholder": "Choose department...",
+    "options": [
+      { "id": "support", "text": "Customer Support", "value": "support" },
+      { "id": "sales", "text": "Sales Team", "value": "sales" },
+      { "id": "tech", "text": "Technical Help", "value": "technical" }
+    ]
+  }
 }</div>
             
             <h3>Priority Level</h3>
             <div class="api-response">{
   "type": "select",
-  "placeholder": "Select priority...",
-  "options": [
-    { "id": "low", "text": "Low Priority", "value": "low" },
-    { "id": "medium", "text": "Medium Priority", "value": "medium" },
-    { "id": "high", "text": "High Priority", "value": "high" },
-    { "id": "urgent", "text": "Urgent", "value": "urgent" }
-  ]
+  "props": {
+    "placeholder": "Select priority...",
+    "options": [
+      { "id": "low", "text": "Low Priority", "value": "low" },
+      { "id": "medium", "text": "Medium Priority", "value": "medium" },
+      { "id": "high", "text": "High Priority", "value": "high" },
+      { "id": "urgent", "text": "Urgent", "value": "urgent" }
+    ]
+  }
 }</div>
             
             <h3>Country Selection</h3>
             <div class="api-response">{
   "type": "select",
-  "placeholder": "Select your country...",
-  "options": [
-    { "id": "us", "text": "United States", "value": "US" },
-    { "id": "uk", "text": "United Kingdom", "value": "UK" },
-    { "id": "ca", "text": "Canada", "value": "CA" },
-    { "id": "au", "text": "Australia", "value": "AU" }
-  ]
+  "props": {
+    "placeholder": "Select your country...",
+    "options": [
+      { "id": "us", "text": "United States", "value": "US" },
+      { "id": "uk", "text": "United Kingdom", "value": "UK" },
+      { "id": "ca", "text": "Canada", "value": "CA" },
+      { "id": "au", "text": "Australia", "value": "AU" }
+    ]
+  }
 }</div>
         </div>
 

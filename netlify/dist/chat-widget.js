@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-22T19:13:06.453Z
+ * Generated on: 2026-01-22T19:33:33.612Z
  */
 
 
@@ -7222,11 +7222,11 @@
     container.scrollTop = container.scrollHeight;
   }
   function createWidgetElement(widgetData, widgetId) {
-    const widget = WidgetFactory.createWidget(widgetData, widgetId);
-    if (!widget) {
+    const widgetElement = WidgetFactory.createWidget(widgetData, widgetId);
+    if (!widgetElement) {
       return document.createComment(`Unsupported widget type: ${widgetData?.type}`);
     }
-    return widget.createElement();
+    return widgetElement;
   }
 
   // src/modules/theme.js

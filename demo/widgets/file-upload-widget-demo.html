@@ -86,14 +86,19 @@
             <p>To trigger a file upload widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "Please upload your documents:",
-  "widget": {
-    "type": "file",
-    "label": "Upload Documents",
-    "accept": ".pdf,.doc,.docx",
-    "maxFiles": 3,
-    "maxSize": 5242880,
-    "buttonText": "Upload"
-  }
+  "widgets": [
+    {
+      "type": "file",
+      "props": {
+        "label": "Upload Documents",
+        "accept": ".pdf,.doc,.docx",
+        "maxFiles": 3,
+        "maxSize": 5242880,
+        "buttonText": "Upload",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -101,21 +106,25 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "file",
-  "label": "Upload a file",
-  "accept": ".jpg,.png,.pdf",
-  "maxFiles": 1,
-  "maxSize": 10485760,
-  "buttonText": "Upload"
+  "props": {
+    "label": "Upload a file",
+    "accept": ".jpg,.png,.pdf",
+    "maxFiles": 1,
+    "maxSize": 10485760,
+    "buttonText": "Upload",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "file"</li>
-                <li><strong>label:</strong> Label text for the upload area (default: "Upload a file")</li>
-                <li><strong>accept:</strong> Accepted file types (e.g., ".pdf,.doc" or "image/*")</li>
-                <li><strong>maxFiles:</strong> Maximum number of files (default: 1)</li>
-                <li><strong>maxSize:</strong> Maximum file size in bytes (default: 10MB)</li>
-                <li><strong>buttonText:</strong> Text displayed on the upload button (default: "Upload")</li>
+                <li><strong>props.label:</strong> Label text for the upload area (default: "Upload a file")</li>
+                <li><strong>props.accept:</strong> Accepted file types (e.g., ".pdf,.doc" or "image/*")</li>
+                <li><strong>props.maxFiles:</strong> Maximum number of files (default: 1)</li>
+                <li><strong>props.maxSize:</strong> Maximum file size in bytes (default: 10MB)</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the upload button (default: "Upload")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
         </div>
 
@@ -125,30 +134,39 @@
             <h3>Document Upload</h3>
             <div class="api-response">{
   "type": "file",
-  "label": "Upload Documents",
-  "accept": ".pdf,.doc,.docx",
-  "maxFiles": 5,
-  "maxSize": 10485760,
-  "buttonText": "Upload Files"
+  "props": {
+    "label": "Upload Documents",
+    "accept": ".pdf,.doc,.docx",
+    "maxFiles": 5,
+    "maxSize": 10485760,
+    "buttonText": "Upload Files",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Image Upload</h3>
             <div class="api-response">{
   "type": "file",
-  "label": "Upload Profile Picture",
-  "accept": "image/*",
-  "maxFiles": 1,
-  "maxSize": 5242880,
-  "buttonText": "Upload Image"
+  "props": {
+    "label": "Upload Profile Picture",
+    "accept": "image/*",
+    "maxFiles": 1,
+    "maxSize": 5242880,
+    "buttonText": "Upload Image",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Any File Type</h3>
             <div class="api-response">{
   "type": "file",
-  "label": "Upload File",
-  "maxFiles": 1,
-  "maxSize": 20971520,
-  "buttonText": "Submit"
+  "props": {
+    "label": "Upload File",
+    "maxFiles": 1,
+    "maxSize": 20971520,
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

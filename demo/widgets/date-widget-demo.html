@@ -85,13 +85,18 @@
             <p>To trigger a date widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "When would you like to schedule your appointment?",
-  "widget": {
-    "type": "date",
-    "label": "Select Date",
-    "minDate": "2024-01-01",
-    "maxDate": "2024-12-31",
-    "buttonText": "Schedule"
-  }
+  "widgets": [
+    {
+      "type": "date",
+      "props": {
+        "label": "Select Date",
+        "minDate": "2024-01-01",
+        "maxDate": "2024-12-31",
+        "buttonText": "Schedule",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -99,19 +104,23 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "date",
-  "label": "Select a date",
-  "minDate": "YYYY-MM-DD",
-  "maxDate": "YYYY-MM-DD",
-  "buttonText": "Submit"
+  "props": {
+    "label": "Select a date",
+    "minDate": "YYYY-MM-DD",
+    "maxDate": "YYYY-MM-DD",
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "date"</li>
-                <li><strong>label:</strong> Label text for the date picker (default: "Select a date")</li>
-                <li><strong>minDate:</strong> Minimum selectable date in YYYY-MM-DD format (optional)</li>
-                <li><strong>maxDate:</strong> Maximum selectable date in YYYY-MM-DD format (optional)</li>
-                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.label:</strong> Label text for the date picker (default: "Select a date")</li>
+                <li><strong>props.minDate:</strong> Minimum selectable date in YYYY-MM-DD format (optional)</li>
+                <li><strong>props.maxDate:</strong> Maximum selectable date in YYYY-MM-DD format (optional)</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
         </div>
 
@@ -121,26 +130,35 @@
             <h3>Appointment Scheduling</h3>
             <div class="api-response">{
   "type": "date",
-  "label": "Select Appointment Date",
-  "minDate": "2024-01-01",
-  "maxDate": "2024-12-31",
-  "buttonText": "Schedule"
+  "props": {
+    "label": "Select Appointment Date",
+    "minDate": "2024-01-01",
+    "maxDate": "2024-12-31",
+    "buttonText": "Schedule",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Birthdate Selection</h3>
             <div class="api-response">{
   "type": "date",
-  "label": "Select Your Birthdate",
-  "maxDate": "2006-01-01",
-  "buttonText": "Submit"
+  "props": {
+    "label": "Select Your Birthdate",
+    "maxDate": "2006-01-01",
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Deadline Selection</h3>
             <div class="api-response">{
   "type": "date",
-  "label": "Select Deadline",
-  "minDate": "2024-01-01",
-  "buttonText": "Set Deadline"
+  "props": {
+    "label": "Select Deadline",
+    "minDate": "2024-01-01",
+    "buttonText": "Set Deadline",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

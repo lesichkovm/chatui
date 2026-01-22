@@ -1477,11 +1477,11 @@ export function appendMessage(container, message, sender, widgetId, legacyWidget
  * @returns {HTMLElement|Comment} Widget element or comment for unsupported types
  */
 function createWidgetElement(widgetData, widgetId) {
-  const widget = WidgetFactory.createWidget(widgetData, widgetId);
+  const widgetElement = WidgetFactory.createWidget(widgetData, widgetId);
 
-  if (!widget) {
+  if (!widgetElement) {
     return document.createComment(`Unsupported widget type: ${widgetData?.type}`);
   }
 
-  return widget.createElement();
+  return widgetElement;
 }

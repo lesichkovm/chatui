@@ -85,12 +85,17 @@
             <p>To trigger a rating widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "How would you rate our service?",
-  "widget": {
-    "type": "rating",
-    "label": "Rate your experience",
-    "maxRating": 5,
-    "iconType": "stars"
-  }
+  "widgets": [
+    {
+      "type": "rating",
+      "props": {
+        "label": "Rate your experience",
+        "maxRating": 5,
+        "iconType": "stars",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -98,17 +103,21 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "rating",
-  "label": "Rate this",
-  "maxRating": 5,
-  "iconType": "stars"
+  "props": {
+    "label": "Rate this",
+    "maxRating": 5,
+    "iconType": "stars",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "rating"</li>
-                <li><strong>label:</strong> Label text for the rating (default: "Rate this")</li>
-                <li><strong>maxRating:</strong> Maximum rating value (default: 5)</li>
-                <li><strong>iconType:</strong> Icon type - "stars" or "emojis" (default: "stars")</li>
+                <li><strong>props.label:</strong> Label text for the rating (default: "Rate this")</li>
+                <li><strong>props.maxRating:</strong> Maximum rating value (default: 5)</li>
+                <li><strong>props.iconType:</strong> Icon type - "stars" or "emojis" (default: "stars")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
         </div>
 
@@ -118,25 +127,34 @@
             <h3>5-Star Rating</h3>
             <div class="api-response">{
   "type": "rating",
-  "label": "Rate your satisfaction",
-  "maxRating": 5,
-  "iconType": "stars"
+  "props": {
+    "label": "Rate your satisfaction",
+    "maxRating": 5,
+    "iconType": "stars",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>10-Star Rating</h3>
             <div class="api-response">{
   "type": "rating",
-  "label": "Rate on a scale of 1-10",
-  "maxRating": 10,
-  "iconType": "stars"
+  "props": {
+    "label": "Rate on a scale of 1-10",
+    "maxRating": 10,
+    "iconType": "stars",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Emoji Rating</h3>
             <div class="api-response">{
   "type": "rating",
-  "label": "How much do you like this?",
-  "maxRating": 5,
-  "iconType": "emojis"
+  "props": {
+    "label": "How much do you like this?",
+    "maxRating": 5,
+    "iconType": "emojis",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

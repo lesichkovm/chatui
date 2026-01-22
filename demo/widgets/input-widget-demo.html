@@ -85,12 +85,17 @@
             <p>To trigger an input widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "Please enter your email address:",
-  "widget": {
-    "type": "input",
-    "inputType": "email",
-    "placeholder": "Enter your email...",
-    "buttonText": "Submit"
-  }
+  "widgets": [
+    {
+      "type": "input",
+      "props": {
+        "type": "email",
+        "placeholder": "Enter your email...",
+        "buttonText": "Submit",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -98,17 +103,21 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "input",
-  "inputType": "text",
-  "placeholder": "Enter your response...",
-  "buttonText": "Submit"
+  "props": {
+    "type": "text",
+    "placeholder": "Enter your response...",
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "input"</li>
-                <li><strong>inputType:</strong> HTML input type (default: "text")</li>
-                <li><strong>placeholder:</strong> Placeholder text for the input field</li>
-                <li><strong>buttonText:</strong> Text displayed on the submit button</li>
+                <li><strong>props.type:</strong> HTML input type (default: "text")</li>
+                <li><strong>props.placeholder:</strong> Placeholder text for the input field</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the submit button</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
             
             <h3>Supported Input Types:</h3>
@@ -128,25 +137,34 @@
             <h3>Email Collection</h3>
             <div class="api-response">{
   "type": "input",
-  "inputType": "email",
-  "placeholder": "Enter your email address",
-  "buttonText": "Subscribe"
+  "props": {
+    "type": "email",
+    "placeholder": "Enter your email address",
+    "buttonText": "Subscribe",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Name Input</h3>
             <div class="api-response">{
   "type": "input",
-  "inputType": "text",
-  "placeholder": "What's your name?",
-  "buttonText": "Send"
+  "props": {
+    "type": "text",
+    "placeholder": "What's your name?",
+    "buttonText": "Send",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Phone Number</h3>
             <div class="api-response">{
   "type": "input",
-  "inputType": "tel",
-  "placeholder": "Enter your phone number",
-  "buttonText": "Submit"
+  "props": {
+    "type": "tel",
+    "placeholder": "Enter your phone number",
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

@@ -85,13 +85,18 @@
             <p>To trigger a textarea widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "Please describe your issue in detail:",
-  "widget": {
-    "type": "textarea",
-    "placeholder": "Describe your issue here...",
-    "rows": 6,
-    "maxLength": 500,
-    "buttonText": "Submit"
-  }
+  "widgets": [
+    {
+      "type": "textarea",
+      "props": {
+        "placeholder": "Describe your issue here...",
+        "rows": 6,
+        "maxLength": 500,
+        "buttonText": "Submit",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -99,19 +104,23 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "textarea",
-  "placeholder": "Enter your response...",
-  "rows": 4,
-  "maxLength": 1000,
-  "buttonText": "Submit"
+  "props": {
+    "placeholder": "Enter your response...",
+    "rows": 4,
+    "maxLength": 1000,
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "textarea"</li>
-                <li><strong>placeholder:</strong> Placeholder text for the textarea (default: "Enter your response...")</li>
-                <li><strong>rows:</strong> Number of visible rows (default: 4)</li>
-                <li><strong>maxLength:</strong> Maximum character count (optional)</li>
-                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.placeholder:</strong> Placeholder text for the textarea (default: "Enter your response...")</li>
+                <li><strong>props.rows:</strong> Number of visible rows (default: 4)</li>
+                <li><strong>props.maxLength:</strong> Maximum character count (optional)</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
         </div>
 
@@ -121,27 +130,36 @@
             <h3>Feedback Form</h3>
             <div class="api-response">{
   "type": "textarea",
-  "placeholder": "Please share your feedback...",
-  "rows": 6,
-  "maxLength": 1000,
-  "buttonText": "Send Feedback"
+  "props": {
+    "placeholder": "Please share your feedback...",
+    "rows": 6,
+    "maxLength": 1000,
+    "buttonText": "Send Feedback",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Bug Report</h3>
             <div class="api-response">{
   "type": "textarea",
-  "placeholder": "Describe the bug and steps to reproduce...",
-  "rows": 8,
-  "maxLength": 2000,
-  "buttonText": "Submit Report"
+  "props": {
+    "placeholder": "Describe the bug and steps to reproduce...",
+    "rows": 8,
+    "maxLength": 2000,
+    "buttonText": "Submit Report",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Short Note</h3>
             <div class="api-response">{
   "type": "textarea",
-  "placeholder": "Add a note...",
-  "rows": 3,
-  "buttonText": "Save"
+  "props": {
+    "placeholder": "Add a note...",
+    "rows": 3,
+    "buttonText": "Save",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

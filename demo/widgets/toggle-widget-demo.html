@@ -85,12 +85,17 @@
             <p>To trigger a toggle widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "Would you like to enable notifications?",
-  "widget": {
-    "type": "toggle",
-    "label": "Enable Notifications",
-    "defaultValue": false,
-    "buttonText": "Save"
-  }
+  "widgets": [
+    {
+      "type": "toggle",
+      "props": {
+        "label": "Enable Notifications",
+        "defaultValue": false,
+        "buttonText": "Save",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -98,17 +103,21 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "toggle",
-  "label": "Enable",
-  "defaultValue": false,
-  "buttonText": "Submit"
+  "props": {
+    "label": "Enable",
+    "defaultValue": false,
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "toggle"</li>
-                <li><strong>label:</strong> Label text for the toggle (default: "Enable")</li>
-                <li><strong>defaultValue:</strong> Initial state (default: false)</li>
-                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.label:</strong> Label text for the toggle (default: "Enable")</li>
+                <li><strong>props.defaultValue:</strong> Initial state (default: false)</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
         </div>
 
@@ -118,25 +127,34 @@
             <h3>Enable Notifications</h3>
             <div class="api-response">{
   "type": "toggle",
-  "label": "Enable Notifications",
-  "defaultValue": false,
-  "buttonText": "Save Settings"
+  "props": {
+    "label": "Enable Notifications",
+    "defaultValue": false,
+    "buttonText": "Save Settings",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Subscribe to Newsletter</h3>
             <div class="api-response">{
   "type": "toggle",
-  "label": "Subscribe to Newsletter",
-  "defaultValue": true,
-  "buttonText": "Update Preferences"
+  "props": {
+    "label": "Subscribe to Newsletter",
+    "defaultValue": true,
+    "buttonText": "Update Preferences",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Dark Mode</h3>
             <div class="api-response">{
   "type": "toggle",
-  "label": "Enable Dark Mode",
-  "defaultValue": false,
-  "buttonText": "Apply"
+  "props": {
+    "label": "Enable Dark Mode",
+    "defaultValue": false,
+    "buttonText": "Apply",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

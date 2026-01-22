@@ -157,9 +157,8 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'buttons',
                 props: {
-                  type: 'buttons',
                   options: [
                     { id: 'opt1', text: 'Customer Support', value: 'support' },
                     { id: 'opt2', text: 'Sales Inquiry', value: 'sales' },
@@ -182,9 +181,8 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'select',
                 props: {
-                  type: 'select',
                   placeholder: 'Select a department...',
                   options: [
                     { id: 'dept1', text: 'Customer Support', value: 'support' },
@@ -208,12 +206,12 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'input',
                 props: {
-                  type: 'input',
-                  inputType: 'email',
+                  type: 'email',
                   placeholder: 'Enter your email...',
-                  buttonText: 'Submit'
+                  buttonText: 'Submit',
+                  showSubmitButton: true
                 }
               }
             ]
@@ -230,12 +228,12 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'rating',
                 props: {
-                  type: 'rating',
                   label: 'Rate your experience',
                   maxRating: 5,
-                  iconType: 'stars'
+                  iconType: 'stars',
+                  showSubmitButton: true
                 }
               }
             ]
@@ -252,10 +250,10 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'checkbox',
                 props: {
-                  type: 'checkbox',
                   buttonText: 'Submit',
+                  showSubmitButton: true,
                   options: [
                     { id: 'tech', text: 'Technology', 'value': 'tech' },
                     { id: 'sports', text: 'Sports', 'value': 'sports' },
@@ -278,13 +276,13 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'textarea',
                 props: {
-                  type: 'textarea',
                   placeholder: 'Describe your issue here...',
                   rows: 6,
                   maxLength: 500,
-                  buttonText: 'Submit'
+                  buttonText: 'Submit',
+                  showSubmitButton: true
                 }
               }
             ]
@@ -301,14 +299,14 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'slider',
                 props: {
-                  type: 'slider',
                   label: 'Satisfaction Level',
                   min: 0,
                   max: 100,
                   step: 10,
-                  value: 50
+                  value: 50,
+                  showSubmitButton: true
                 }
               }
             ]
@@ -325,12 +323,12 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'toggle',
                 props: {
-                  type: 'toggle',
                   label: 'Enable Notifications',
                   defaultValue: false,
-                  buttonText: 'Save'
+                  buttonText: 'Save',
+                  showSubmitButton: true
                 }
               }
             ]
@@ -347,13 +345,13 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'date',
                 props: {
-                  type: 'date',
                   label: 'Select Date',
                   minDate: '2024-01-01',
                   maxDate: '2024-12-31',
-                  buttonText: 'Schedule'
+                  buttonText: 'Schedule',
+                  showSubmitButton: true
                 }
               }
             ]
@@ -370,14 +368,14 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'tags',
                 props: {
-                  type: 'tags',
                   label: 'Select Your Interests',
                   placeholder: 'Type and press Enter',
                   suggestions: ['Technology', 'Sports', 'Music', 'Travel', 'Food'],
                   maxTags: 5,
-                  buttonText: 'Submit'
+                  buttonText: 'Submit',
+                  showSubmitButton: true
                 }
               }
             ]
@@ -394,14 +392,14 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'file',
                 props: {
-                  type: 'file',
                   label: 'Upload Documents',
                   accept: '.pdf,.doc,.docx',
                   maxFiles: 3,
                   maxSize: 5242880,
-                  buttonText: 'Upload Files'
+                  buttonText: 'Upload Files',
+                  showSubmitButton: true
                 }
               }
             ]
@@ -418,13 +416,13 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'color',
                 props: {
-                  type: 'color',
                   label: 'Select Theme Color',
                   defaultColor: '#007bff',
                   presetColors: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8'],
-                  buttonText: 'Apply'
+                  buttonText: 'Apply',
+                  showSubmitButton: true
                 }
               }
             ]
@@ -441,9 +439,8 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'confirmation',
                 props: {
-                  type: 'confirmation',
                   message: 'This action cannot be undone. Are you sure?',
                   confirmText: 'Delete',
                   cancelText: 'Cancel'
@@ -463,10 +460,10 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'radio',
                 props: {
-                  type: 'radio',
                   buttonText: 'Submit',
+                  showSubmitButton: true,
                   options: [
                     { id: 'email', text: 'Email', 'value': 'email' },
                     { id: 'phone', text: 'Phone', 'value': 'phone' },
@@ -488,9 +485,8 @@ function processMessage(req, res, callback, message, type, session_key, referer)
                 }
               },
               {
-                type: 'widget',
+                type: 'progress',
                 props: {
-                  type: 'progress',
                   label: 'Download Progress',
                   value: 75,
                   max: 100,

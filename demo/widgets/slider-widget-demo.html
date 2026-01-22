@@ -85,15 +85,20 @@
             <p>To trigger a slider widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "How satisfied are you with our service?",
-  "widget": {
-    "type": "slider",
-    "label": "Satisfaction Rating",
-    "min": 0,
-    "max": 10,
-    "step": 1,
-    "defaultValue": 5,
-    "buttonText": "Submit"
-  }
+  "widgets": [
+    {
+      "type": "slider",
+      "props": {
+        "label": "Satisfaction Rating",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "defaultValue": 5,
+        "buttonText": "Submit",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -101,23 +106,27 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "slider",
-  "label": "Select a value",
-  "min": 0,
-  "max": 100,
-  "step": 1,
-  "defaultValue": 50,
-  "buttonText": "Submit"
+  "props": {
+    "label": "Select a value",
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "defaultValue": 50,
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "slider"</li>
-                <li><strong>label:</strong> Label text for the slider (default: "Select a value")</li>
-                <li><strong>min:</strong> Minimum value (required)</li>
-                <li><strong>max:</strong> Maximum value (required, must be greater than min)</li>
-                <li><strong>step:</strong> Step increment (default: 1)</li>
-                <li><strong>defaultValue:</strong> Initial slider position (default: midpoint)</li>
-                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.label:</strong> Label text for the slider (default: "Select a value")</li>
+                <li><strong>props.min:</strong> Minimum value (required)</li>
+                <li><strong>props.max:</strong> Maximum value (required, must be greater than min)</li>
+                <li><strong>props.step:</strong> Step increment (default: 1)</li>
+                <li><strong>props.defaultValue:</strong> Initial slider position (default: midpoint)</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
         </div>
 
@@ -127,34 +136,43 @@
             <h3>Satisfaction Rating (0-10)</h3>
             <div class="api-response">{
   "type": "slider",
-  "label": "Rate your satisfaction",
-  "min": 0,
-  "max": 10,
-  "step": 1,
-  "defaultValue": 5,
-  "buttonText": "Submit Rating"
+  "props": {
+    "label": "Rate your satisfaction",
+    "min": 0,
+    "max": 10,
+    "step": 1,
+    "defaultValue": 5,
+    "buttonText": "Submit Rating",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Budget Range ($0-$5000)</h3>
             <div class="api-response">{
   "type": "slider",
-  "label": "Your Budget ($)",
-  "min": 0,
-  "max": 5000,
-  "step": 100,
-  "defaultValue": 2500,
-  "buttonText": "Set Budget"
+  "props": {
+    "label": "Your Budget ($)",
+    "min": 0,
+    "max": 5000,
+    "step": 100,
+    "defaultValue": 2500,
+    "buttonText": "Set Budget",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Percentage (0-100)</h3>
             <div class="api-response">{
   "type": "slider",
-  "label": "Completion Percentage",
-  "min": 0,
-  "max": 100,
-  "step": 5,
-  "defaultValue": 0,
-  "buttonText": "Update"
+  "props": {
+    "label": "Completion Percentage",
+    "min": 0,
+    "max": 100,
+    "step": 5,
+    "defaultValue": 0,
+    "buttonText": "Update",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

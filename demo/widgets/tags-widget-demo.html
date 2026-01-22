@@ -85,14 +85,19 @@
             <p>To trigger a tags widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "What are your interests?",
-  "widget": {
-    "type": "tags",
-    "label": "Select Your Interests",
-    "placeholder": "Type and press Enter",
-    "suggestions": ["Technology", "Sports", "Music", "Travel", "Food"],
-    "maxTags": 5,
-    "buttonText": "Submit"
-  }
+  "widgets": [
+    {
+      "type": "tags",
+      "props": {
+        "label": "Select Your Interests",
+        "placeholder": "Type and press Enter",
+        "suggestions": ["Technology", "Sports", "Music", "Travel", "Food"],
+        "maxTags": 5,
+        "buttonText": "Submit",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -100,21 +105,25 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "tags",
-  "label": "Add tags",
-  "placeholder": "Type and press Enter to add tag",
-  "suggestions": ["tag1", "tag2", "tag3"],
-  "maxTags": 10,
-  "buttonText": "Submit"
+  "props": {
+    "label": "Add tags",
+    "placeholder": "Type and press Enter to add tag",
+    "suggestions": ["tag1", "tag2", "tag3"],
+    "maxTags": 10,
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "tags"</li>
-                <li><strong>label:</strong> Label text for the tags input (default: "Add tags")</li>
-                <li><strong>placeholder:</strong> Placeholder text (default: "Type and press Enter to add tag")</li>
-                <li><strong>suggestions:</strong> Array of suggested tags (optional)</li>
-                <li><strong>maxTags:</strong> Maximum number of tags (default: 10)</li>
-                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.label:</strong> Label text for the tags input (default: "Add tags")</li>
+                <li><strong>props.placeholder:</strong> Placeholder text (default: "Type and press Enter to add tag")</li>
+                <li><strong>props.suggestions:</strong> Array of suggested tags (optional)</li>
+                <li><strong>props.maxTags:</strong> Maximum number of tags (default: 10)</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
         </div>
 
@@ -124,30 +133,39 @@
             <h3>Interest Selection</h3>
             <div class="api-response">{
   "type": "tags",
-  "label": "Your Interests",
-  "placeholder": "Add interests...",
-  "suggestions": ["Technology", "Sports", "Music", "Travel", "Art", "Science"],
-  "maxTags": 5,
-  "buttonText": "Save"
+  "props": {
+    "label": "Your Interests",
+    "placeholder": "Add interests...",
+    "suggestions": ["Technology", "Sports", "Music", "Travel", "Art", "Science"],
+    "maxTags": 5,
+    "buttonText": "Save",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Skill Tags</h3>
             <div class="api-response">{
   "type": "tags",
-  "label": "Your Skills",
-  "placeholder": "Add skills...",
-  "suggestions": ["JavaScript", "Python", "React", "Node.js", "SQL"],
-  "maxTags": 8,
-  "buttonText": "Submit"
+  "props": {
+    "label": "Your Skills",
+    "placeholder": "Add skills...",
+    "suggestions": ["JavaScript", "Python", "React", "Node.js", "SQL"],
+    "maxTags": 8,
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Category Labels</h3>
             <div class="api-response">{
   "type": "tags",
-  "label": "Categories",
-  "placeholder": "Add categories...",
-  "maxTags": 3,
-  "buttonText": "Apply"
+  "props": {
+    "label": "Categories",
+    "placeholder": "Add categories...",
+    "maxTags": 3,
+    "buttonText": "Apply",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

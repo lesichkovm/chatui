@@ -84,26 +84,18 @@
             <p>To trigger a buttons widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "Please select an option:",
-  "widget": {
-    "type": "buttons",
-    "options": [
-      { 
-        "id": "opt1", 
-        "text": "Customer Support", 
-        "value": "support" 
-      },
-      { 
-        "id": "opt2", 
-        "text": "Sales Inquiry", 
-        "value": "sales" 
-      },
-      { 
-        "id": "opt3", 
-        "text": "Technical Help", 
-        "value": "technical" 
+  "widgets": [
+    {
+      "type": "buttons",
+      "props": {
+        "options": [
+          { "id": "opt1", "text": "Customer Support", "value": "support" },
+          { "id": "opt2", "text": "Sales Inquiry", "value": "sales" },
+          { "id": "opt3", "text": "Technical Help", "value": "technical" }
+        ]
       }
-    ]
-  }
+    }
+  ]
 }</div>
         </div>
 
@@ -111,13 +103,15 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "buttons",
-  "options": [
-    {
-      "id": "unique_option_id",
-      "text": "Display text for button",
-      "value": "backend_value"
-    }
-  ]
+  "props": {
+    "options": [
+      {
+        "id": "unique_option_id",
+        "text": "Display text for button",
+        "value": "backend_value"
+      }
+    ]
+  }
 }</div>
             
             <h3>Required Fields:</h3>

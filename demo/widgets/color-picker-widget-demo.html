@@ -85,13 +85,18 @@
             <p>To trigger a color picker widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "Choose your preferred theme color:",
-  "widget": {
-    "type": "color",
-    "label": "Select Theme Color",
-    "defaultColor": "#007bff",
-    "presetColors": ["#007bff", "#28a745", "#dc3545", "#ffc107", "#17a2b8"],
-    "buttonText": "Apply"
-  }
+  "widgets": [
+    {
+      "type": "color",
+      "props": {
+        "label": "Select Theme Color",
+        "defaultColor": "#007bff",
+        "presetColors": ["#007bff", "#28a745", "#dc3545", "#ffc107", "#17a2b8"],
+        "buttonText": "Apply",
+        "showSubmitButton": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -99,19 +104,23 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "color",
-  "label": "Select a color",
-  "defaultColor": "#007bff",
-  "presetColors": ["#ff0000", "#00ff00", "#0000ff"],
-  "buttonText": "Submit"
+  "props": {
+    "label": "Select a color",
+    "defaultColor": "#007bff",
+    "presetColors": ["#ff0000", "#00ff00", "#0000ff"],
+    "buttonText": "Submit",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "color"</li>
-                <li><strong>label:</strong> Label text for the color picker (default: "Select a color")</li>
-                <li><strong>defaultColor:</strong> Default selected color in hex format (optional)</li>
-                <li><strong>presetColors:</strong> Array of preset colors in hex format (optional)</li>
-                <li><strong>buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.label:</strong> Label text for the color picker (default: "Select a color")</li>
+                <li><strong>props.defaultColor:</strong> Default selected color in hex format (optional)</li>
+                <li><strong>props.presetColors:</strong> Array of preset colors in hex format (optional)</li>
+                <li><strong>props.buttonText:</strong> Text displayed on the submit button (default: "Submit")</li>
+                <li><strong>props.showSubmitButton:</strong> Whether to show the submit button (Phase 3 default: false)</li>
             </ul>
         </div>
 
@@ -121,26 +130,35 @@
             <h3>Theme Color Selection</h3>
             <div class="api-response">{
   "type": "color",
-  "label": "Choose Theme Color",
-  "defaultColor": "#007bff",
-  "presetColors": ["#007bff", "#28a745", "#dc3545", "#ffc107", "#6c757d"],
-  "buttonText": "Apply Theme"
+  "props": {
+    "label": "Choose Theme Color",
+    "defaultColor": "#007bff",
+    "presetColors": ["#007bff", "#28a745", "#dc3545", "#ffc107", "#6c757d"],
+    "buttonText": "Apply Theme",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Brand Color</h3>
             <div class="api-response">{
   "type": "color",
-  "label": "Select Brand Color",
-  "defaultColor": "#000000",
-  "buttonText": "Save"
+  "props": {
+    "label": "Select Brand Color",
+    "defaultColor": "#000000",
+    "buttonText": "Save",
+    "showSubmitButton": true
+  }
 }</div>
             
             <h3>Category Color</h3>
             <div class="api-response">{
   "type": "color",
-  "label": "Category Color",
-  "presetColors": ["#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6"],
-  "buttonText": "Set Color"
+  "props": {
+    "label": "Category Color",
+    "presetColors": ["#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6"],
+    "buttonText": "Set Color",
+    "showSubmitButton": true
+  }
 }</div>
         </div>
 

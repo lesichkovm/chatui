@@ -85,13 +85,17 @@
             <p>To trigger a progress widget, the backend should respond with:</p>
             <div class="api-response">{
   "text": "Your download is in progress:",
-  "widget": {
-    "type": "progress",
-    "label": "Download Progress",
-    "value": 75,
-    "max": 100,
-    "showPercentage": true
-  }
+  "widgets": [
+    {
+      "type": "progress",
+      "props": {
+        "label": "Download Progress",
+        "value": 75,
+        "max": 100,
+        "showPercentage": true
+      }
+    }
+  ]
 }</div>
         </div>
 
@@ -99,19 +103,21 @@
             <h2>Widget Data Structure</h2>
             <div class="api-response">{
   "type": "progress",
-  "label": "Progress",
-  "value": 50,
-  "max": 100,
-  "showPercentage": true
+  "props": {
+    "label": "Progress",
+    "value": 50,
+    "max": 100,
+    "showPercentage": true
+  }
 }</div>
             
             <h3>Fields:</h3>
             <ul class="feature-list">
                 <li><strong>type:</strong> Must be "progress"</li>
-                <li><strong>label:</strong> Label text for the progress bar (default: "Progress")</li>
-                <li><strong>value:</strong> Current progress value (required)</li>
-                <li><strong>max:</strong> Maximum value (required, must be > 0)</li>
-                <li><strong>showPercentage:</strong> Show percentage in text (default: true)</li>
+                <li><strong>props.label:</strong> Label text for the progress bar (default: "Progress")</li>
+                <li><strong>props.value:</strong> Current progress value (required)</li>
+                <li><strong>props.max:</strong> Maximum value (required, must be > 0)</li>
+                <li><strong>props.showPercentage:</strong> Show percentage in text (default: true)</li>
             </ul>
         </div>
 
@@ -121,37 +127,45 @@
             <h3>Download Progress</h3>
             <div class="api-response">{
   "type": "progress",
-  "label": "Download Progress",
-  "value": 75,
-  "max": 100,
-  "showPercentage": true
+  "props": {
+    "label": "Download Progress",
+    "value": 75,
+    "max": 100,
+    "showPercentage": true
+  }
 }</div>
             
             <h3>Task Completion</h3>
             <div class="api-response">{
   "type": "progress",
-  "label": "Tasks Completed",
-  "value": 8,
-  "max": 10,
-  "showPercentage": true
+  "props": {
+    "label": "Tasks Completed",
+    "value": 8,
+    "max": 10,
+    "showPercentage": true
+  }
 }</div>
             
             <h3>File Upload</h3>
             <div class="api-response">{
   "type": "progress",
-  "label": "Upload Progress",
-  "value": 256,
-  "max": 1024,
-  "showPercentage": true
+  "props": {
+    "label": "Upload Progress",
+    "value": 256,
+    "max": 1024,
+    "showPercentage": true
+  }
 }</div>
             
             <h3>Simple Counter</h3>
             <div class="api-response">{
   "type": "progress",
-  "label": "Steps Completed",
-  "value": 3,
-  "max": 5,
-  "showPercentage": false
+  "props": {
+    "label": "Steps Completed",
+    "value": 3,
+    "max": 5,
+    "showPercentage": false
+  }
 }</div>
         </div>
 
