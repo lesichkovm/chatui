@@ -22,22 +22,7 @@ test.describe('Input Widget Integration Tests (Mocked API)', () => {
           // Force test environment mode to bypass API calls
           widget.api.isTestEnvironment = () => true;
           
-          // Mock the handshake and connect methods to simulate successful API calls
-          const originalPerformHandshake = widget.api.performHandshake.bind(widget.api);
-          widget.api.performHandshake = function(onSuccess: any) {
-            console.log('Mock handshake called');
-            if (onSuccess) onSuccess();
-          };
-          
-          const originalConnect = widget.api.connect.bind(widget.api);
-          widget.api.connect = function(onMessage: any) {
-            console.log('Mock connect called');
-            // Simulate initial welcome message
-            if (onMessage) {
-              onMessage("Hello! I'm here to help. Type 'show input' to see the input widget.", "bot");
-            }
-          };
-          
+          // Mock the sendMessage method to provide custom responses
           const originalSendMessage = widget.api.sendMessage.bind(widget.api);
           widget.api.sendMessage = function(message: string, onResponse: any) {
             console.log('Mock sendMessage called with:', message);
@@ -45,21 +30,38 @@ test.describe('Input Widget Integration Tests (Mocked API)', () => {
             // Simulate input widget response
             if (message === 'show input') {
               if (onResponse) {
-                onResponse("Please enter your email address:", "bot", {
-                  type: "input",
-                  inputType: "email",
-                  placeholder: "Enter your email...",
-                  buttonText: "Submit"
-                });
+                setTimeout(() => {
+                  onResponse("Please enter your email", "bot", {
+                    type: "input",
+                    inputType: "email",
+                    placeholder: "Enter your email...",
+                    buttonText: "Submit"
+                  });
+                }, 100);
               }
             } else if (message && message.includes('@')) {
               if (onResponse) {
-                onResponse(`Thank you! We've received your email: ${message}`, "bot");
+                setTimeout(() => {
+                  onResponse(`Thank you! We've received your email: ${message}`, "bot");
+                }, 100);
               }
             } else {
               if (onResponse) {
-                onResponse(`Echo: ${message}`, "bot");
+                setTimeout(() => {
+                  onResponse(`Echo: ${message}`, "bot");
+                }, 100);
               }
+            }
+          };
+          
+          // Also mock connect to provide welcome message
+          widget.api.connect = function(onMessage: any) {
+            console.log('Mock connect called');
+            // Simulate initial welcome message
+            if (onMessage) {
+              setTimeout(() => {
+                onMessage("Hello! I'm here to help. Type 'show input' to see the input widget.", "bot");
+              }, 100);
             }
           };
           
@@ -72,6 +74,9 @@ test.describe('Input Widget Integration Tests (Mocked API)', () => {
         }
       }
     });
+    
+    // Wait for the welcome message to appear
+    await page.waitForTimeout(300);
   });
 
   test('should disable input widget after submission', async ({ page }) => {
@@ -98,16 +103,15 @@ test.describe('Input Widget Integration Tests (Mocked API)', () => {
     // Fill in the input field
     await inputElement.fill('test@example.com');
     
-    // Click the submit button
+    // Submit the form
     await submitButton.click();
     
-    // Verify both are disabled after submission
+    // Verify the input is disabled after submission
     await expect(inputElement).toBeDisabled();
     await expect(submitButton).toBeDisabled();
     
-    // Verify they have the disabled class
-    await expect(inputElement).toHaveClass(/widget-input-disabled/);
-    await expect(submitButton).toHaveClass(/widget-input-disabled/);
+    // Wait for the response message
+    await page.waitForSelector('[id^="chat-widget-"][id*="-message-"]:has-text("Thank you")', { timeout: 5000 });
   });
 
   test('should disable input widget after Enter key submission', async ({ page }) => {

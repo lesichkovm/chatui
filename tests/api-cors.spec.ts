@@ -179,13 +179,25 @@ test.describe('CorsAPI', () => {
       (global as any).fetch = mockFetch;
       
       let connectMessage: any = null;
+      let connectError: any = null;
       
       await new Promise<void>((resolve) => {
-        api.connect((text: string, sender: string, widget: any) => {
-          connectMessage = { text, sender, widget };
-          resolve();
-        }, () => {});
+        api.connect(
+          (text: string, sender: string, widget: any) => {
+            connectMessage = { text, sender, widget };
+            resolve();
+          }, 
+          (error: any) => {
+            connectError = error;
+            resolve();
+          }
+        );
       });
+
+      // If there was an error, log it for debugging
+      if (connectError) {
+        console.log('Connect error:', connectError);
+      }
 
       expect(connectMessage).toEqual({
         text: 'Hello from bot',
@@ -440,9 +452,25 @@ test.describe('CorsAPI', () => {
       let responseReceived = false;
       let responseText = '';
 
+      // Set up mock fetch with delay
+      mockFetch = () => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(new MockResponse({
+              status: 'success',
+              text: 'Test response to: test message'
+            }));
+          }, 150); // 150ms delay
+        });
+      };
+      (global as any).fetch = mockFetch;
+
       const startTime = Date.now();
       
       await new Promise<void>((resolve) => {
+        // Override isTestEnvironment to use mock fetch instead of early return
+        api.isTestEnvironment = () => false;
+        
         api.sendMessage('test message', (text: string) => {
           responseText = text;
           responseReceived = true;

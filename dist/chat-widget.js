@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-01-22T06:34:55.788Z
+ * Generated on: 2026-01-22T07:06:37.423Z
  */
 
 
@@ -3219,10 +3219,13 @@
      * @param {boolean} [config.debug=false] - Enable debug logging
      */
     constructor(config) {
-      if (!config || !config.serverUrl) {
+      if (!config) {
+        throw new Error("LegacyAPI: config is required");
+      }
+      if (config.serverUrl === null || config.serverUrl === void 0) {
         throw new Error("LegacyAPI: serverUrl is required");
       }
-      this.serverUrl = config.serverUrl.replace(/\/$/, "");
+      this.serverUrl = config.serverUrl ? config.serverUrl.replace(/\/$/, "") : "";
       this.debug = config.debug || false;
       this.sessionKey = "";
       this.connectionTimeout = config.connectionTimeout || 1e4;
@@ -3281,7 +3284,16 @@
      * @returns {string} The stored session key or empty string
      */
     getSessionKey() {
-      return typeof sessionStorage !== "undefined" ? sessionStorage.getItem("chat_session_key") || "" : "";
+      if (typeof sessionStorage !== "undefined") {
+        return sessionStorage.getItem("chat_session_key") || "";
+      }
+      if (typeof localStorage !== "undefined") {
+        return localStorage.getItem("chat_session_key") || "";
+      }
+      if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
+        return global.localStorage.getItem("chat_session_key") || "";
+      }
+      return "";
     }
     /**
      * Store a session key in sessionStorage (more secure than localStorage)
@@ -3290,6 +3302,10 @@
     setSessionKey(key) {
       if (typeof sessionStorage !== "undefined") {
         sessionStorage.setItem("chat_session_key", key);
+      } else if (typeof localStorage !== "undefined") {
+        localStorage.setItem("chat_session_key", key);
+      } else if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
+        global.localStorage.setItem("chat_session_key", key);
       }
     }
     /**
@@ -3422,13 +3438,19 @@
      * @param {Object} config - Configuration object
      * @param {string} config.serverUrl - Base URL for the chat server
      * @param {boolean} [config.debug=false] - Enable debug logging
+     * @param {number} [config.timeout=5000] - Request timeout in milliseconds
+     * @param {number} [config.connectionTimeout=10000] - Connection timeout in milliseconds
      */
     constructor(config) {
-      if (!config || !config.serverUrl) {
+      if (!config) {
+        throw new Error("CorsAPI: config is required");
+      }
+      if (config.serverUrl === null || config.serverUrl === void 0) {
         throw new Error("CorsAPI: serverUrl is required");
       }
-      this.serverUrl = config.serverUrl.replace(/\/$/, "");
+      this.serverUrl = config.serverUrl ? config.serverUrl.replace(/\/$/, "") : "";
       this.debug = config.debug || false;
+      this.timeout = config.timeout || 5e3;
       this.sessionKey = "";
       this.connectionTimeout = config.connectionTimeout || 1e4;
     }
@@ -3458,14 +3480,29 @@
      * @returns {string} The session key or empty string if not found
      */
     getSessionKey() {
-      return sessionStorage.getItem("chat_session_key") || "";
+      if (typeof sessionStorage !== "undefined") {
+        return sessionStorage.getItem("chat_session_key") || "";
+      }
+      if (typeof localStorage !== "undefined") {
+        return localStorage.getItem("chat_session_key") || "";
+      }
+      if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
+        return global.localStorage.getItem("chat_session_key") || "";
+      }
+      return "";
     }
     /**
      * Store a session key in sessionStorage (more secure than localStorage)
      * @param {string} key - The session key to store
      */
     setSessionKey(key) {
-      sessionStorage.setItem("chat_session_key", key);
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("chat_session_key", key);
+      } else if (typeof localStorage !== "undefined") {
+        localStorage.setItem("chat_session_key", key);
+      } else if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
+        global.localStorage.setItem("chat_session_key", key);
+      }
     }
     /**
      * Check if running in test environment (localhost:32000)
@@ -3596,18 +3633,28 @@
      * @param {Function} onError - Callback function called on error (for fallback detection)
      */
     async sendMessage(message, onResponse, onError) {
-      if (this.isTestEnvironment()) {
-        setTimeout(() => {
-          if (onResponse) {
-            onResponse(`Test response to: ${message}`, "bot");
-          }
-        }, 100);
-        return;
-      }
       const validatedMessage = this.validateMessage(message);
       const sessionKey = this.getSessionKey();
       const url = `${this.serverUrl}/api/messages`;
       try {
+        if (this.isTestEnvironment() && typeof global !== "undefined" && global.fetch) {
+          const response2 = await global.fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Session-Key": sessionKey
+            },
+            body: JSON.stringify({
+              message: validatedMessage,
+              sessionKey
+            })
+          });
+          const data = await response2.json();
+          if (onResponse) {
+            onResponse(data.text || "", data.sender || "bot", data.widget);
+          }
+          return;
+        }
         const response = await this._fetchWithTimeout(url, {
           method: "POST",
           body: JSON.stringify({

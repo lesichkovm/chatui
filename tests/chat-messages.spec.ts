@@ -99,13 +99,30 @@ test.describe('Chat Widget - Message Functionality', () => {
     const messageInput = page.locator('#chat-widget-1-input');
     const sendButton = page.locator('#chat-widget-1-send');
     
+    // Set up test environment to ensure proper responses
+    await page.evaluate(() => {
+      // Find the widget instance and ensure it's in test mode
+      const scriptElement = document.querySelector('script[id^="chat-widget-"]');
+      if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
+        const widget = (scriptElement as any)._chatWidgetInstance;
+        if (widget && widget.api) {
+          // Force test environment
+          widget.api.isTestEnvironment = () => true;
+        }
+      }
+    });
+    
     const messages = ['First message', 'Second message', 'Third message'];
     
     for (const message of messages) {
       await messageInput.fill(message);
       await sendButton.click();
-      // Wait for the response to arrive before sending next message
-      await page.waitForTimeout(150);
+      // Wait for user message to appear first
+      await page.waitForSelector(`.user-message:has-text("${message}")`, { timeout: 5000 });
+      // Wait for bot response to appear (any bot message)
+      await page.waitForSelector('.bot-message:not(.waiting-message)', { timeout: 5000 });
+      // Small delay to ensure processing is complete
+      await page.waitForTimeout(300);
     }
     
     const messagesContainer = page.locator('#chat-widget-1-messages');
@@ -220,6 +237,19 @@ test.describe('Chat Widget - Message Functionality', () => {
     const messageInput = page.locator('#chat-widget-1-input');
     const sendButton = page.locator('#chat-widget-1-send');
     
+    // Set up test environment to ensure proper responses
+    await page.evaluate(() => {
+      // Find the widget instance and ensure it's in test mode
+      const scriptElement = document.querySelector('script[id^="chat-widget-"]');
+      if (scriptElement && (scriptElement as any)._chatWidgetInstance) {
+        const widget = (scriptElement as any)._chatWidgetInstance;
+        if (widget && widget.api) {
+          // Force test environment
+          widget.api.isTestEnvironment = () => true;
+        }
+      }
+    });
+    
     const testMessage = 'Test waiting removal';
     await messageInput.fill(testMessage);
     
@@ -232,7 +262,11 @@ test.describe('Chat Widget - Message Functionality', () => {
     const waitingMessage = messagesContainer.locator('.waiting-message');
     await expect(waitingMessage).toBeVisible();
     
-    // Wait for the response to arrive (in test environment, this should be quick)
+    // Wait for the response to arrive and waiting message to be replaced
+    // Wait for a bot message that contains the expected response text
+    await page.waitForSelector('.bot-message:not(.waiting-message)', { timeout: 10000 });
+    
+    // Give some time for the waiting message to be removed
     await page.waitForTimeout(100);
     
     // Check that waiting message is removed and replaced with bot response
