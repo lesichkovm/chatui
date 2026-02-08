@@ -15,7 +15,9 @@ const handler = withErrorHandling(async (event, context) => {
   if (httpMethod === 'OPTIONS') {
     return handlePreflight();
   }
-    if (httpMethod === 'GET') {
+  
+  // Handle GET requests
+  else if (httpMethod === 'GET') {
       const { callback, message, session_key, type } = queryStringParameters || {};
       
       // Handle JSONP callback
@@ -306,7 +308,6 @@ const handler = withErrorHandling(async (event, context) => {
         return createJSONResponse(responseData);
       }
     }
-  }
   
   // Handle POST requests (for WebSocket-like functionality)
   else if (httpMethod === 'POST') {

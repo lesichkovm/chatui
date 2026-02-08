@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-02-08T05:26:50.915Z
+ * Generated on: 2026-02-08T22:11:30.569Z
  */
 
 
@@ -498,6 +498,14 @@
           if (!allowedAttrs.includes(attrName)) {
             node.removeAttribute(attrName);
           } else if (attrName === "style") {
+            const styleValue = node.getAttribute("style");
+            const sanitizedStyle = sanitizeStyleProps(parseStyleString(styleValue));
+            const sanitizedStyleString = Object.entries(sanitizedStyle).map(([key, value]) => `${camelToKebab(key)}: ${value}`).join("; ");
+            if (sanitizedStyleString) {
+              node.setAttribute("style", sanitizedStyleString);
+            } else {
+              node.removeAttribute("style");
+            }
           }
         }
         const children = Array.from(node.childNodes);
@@ -765,6 +773,25 @@
     if (typeof text !== "string") return "";
     const escapedText = sanitizeHTML(text);
     return escapedText.replace(/\n/g, "<br>");
+  }
+  function parseStyleString(styleString) {
+    if (!styleString || typeof styleString !== "string") return {};
+    const styles = {};
+    const declarations = styleString.split(";");
+    for (const declaration of declarations) {
+      const colonIndex = declaration.indexOf(":");
+      if (colonIndex > 0) {
+        const property = declaration.substring(0, colonIndex).trim();
+        const value = declaration.substring(colonIndex + 1).trim();
+        if (property && value) {
+          styles[property] = value;
+        }
+      }
+    }
+    return styles;
+  }
+  function camelToKebab(str) {
+    return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
   }
   var template, div;
   var init_security = __esm({
@@ -4679,8 +4706,48 @@
     }
   });
 
+  // src/modules/api-base.js
+  var BaseAPI = class {
+    /**
+     * Get the stored session key from sessionStorage
+     * @returns {string} The stored session key or empty string
+     */
+    getSessionKey() {
+      if (typeof sessionStorage !== "undefined") {
+        return sessionStorage.getItem("chat_session_key") || "";
+      }
+      if (typeof localStorage !== "undefined") {
+        return localStorage.getItem("chat_session_key") || "";
+      }
+      if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
+        return global.localStorage.getItem("chat_session_key") || "";
+      }
+      return "";
+    }
+    /**
+     * Store a session key in sessionStorage (more secure than localStorage)
+     * @param {string} key - The session key to store
+     */
+    setSessionKey(key) {
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("chat_session_key", key);
+      } else if (typeof localStorage !== "undefined") {
+        localStorage.setItem("chat_session_key", key);
+      } else if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
+        global.localStorage.setItem("chat_session_key", key);
+      }
+    }
+    /**
+     * Check if running in test environment (localhost:32000)
+     * @returns {boolean} True if in test environment
+     */
+    isTestEnvironment() {
+      return typeof window !== "undefined" && window.__CHAT_WIDGET_TEST_MODE__ || typeof window !== "undefined" && window.location && window.location.hostname === "localhost" && window.location.port === "32000";
+    }
+  };
+
   // src/modules/api-legacy.js
-  var LegacyAPI = class {
+  var LegacyAPI = class extends BaseAPI {
     /**
      * Create a new LegacyAPI instance
      * @param {Object} config - Configuration object
@@ -4730,7 +4797,15 @@
      * @returns {string} Random callback name
      */
     _generateSecureCallbackName() {
-      const randomPart = Math.random().toString(36).substr(2, 16);
+      const array = new Uint8Array(16);
+      if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+        crypto.getRandomValues(array);
+      } else {
+        for (let i = 0; i < array.length; i++) {
+          array[i] = Math.floor(Math.random() * 256);
+        }
+      }
+      const randomPart = Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
       const timestamp = Date.now();
       return `chatCallback_${randomPart}_${timestamp}`;
     }
@@ -4751,42 +4826,6 @@
         return false;
       }
       return true;
-    }
-    /**
-     * Get the stored session key from sessionStorage
-     * @returns {string} The stored session key or empty string
-     */
-    getSessionKey() {
-      if (typeof sessionStorage !== "undefined") {
-        return sessionStorage.getItem("chat_session_key") || "";
-      }
-      if (typeof localStorage !== "undefined") {
-        return localStorage.getItem("chat_session_key") || "";
-      }
-      if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
-        return global.localStorage.getItem("chat_session_key") || "";
-      }
-      return "";
-    }
-    /**
-     * Store a session key in sessionStorage (more secure than localStorage)
-     * @param {string} key - The session key to store
-     */
-    setSessionKey(key) {
-      if (typeof sessionStorage !== "undefined") {
-        sessionStorage.setItem("chat_session_key", key);
-      } else if (typeof localStorage !== "undefined") {
-        localStorage.setItem("chat_session_key", key);
-      } else if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
-        global.localStorage.setItem("chat_session_key", key);
-      }
-    }
-    /**
-     * Check if running in test environment (localhost:32000)
-     * @returns {boolean} True if in test environment
-     */
-    isTestEnvironment() {
-      return typeof window !== "undefined" && window.__CHAT_WIDGET_TEST_MODE__ || typeof window !== "undefined" && window.location && window.location.hostname === "localhost" && window.location.port === "32000";
     }
     /**
      * Perform initial handshake with server to establish session
@@ -4914,7 +4953,7 @@
   };
 
   // src/modules/api-cors.js
-  var CorsAPI = class {
+  var CorsAPI = class extends BaseAPI {
     /**
      * Create a new CorsAPI instance
      * @param {Object} config - Configuration object
@@ -4956,42 +4995,6 @@
         throw new Error("Invalid message: message contains only disallowed content");
       }
       return sanitized;
-    }
-    /**
-     * Get the stored session key from sessionStorage (more secure than localStorage)
-     * @returns {string} The session key or empty string if not found
-     */
-    getSessionKey() {
-      if (typeof sessionStorage !== "undefined") {
-        return sessionStorage.getItem("chat_session_key") || "";
-      }
-      if (typeof localStorage !== "undefined") {
-        return localStorage.getItem("chat_session_key") || "";
-      }
-      if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
-        return global.localStorage.getItem("chat_session_key") || "";
-      }
-      return "";
-    }
-    /**
-     * Store a session key in sessionStorage (more secure than localStorage)
-     * @param {string} key - The session key to store
-     */
-    setSessionKey(key) {
-      if (typeof sessionStorage !== "undefined") {
-        sessionStorage.setItem("chat_session_key", key);
-      } else if (typeof localStorage !== "undefined") {
-        localStorage.setItem("chat_session_key", key);
-      } else if (this.isTestEnvironment() && typeof global !== "undefined" && global.localStorage) {
-        global.localStorage.setItem("chat_session_key", key);
-      }
-    }
-    /**
-     * Check if running in test environment (localhost:32000)
-     * @returns {boolean} True if in test environment
-     */
-    isTestEnvironment() {
-      return typeof window !== "undefined" && window.__CHAT_WIDGET_TEST_MODE__ || typeof window !== "undefined" && window.location && window.location.hostname === "localhost" && window.location.port === "32000";
     }
     /**
      * Perform HTTP request with timeout and CORS error detection
@@ -5339,11 +5342,6 @@
      * @param {Function} onError - Callback function called on handshake error
      */
     performWebSocketHandshake(onSuccess, onError) {
-      if (this.isTestEnvironment()) {
-        this.setSessionKey("test-session-key");
-        if (onSuccess) onSuccess();
-        return;
-      }
       this.initWebSocket().then(() => {
         if (!this.wsConnection) return;
         this.wsConnection.send(
@@ -5413,6 +5411,49 @@
       );
     }
     /**
+     * Handle incoming WebSocket message
+     * @private
+     * @param {MessageEvent} event - WebSocket message event
+     * @param {Function} onMessage - Callback for message data
+     * @param {Object} options - Handler options
+     * @param {Function} [options.onError] - Error callback
+     * @param {boolean} [options.isResponseHandler=false] - Whether handling a response (vs incoming message)
+     */
+    _handleWebSocketMessage(event, onMessage, options = {}) {
+      const { onError, isResponseHandler = false } = options;
+      try {
+        const data = JSON.parse(event.data);
+        const isValidMessage = isResponseHandler ? data.type === "message" || data.type === "message:stream" || data.status === "success" && (data.widgets || data.text) : data.type === "message" || data.status === "success" && (data.widgets || data.text);
+        if (isValidMessage) {
+          if (onMessage) {
+            if (data.widgets && Array.isArray(data.widgets)) {
+              onMessage(data.widgets, "bot");
+            } else if (data.text) {
+              if (data.widget) {
+                onMessage(data.text, "bot", data.widget);
+              } else {
+                onMessage(data.text, "bot");
+              }
+            }
+          }
+        } else if (!isResponseHandler) {
+          if (data.type === "typing") {
+            this.handleTypingIndicator(data);
+          } else if (data.type === "read_receipt") {
+            this.handleReadReceipt(data);
+          }
+        }
+      } catch (error) {
+        console.error("ChatWidget: Invalid WebSocket message format:", error);
+        if (onError) {
+          onError(error);
+        }
+        if (this.debug) {
+          console.error("Received data:", event.data);
+        }
+      }
+    }
+    /**
      * Connect via WebSocket
      * @private
      * @param {Function} onMessage - Callback function for incoming messages
@@ -5430,64 +5471,13 @@
           })
         );
         this.wsConnection.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === "message" || data.status === "success" && (data.widgets || data.text)) {
-              if (onMessage) {
-                if (data.widgets && Array.isArray(data.widgets)) {
-                  onMessage(data.widgets, "bot");
-                } else if (data.text) {
-                  if (data.widget) {
-                    onMessage(data.text, "bot", data.widget);
-                  } else {
-                    onMessage(data.text, "bot");
-                  }
-                }
-              }
-            } else if (data.type === "typing") {
-              this.handleTypingIndicator(data);
-            } else if (data.type === "read_receipt") {
-              this.handleReadReceipt(data);
-            }
-          } catch (error) {
-            console.error("ChatWidget: Invalid WebSocket message format:", error);
-            if (this.debug) {
-              console.error("Received data:", event.data);
-            }
-          }
+          this._handleWebSocketMessage(event, onMessage);
         };
         return;
       }
       this.initWebSocket().then(() => {
         this.wsConnection.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === "message" || data.status === "success" && (data.widgets || data.text)) {
-              if (onMessage) {
-                if (data.widgets && Array.isArray(data.widgets)) {
-                  onMessage(data.widgets, "bot");
-                } else if (data.text) {
-                  if (data.widget) {
-                    onMessage(data.text, "bot", data.widget);
-                  } else {
-                    onMessage(data.text, "bot");
-                  }
-                }
-              }
-            } else if (data.type === "typing") {
-              this.handleTypingIndicator(data);
-            } else if (data.type === "read_receipt") {
-              this.handleReadReceipt(data);
-            }
-          } catch (error) {
-            console.error(
-              "ChatWidget: Invalid WebSocket message format:",
-              error
-            );
-            if (this.debug) {
-              console.error("Received data:", event.data);
-            }
-          }
+          this._handleWebSocketMessage(event, onMessage);
         };
       }).catch((error) => {
         console.error("ChatWidget: WebSocket connection failed", error);
@@ -5561,31 +5551,10 @@
         );
         if (onSuccess) {
           this.wsConnection.onmessage = (event) => {
-            try {
-              const data = JSON.parse(event.data);
-              if (data.type === "message" || data.type === "message:stream" || data.status === "success" && (data.widgets || data.text)) {
-                if (data.widgets && Array.isArray(data.widgets)) {
-                  onSuccess(data.widgets, "bot");
-                } else if (data.text) {
-                  if (data.widget) {
-                    onSuccess(data.text, "bot", data.widget);
-                  } else {
-                    onSuccess(data.text, "bot");
-                  }
-                }
-              }
-            } catch (error) {
-              console.error(
-                "ChatWidget: Invalid WebSocket message format:",
-                error
-              );
-              if (onError) {
-                onError(error);
-              }
-              if (this.debug) {
-                console.error("Received data:", event.data);
-              }
-            }
+            this._handleWebSocketMessage(event, onSuccess, {
+              onError,
+              isResponseHandler: true
+            });
           };
         }
       } else {
@@ -5729,7 +5698,7 @@
      */
     isLocalhost(hostname) {
       const localhostPatterns = ["localhost", "127.0.0.1", "::1", "0.0.0.0"];
-      return localhostPatterns.includes(hostname.toLowerCase()) || hostname.startsWith("192.168.") || hostname.startsWith("10.") || hostname.startsWith("172.16.");
+      return localhostPatterns.includes(hostname.toLowerCase()) || hostname.startsWith("192.168.") || hostname.startsWith("10.") || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
     }
     /**
      * Check if URL contains suspicious patterns
@@ -5740,7 +5709,8 @@
     containsSuspiciousPatterns(url) {
       const suspiciousPatterns = [
         /javascript:/i,
-        /data:/i,
+        /data:[^/]/i,
+        // Only match data: when not followed by / (to avoid matching /api/data/...)
         /vbscript:/i,
         /file:/i,
         /ftp:/i,
@@ -5759,7 +5729,7 @@
       if (typeof location === "undefined") {
         return false;
       }
-      return location.protocol === "https:" || location.hostname !== "localhost" && location.hostname !== "127.0.0.1" && !location.hostname.startsWith("192.168.") && !location.hostname.startsWith("10.") && !location.hostname.startsWith("172.16.");
+      return location.protocol === "https:" || location.hostname !== "localhost" && location.hostname !== "127.0.0.1" && !location.hostname.startsWith("192.168.") && !location.hostname.startsWith("10.") && !/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(location.hostname);
     }
     /**
      * Check if running in production environment
@@ -7169,7 +7139,7 @@
     }
     chatWindow.innerHTML = `
     <div class="header" id="${widgetId}-header">
-      <h3>${title}</h3>
+      <h3></h3>
       ${displayMode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">\xD7</button>` : ""}
     </div>
     <div class="messages" id="${widgetId}-messages" role="log" aria-live="polite" aria-atomic="false"></div>
@@ -7178,6 +7148,10 @@
       <button type="button" class="send" id="${widgetId}-send" aria-label="Send message">Send</button>
     </div>
   `;
+    const headerH3 = chatWindow.querySelector(".header h3");
+    if (headerH3) {
+      headerH3.textContent = title;
+    }
     let chatButton = null;
     if (displayMode === "popup") {
       chatButton = document.createElement("button");
@@ -7211,7 +7185,6 @@
     return { container, chatWindow, chatButton };
   }
   function appendMessage(container, message, sender, widgetId, legacyWidgetData = null) {
-    console.log("UI: appendMessage called", { message, sender, messageLength: message.length, widgetId });
     const messageElement = document.createElement("div");
     messageElement.className = `message ${sender}-message`;
     messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -7546,7 +7519,6 @@
       this.api.performHandshake(
         // Success callback
         () => {
-          console.log("ChatWidget: Handshake successful");
           this.clearError();
           this.api.connect(
             // Message callback
@@ -7755,7 +7727,6 @@
     sendMessage(text) {
       const message = text || this.textarea.value.trim();
       if (!message) {
-        console.log("ChatWidget: Empty message rejected");
         return;
       }
       const now = Date.now();
@@ -7904,15 +7875,17 @@
     addFailedMessageIndicator(message) {
       const failedElement = document.createElement("div");
       failedElement.className = "chat-failed-message";
-      failedElement.innerHTML = `
-      <div style="color: #666; font-style: italic; font-size: 12px; margin: 4px 0;">
-        Failed to send: "${message.substring(0, 50)}${message.length > 50 ? "..." : ""}"
-        <button class="retry-btn" style="margin-left: 8px; padding: 2px 6px; font-size: 11px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; cursor: pointer;">
-          Retry
-        </button>
-      </div>
-    `;
-      const retryBtn = failedElement.querySelector(".retry-btn");
+      const container = document.createElement("div");
+      container.style.cssText = "color: #666; font-style: italic; font-size: 12px; margin: 4px 0;";
+      const textSpan = document.createElement("span");
+      textSpan.textContent = `Failed to send: "${message.substring(0, 50)}${message.length > 50 ? "..." : ""}"`;
+      const retryBtn = document.createElement("button");
+      retryBtn.className = "retry-btn";
+      retryBtn.textContent = "Retry";
+      retryBtn.style.cssText = "margin-left: 8px; padding: 2px 6px; font-size: 11px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; cursor: pointer;";
+      container.appendChild(textSpan);
+      container.appendChild(retryBtn);
+      failedElement.appendChild(container);
       retryBtn.addEventListener("click", () => {
         this.sendMessage(message);
         failedElement.remove();
@@ -7985,11 +7958,6 @@
      * @param {Object} [widgetData] - Optional widget data for bot messages
      */
     addMessage(text, sender, widgetData = null) {
-      console.log("ChatWidget: addMessage called", {
-        text,
-        sender,
-        widgetData
-      });
       const isWidgetConfig = Array.isArray(text) || typeof text === "object" && text !== null && text.widgets;
       const messageContent = isWidgetConfig ? text : text === null || text === void 0 ? "" : String(text);
       const messageObj = { text: messageContent, sender, timestamp: Date.now(), widgetData };
@@ -8141,9 +8109,38 @@
   window.createChatWidget = function(scriptElement) {
     return new ChatWidget(scriptElement);
   };
+  var widgetInstances = [];
+  var autoInitObserver = null;
   window.ChatUI = {
     init: function(config) {
-      return new ChatWidget(config);
+      const widget = new ChatWidget(config);
+      widgetInstances.push(widget);
+      return widget;
+    },
+    /**
+     * Destroy all ChatUI widgets and cleanup resources
+     * Disconnects MutationObserver and destroys all widget instances
+     */
+    destroy: function() {
+      widgetInstances.forEach((widget) => {
+        if (widget && typeof widget.destroy === "function") {
+          widget.destroy();
+        }
+      });
+      widgetInstances.length = 0;
+      if (autoInitObserver) {
+        autoInitObserver.disconnect();
+        autoInitObserver = null;
+      }
+      delete window.createChatWidget;
+      delete window.ChatUI;
+    },
+    /**
+     * Get all active widget instances
+     * @returns {Array} Array of ChatWidget instances
+     */
+    getWidgets: function() {
+      return [...widgetInstances];
     }
   };
   document.addEventListener("DOMContentLoaded", function() {
@@ -8152,26 +8149,29 @@
       if (script.src && script.src !== window.location.href) {
         return;
       }
-      window.createChatWidget(script);
+      const widget = window.createChatWidget(script);
+      widgetInstances.push(widget);
     });
   });
-  var observer = new MutationObserver(function(mutations) {
+  autoInitObserver = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       mutation.addedNodes.forEach(function(node) {
         if (node.nodeName === "SCRIPT" && node.id && node.id.startsWith("chat-widget")) {
           if (node.src && node.src !== window.location.href) {
             return;
           }
-          window.createChatWidget(node);
+          const widget = window.createChatWidget(node);
+          widgetInstances.push(widget);
         }
       });
     });
   });
-  observer.observe(document.documentElement, {
+  autoInitObserver.observe(document.documentElement, {
     childList: true,
     subtree: true
   });
   if (document.currentScript && document.currentScript.id && document.currentScript.id.startsWith("chat-widget")) {
-    window.createChatWidget(document.currentScript);
+    const widget = window.createChatWidget(document.currentScript);
+    widgetInstances.push(widget);
   }
 })();
