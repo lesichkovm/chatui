@@ -159,7 +159,7 @@ export class ChatWidget {
     this.api.performHandshake(
       // Success callback
       () => {
-        console.log("ChatWidget: Handshake successful");
+        // Handshake successful - connection established
         this.clearError();
 
         // Connect with error handling after successful handshake
@@ -412,7 +412,6 @@ export class ChatWidget {
 
     // Check for empty message first
     if (!message) {
-      console.log("ChatWidget: Empty message rejected");
       return;
     }
 
@@ -620,17 +619,23 @@ export class ChatWidget {
   addFailedMessageIndicator(message) {
     const failedElement = document.createElement("div");
     failedElement.className = "chat-failed-message";
-    failedElement.innerHTML = `
-      <div style="color: #666; font-style: italic; font-size: 12px; margin: 4px 0;">
-        Failed to send: "${message.substring(0, 50)}${message.length > 50 ? "..." : ""}"
-        <button class="retry-btn" style="margin-left: 8px; padding: 2px 6px; font-size: 11px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; cursor: pointer;">
-          Retry
-        </button>
-      </div>
-    `;
+    
+    const container = document.createElement("div");
+    container.style.cssText = "color: #666; font-style: italic; font-size: 12px; margin: 4px 0;";
+    
+    const textSpan = document.createElement("span");
+    textSpan.textContent = `Failed to send: "${message.substring(0, 50)}${message.length > 50 ? "..." : ""}"`;
+    
+    const retryBtn = document.createElement("button");
+    retryBtn.className = "retry-btn";
+    retryBtn.textContent = "Retry";
+    retryBtn.style.cssText = "margin-left: 8px; padding: 2px 6px; font-size: 11px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; cursor: pointer;";
+    
+    container.appendChild(textSpan);
+    container.appendChild(retryBtn);
+    failedElement.appendChild(container);
 
     // Add retry functionality
-    const retryBtn = failedElement.querySelector(".retry-btn");
     retryBtn.addEventListener("click", () => {
       this.sendMessage(message);
       failedElement.remove();
@@ -719,13 +724,6 @@ export class ChatWidget {
    * @param {Object} [widgetData] - Optional widget data for bot messages
    */
   addMessage(text, sender, widgetData = null) {
-    // Debug logging
-    console.log("ChatWidget: addMessage called", {
-      text,
-      sender,
-      widgetData,
-    });
-
     // Check if text is actually a widget configuration (Array or Object with widgets)
     const isWidgetConfig = Array.isArray(text) || (typeof text === 'object' && text !== null && text.widgets);
     

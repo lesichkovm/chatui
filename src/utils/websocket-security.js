@@ -54,13 +54,15 @@ export const WebSocketSecurityConfig = {
   logConnectionEvents: true,          // Log connection events
   logMessageEvents: false,            // Log message events (privacy)
   
-  // Environment detection
-  productionIndicators: [
-    'NODE_ENV' === 'production',
-    location.protocol === 'https:',
-    !location.hostname.includes('localhost'),
-    !location.hostname.includes('127.0.0.1')
-  ]
+  // Environment detection - lazy evaluation to avoid ReferenceError in non-browser environments
+  get productionIndicators() {
+    return [
+      typeof process !== 'undefined' && process.env?.NODE_ENV === 'production',
+      typeof location !== 'undefined' && location.protocol === 'https:',
+      typeof location !== 'undefined' && !location.hostname.includes('localhost'),
+      typeof location !== 'undefined' && !location.hostname.includes('127.0.0.1')
+    ];
+  }
 };
 
 /**
@@ -273,10 +275,14 @@ export class WebSocketSecurityValidator {
       '0.0.0.0'
     ];
     
+    // Full RFC 1918 private IP ranges:
+    // 10.0.0.0 - 10.255.255.255 (10.x.x.x)
+    // 172.16.0.0 - 172.31.255.255 (172.16.x.x - 172.31.x.x)
+    // 192.168.0.0 - 192.168.255.255 (192.168.x.x)
     return localhostPatterns.includes(hostname) ||
            hostname.startsWith('192.168.') ||
            hostname.startsWith('10.') ||
-           hostname.startsWith('172.16.');
+           /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname);
   }
 
   /**
@@ -284,9 +290,11 @@ export class WebSocketSecurityValidator {
    * @private
    */
   static hasSuspiciousPatterns(text) {
+    // Use word boundaries or protocol position to avoid matching legitimate URLs
+    // e.g., /api/data/endpoint should not match data: protocol
     const suspiciousPatterns = [
       /javascript:/i,
-      /data:/i,
+      /data:[^/]/i,           // Only match data: when not followed by / (to avoid matching /api/data/...)
       /vbscript:/i,
       /file:/i,
       /ftp:/i,

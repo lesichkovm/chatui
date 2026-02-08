@@ -1373,7 +1373,7 @@ export function createWidgetDOM(widgetId, config) {
 
   chatWindow.innerHTML = `
     <div class="header" id="${widgetId}-header">
-      <h3>${title}</h3>
+      <h3></h3>
       ${displayMode === "popup" ? `<button type="button" class="close" id="${widgetId}-close" aria-label="Close chat">×</button>` : ""
     }
     </div>
@@ -1383,6 +1383,12 @@ export function createWidgetDOM(widgetId, config) {
       <button type="button" class="send" id="${widgetId}-send" aria-label="Send message">Send</button>
     </div>
   `;
+
+  // Set title safely using textContent to prevent XSS
+  const headerH3 = chatWindow.querySelector('.header h3');
+  if (headerH3) {
+    headerH3.textContent = title;
+  }
 
   let chatButton = null;
 
@@ -1432,9 +1438,6 @@ export function createWidgetDOM(widgetId, config) {
  * @param {Object} [legacyWidgetData] - Optional legacy widget data for backward compatibility
  */
 export function appendMessage(container, message, sender, widgetId, legacyWidgetData = null) {
-  // Debug logging
-  console.log('UI: appendMessage called', { message, sender, messageLength: message.length, widgetId });
-  
   const messageElement = document.createElement("div");
   messageElement.className = `message ${sender}-message`;
   messageElement.id = `${widgetId}-message-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

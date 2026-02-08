@@ -179,11 +179,8 @@ export class HybridChatAPI extends ChatAPI {
    * @param {Function} onError - Callback function called on handshake error
    */
   performWebSocketHandshake(onSuccess, onError) {
-    if (this.isTestEnvironment()) {
-      this.setSessionKey("test-session-key");
-      if (onSuccess) onSuccess();
-      return;
-    }
+    // Note: Test environment check is not needed here because
+    // performHandshake() already checks and returns early before calling this method
 
     this.initWebSocket()
       .then(() => {
@@ -262,6 +259,61 @@ export class HybridChatAPI extends ChatAPI {
   }
 
   /**
+   * Handle incoming WebSocket message
+   * @private
+   * @param {MessageEvent} event - WebSocket message event
+   * @param {Function} onMessage - Callback for message data
+   * @param {Object} options - Handler options
+   * @param {Function} [options.onError] - Error callback
+   * @param {boolean} [options.isResponseHandler=false] - Whether handling a response (vs incoming message)
+   */
+  _handleWebSocketMessage(event, onMessage, options = {}) {
+    const { onError, isResponseHandler = false } = options;
+    
+    try {
+      const data = JSON.parse(event.data);
+
+      // Handle both old format (status: success) and new format (type: message)
+      const isValidMessage = isResponseHandler
+        ? data.type === "message" || data.type === "message:stream" ||
+          (data.status === "success" && (data.widgets || data.text))
+        : data.type === "message" ||
+          (data.status === "success" && (data.widgets || data.text));
+
+      if (isValidMessage) {
+        if (onMessage) {
+          if (data.widgets && Array.isArray(data.widgets)) {
+            // New composable widget format
+            onMessage(data.widgets, "bot");
+          } else if (data.text) {
+            // Backward compatibility: old format with text field
+            if (data.widget) {
+              onMessage(data.text, "bot", data.widget);
+            } else {
+              onMessage(data.text, "bot");
+            }
+          }
+        }
+      } else if (!isResponseHandler) {
+        // Only handle typing/read receipts for incoming messages, not responses
+        if (data.type === "typing") {
+          this.handleTypingIndicator(data);
+        } else if (data.type === "read_receipt") {
+          this.handleReadReceipt(data);
+        }
+      }
+    } catch (error) {
+      console.error("ChatWidget: Invalid WebSocket message format:", error);
+      if (onError) {
+        onError(error);
+      }
+      if (this.debug) {
+        console.error("Received data:", event.data);
+      }
+    }
+  }
+
+  /**
    * Connect via WebSocket
    * @private
    * @param {Function} onMessage - Callback function for incoming messages
@@ -282,38 +334,7 @@ export class HybridChatAPI extends ChatAPI {
 
       // Set up message handler even if already connected
       this.wsConnection.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-
-          // Handle both old format (status: success) and new format (type: message)
-          if (
-            data.type === "message" ||
-            (data.status === "success" && (data.widgets || data.text))
-          ) {
-            if (onMessage) {
-              if (data.widgets && Array.isArray(data.widgets)) {
-                // New composable widget format
-                onMessage(data.widgets, "bot");
-              } else if (data.text) {
-                // Backward compatibility: old format with text field
-                if (data.widget) {
-                  onMessage(data.text, "bot", data.widget);
-                } else {
-                  onMessage(data.text, "bot");
-                }
-              }
-            }
-          } else if (data.type === "typing") {
-            this.handleTypingIndicator(data);
-          } else if (data.type === "read_receipt") {
-            this.handleReadReceipt(data);
-          }
-        } catch (error) {
-          console.error("ChatWidget: Invalid WebSocket message format:", error);
-          if (this.debug) {
-            console.error("Received data:", event.data);
-          }
-        }
+        this._handleWebSocketMessage(event, onMessage);
       };
       return;
     }
@@ -321,41 +342,7 @@ export class HybridChatAPI extends ChatAPI {
     this.initWebSocket()
       .then(() => {
         this.wsConnection.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-
-            // Handle both old format (status: success) and new format (type: message)
-            if (
-              data.type === "message" ||
-              (data.status === "success" && (data.widgets || data.text))
-            ) {
-              if (onMessage) {
-                if (data.widgets && Array.isArray(data.widgets)) {
-                  // New composable widget format
-                  onMessage(data.widgets, "bot");
-                } else if (data.text) {
-                  // Backward compatibility: old format with text field
-                  if (data.widget) {
-                    onMessage(data.text, "bot", data.widget);
-                  } else {
-                    onMessage(data.text, "bot");
-                  }
-                }
-              }
-            } else if (data.type === "typing") {
-              this.handleTypingIndicator(data);
-            } else if (data.type === "read_receipt") {
-              this.handleReadReceipt(data);
-            }
-          } catch (error) {
-            console.error(
-              "ChatWidget: Invalid WebSocket message format:",
-              error,
-            );
-            if (this.debug) {
-              console.error("Received data:", event.data);
-            }
-          }
+          this._handleWebSocketMessage(event, onMessage);
         };
       })
       .catch((error) => {
@@ -438,39 +425,10 @@ export class HybridChatAPI extends ChatAPI {
 
       if (onSuccess) {
         this.wsConnection.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-
-            // Handle both old format (status: success) and new format (type: message)
-            if (
-              data.type === "message" ||
-              data.type === "message:stream" ||
-              (data.status === "success" && (data.widgets || data.text))
-            ) {
-              if (data.widgets && Array.isArray(data.widgets)) {
-                // New composable widget format
-                onSuccess(data.widgets, "bot");
-              } else if (data.text) {
-                // Backward compatibility: old format with text field
-                if (data.widget) {
-                  onSuccess(data.text, "bot", data.widget);
-                } else {
-                  onSuccess(data.text, "bot");
-                }
-              }
-            }
-          } catch (error) {
-            console.error(
-              "ChatWidget: Invalid WebSocket message format:",
-              error,
-            );
-            if (onError) {
-              onError(error);
-            }
-            if (this.debug) {
-              console.error("Received data:", event.data);
-            }
-          }
+          this._handleWebSocketMessage(event, onSuccess, {
+            onError,
+            isResponseHandler: true
+          });
         };
       }
     } else {
@@ -647,11 +605,15 @@ export class HybridChatAPI extends ChatAPI {
   isLocalhost(hostname) {
     const localhostPatterns = ["localhost", "127.0.0.1", "::1", "0.0.0.0"];
 
+    // Full RFC 1918 private IP ranges:
+    // 10.0.0.0 - 10.255.255.255 (10.x.x.x)
+    // 172.16.0.0 - 172.31.255.255 (172.16.x.x - 172.31.x.x)
+    // 192.168.0.0 - 192.168.255.255 (192.168.x.x)
     return (
       localhostPatterns.includes(hostname.toLowerCase()) ||
       hostname.startsWith("192.168.") ||
       hostname.startsWith("10.") ||
-      hostname.startsWith("172.16.")
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
     );
   }
 
@@ -662,9 +624,11 @@ export class HybridChatAPI extends ChatAPI {
    * @returns {boolean} True if suspicious patterns found
    */
   containsSuspiciousPatterns(url) {
+    // Use word boundaries or protocol position to avoid matching legitimate URLs
+    // e.g., /api/data/endpoint should not match data: protocol
     const suspiciousPatterns = [
       /javascript:/i,
-      /data:/i,
+      /data:[^/]/i,           // Only match data: when not followed by / (to avoid matching /api/data/...)
       /vbscript:/i,
       /file:/i,
       /ftp:/i,
@@ -688,13 +652,14 @@ export class HybridChatAPI extends ChatAPI {
     }
 
     // Check various indicators of production environment
+    // Full RFC 1918 private IP ranges check
     return (
       location.protocol === "https:" ||
       (location.hostname !== "localhost" &&
         location.hostname !== "127.0.0.1" &&
         !location.hostname.startsWith("192.168.") &&
         !location.hostname.startsWith("10.") &&
-        !location.hostname.startsWith("172.16."))
+        !/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(location.hostname))
     );
   }
 

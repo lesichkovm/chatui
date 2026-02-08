@@ -1,8 +1,10 @@
+import { BaseAPI } from './api-base.js';
+
 /**
  * LegacyAPI class for handling JSONP-based communication with chat server
  * Provides basic chat functionality using JSONP requests for cross-domain compatibility
  */
-export class LegacyAPI {
+export class LegacyAPI extends BaseAPI {
   /**
    * Create a new LegacyAPI instance
    * @param {Object} config - Configuration object
@@ -70,7 +72,16 @@ export class LegacyAPI {
    */
   _generateSecureCallbackName() {
     // Use cryptographically secure random values
-    const randomPart = Math.random().toString(36).substr(2, 16);
+    const array = new Uint8Array(16);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      crypto.getRandomValues(array);
+    } else {
+      // Fallback for environments without crypto API (should not happen in modern browsers)
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    const randomPart = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
     const timestamp = Date.now();
     return `chatCallback_${randomPart}_${timestamp}`;
   }
@@ -97,65 +108,6 @@ export class LegacyAPI {
 
     // Additional validation can be added here as needed
     return true;
-  }
-
-  /**
-   * Get the stored session key from sessionStorage
-   * @returns {string} The stored session key or empty string
-   */
-  getSessionKey() {
-    if (typeof sessionStorage !== "undefined") {
-      return sessionStorage.getItem("chat_session_key") || "";
-    }
-
-    // Fallback for test environment - use localStorage mock if available
-    if (typeof localStorage !== "undefined") {
-      return localStorage.getItem("chat_session_key") || "";
-    }
-
-    // Fallback for test environment using global mock
-    if (
-      this.isTestEnvironment() &&
-      typeof global !== "undefined" &&
-      global.localStorage
-    ) {
-      return global.localStorage.getItem("chat_session_key") || "";
-    }
-
-    return "";
-  }
-
-  /**
-   * Store a session key in sessionStorage (more secure than localStorage)
-   * @param {string} key - The session key to store
-   */
-  setSessionKey(key) {
-    if (typeof sessionStorage !== "undefined") {
-      sessionStorage.setItem("chat_session_key", key);
-    } else if (typeof localStorage !== "undefined") {
-      localStorage.setItem("chat_session_key", key);
-    } else if (
-      this.isTestEnvironment() &&
-      typeof global !== "undefined" &&
-      global.localStorage
-    ) {
-      // Fallback for test environment using global mock
-      global.localStorage.setItem("chat_session_key", key);
-    }
-  }
-
-  /**
-   * Check if running in test environment (localhost:32000)
-   * @returns {boolean} True if in test environment
-   */
-  isTestEnvironment() {
-    return (
-      (typeof window !== "undefined" && window.__CHAT_WIDGET_TEST_MODE__) ||
-      (typeof window !== "undefined" &&
-        window.location &&
-        window.location.hostname === "localhost" &&
-        window.location.port === "32000")
-    );
   }
 
   /**

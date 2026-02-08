@@ -1,8 +1,10 @@
+import { BaseAPI } from './api-base.js';
+
 /**
  * CORS-based API implementation using modern fetch API
  * Provides secure, modern HTTP communication with proper error handling
  */
-export class CorsAPI {
+export class CorsAPI extends BaseAPI {
   /**
    * Create a new CorsAPI instance
    * @param {Object} config - Configuration object
@@ -58,57 +60,6 @@ export class CorsAPI {
     }
     
     return sanitized;
-  }
-
-  /**
-   * Get the stored session key from sessionStorage (more secure than localStorage)
-   * @returns {string} The session key or empty string if not found
-   */
-  getSessionKey() {
-    if (typeof sessionStorage !== 'undefined') {
-      return sessionStorage.getItem("chat_session_key") || "";
-    }
-    
-    // Fallback for test environment - use localStorage mock if available
-    if (typeof localStorage !== 'undefined') {
-      return localStorage.getItem("chat_session_key") || "";
-    }
-    
-    // Fallback for test environment using global mock
-    if (this.isTestEnvironment() && typeof global !== 'undefined' && global.localStorage) {
-      return global.localStorage.getItem("chat_session_key") || "";
-    }
-    
-    return "";
-  }
-
-  /**
-   * Store a session key in sessionStorage (more secure than localStorage)
-   * @param {string} key - The session key to store
-   */
-  setSessionKey(key) {
-    if (typeof sessionStorage !== 'undefined') {
-      sessionStorage.setItem("chat_session_key", key);
-    } else if (typeof localStorage !== 'undefined') {
-      localStorage.setItem("chat_session_key", key);
-    } else if (this.isTestEnvironment() && typeof global !== 'undefined' && global.localStorage) {
-      // Fallback for test environment using global mock
-      global.localStorage.setItem("chat_session_key", key);
-    }
-  }
-
-  /**
-   * Check if running in test environment (localhost:32000)
-   * @returns {boolean} True if in test environment
-   */
-  isTestEnvironment() {
-    return (
-      (typeof window !== "undefined" && window.__CHAT_WIDGET_TEST_MODE__) ||
-      (typeof window !== "undefined" &&
-      window.location &&
-      window.location.hostname === "localhost" &&
-      window.location.port === "32000")
-    );
   }
 
   /**

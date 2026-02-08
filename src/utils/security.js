@@ -55,8 +55,17 @@ export function sanitizeHTML(text) {
         if (!allowedAttrs.includes(attrName)) {
           node.removeAttribute(attrName);
         } else if (attrName === 'style') {
-          // Additional style sanitization logic could be added here
-          // For now, we rely on the fact that we've already defined allowed properties
+          // Sanitize style attribute values to prevent CSS injection
+          const styleValue = node.getAttribute('style');
+          const sanitizedStyle = sanitizeStyleProps(parseStyleString(styleValue));
+          const sanitizedStyleString = Object.entries(sanitizedStyle)
+            .map(([key, value]) => `${camelToKebab(key)}: ${value}`)
+            .join('; ');
+          if (sanitizedStyleString) {
+            node.setAttribute('style', sanitizedStyleString);
+          } else {
+            node.removeAttribute('style');
+          }
         }
       }
       
@@ -305,4 +314,40 @@ export function createSafeMessageHTML(text) {
   // Escape HTML and then add safe line breaks
   const escapedText = sanitizeHTML(text);
   return escapedText.replace(/\n/g, '<br>');
+}
+
+/**
+ * Parse a CSS style string into an object
+ * @private
+ * @param {string} styleString - CSS style string (e.g., "color: red; font-size: 12px")
+ * @returns {Object} Style object with camelCase keys
+ */
+function parseStyleString(styleString) {
+  if (!styleString || typeof styleString !== 'string') return {};
+  
+  const styles = {};
+  const declarations = styleString.split(';');
+  
+  for (const declaration of declarations) {
+    const colonIndex = declaration.indexOf(':');
+    if (colonIndex > 0) {
+      const property = declaration.substring(0, colonIndex).trim();
+      const value = declaration.substring(colonIndex + 1).trim();
+      if (property && value) {
+        styles[property] = value;
+      }
+    }
+  }
+  
+  return styles;
+}
+
+/**
+ * Convert camelCase to kebab-case for CSS properties
+ * @private
+ * @param {string} str - camelCase string
+ * @returns {string} kebab-case string
+ */
+function camelToKebab(str) {
+  return str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
 }

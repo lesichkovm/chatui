@@ -251,8 +251,10 @@ const handler = async (event, context) => {
       const body = JSON.parse(event.body || '{}');
       const { type, payload, session_key } = body;
       
-      // Debug logging
-      console.log('Popup demo POST request:', { type, payload, session_key, body });
+      // Debug logging - only in non-production environments
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Popup demo POST request:', { type, payload, session_key: session_key ? '[REDACTED]' : undefined, body: { ...body, session_key: body.session_key ? '[REDACTED]' : undefined } });
+      }
       
       let responseData = {};
       
@@ -395,7 +397,10 @@ const handler = async (event, context) => {
           break;
           
         default:
-          console.log('Popup demo: Unknown message type:', type);
+          // Debug logging - only in non-production environments
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('Popup demo: Unknown message type:', type);
+          }
           responseData = {
             type: 'error',
             message: 'Popup Chat Demo: Unknown message type',

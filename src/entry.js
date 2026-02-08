@@ -5,10 +5,48 @@ window.createChatWidget = function(scriptElement) {
     return new ChatWidget(scriptElement);
 };
 
+// Store widget instances and observer for cleanup
+const widgetInstances = [];
+let autoInitObserver = null;
+
 // Programmatic API
 window.ChatUI = {
     init: function(config) {
-        return new ChatWidget(config);
+        const widget = new ChatWidget(config);
+        widgetInstances.push(widget);
+        return widget;
+    },
+    
+    /**
+     * Destroy all ChatUI widgets and cleanup resources
+     * Disconnects MutationObserver and destroys all widget instances
+     */
+    destroy: function() {
+        // Destroy all widget instances
+        widgetInstances.forEach(widget => {
+            if (widget && typeof widget.destroy === 'function') {
+                widget.destroy();
+            }
+        });
+        widgetInstances.length = 0;
+        
+        // Disconnect the MutationObserver
+        if (autoInitObserver) {
+            autoInitObserver.disconnect();
+            autoInitObserver = null;
+        }
+        
+        // Clean up global references
+        delete window.createChatWidget;
+        delete window.ChatUI;
+    },
+    
+    /**
+     * Get all active widget instances
+     * @returns {Array} Array of ChatWidget instances
+     */
+    getWidgets: function() {
+        return [...widgetInstances];
     }
 };
 
@@ -19,28 +57,31 @@ document.addEventListener("DOMContentLoaded", function () {
         if (script.src && script.src !== window.location.href) {
             return;
         }
-        window.createChatWidget(script);
+        const widget = window.createChatWidget(script);
+        widgetInstances.push(widget);
     });
 });
 
-const observer = new MutationObserver(function (mutations) {
+autoInitObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
         mutation.addedNodes.forEach(function (node) {
             if (node.nodeName === "SCRIPT" && node.id && node.id.startsWith("chat-widget")) {
                 if (node.src && node.src !== window.location.href) {
                     return;
                 }
-                window.createChatWidget(node);
+                const widget = window.createChatWidget(node);
+                widgetInstances.push(widget);
             }
         });
     });
 });
 
-observer.observe(document.documentElement, {
+autoInitObserver.observe(document.documentElement, {
     childList: true,
     subtree: true,
 });
 
 if (document.currentScript && document.currentScript.id && document.currentScript.id.startsWith("chat-widget")) {
-    window.createChatWidget(document.currentScript);
+    const widget = window.createChatWidget(document.currentScript);
+    widgetInstances.push(widget);
 }
