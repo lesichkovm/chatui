@@ -69,6 +69,10 @@ chat.open();
 | Attribute | Description | Default |
 |---|---|---|
 | `data-server-url` | Base URL for the backend API | `http://localhost:3000` |
+| `data-handshake-url` | Custom handshake endpoint — absolute URL or path resolved against `data-server-url` | `<server-url>/api/handshake` |
+| `data-messages-url` | Custom messages endpoint — absolute URL or path resolved against `data-server-url` | `<server-url>/api/messages` |
+| `data-force-jsonp` | Force JSONP transport, skip CORS | `false` |
+| `data-prefer-jsonp` | Prefer JSONP transport over CORS | `false` |
 | `data-display` | `popup` or `fullpage` | `popup` |
 | `data-position` | `bottom-right`, `bottom-left`, `top-right`, `top-left` | `bottom-right` |
 | `data-title` | Header title | `Chat with us` |
@@ -89,8 +93,10 @@ chat.open();
 | `title` | Header title | `Chat with us` |
 | `targetSelector` / `target` | Container selector (fullpage) | `null` |
 | `serverUrl` | Backend URL | `http://localhost:3000` |
-
-> **Note:** `data-prefer-jsonp` and `data-force-jsonp` are parsed but not currently passed through the widget config. JSONP is still used automatically when CORS fails.
+| `handshakeUrl` | Custom handshake endpoint (absolute URL or path relative to `serverUrl`) | `<serverUrl>/api/handshake` |
+| `messagesUrl` | Custom messages endpoint (absolute URL or path relative to `serverUrl`) | `<serverUrl>/api/messages` |
+| `forceJsonP` | Force JSONP transport, skip CORS | `false` |
+| `preferJsonP` | Prefer JSONP transport over CORS | `false` |
 
 ---
 

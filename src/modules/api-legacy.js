@@ -10,6 +10,8 @@ export class LegacyAPI extends BaseAPI {
    * @param {Object} config - Configuration object
    * @param {string} config.serverUrl - Base URL for the chat server
    * @param {boolean} [config.debug=false] - Enable debug logging
+   * @param {string} [config.handshakeUrl] - Custom handshake endpoint (absolute URL or path resolved against serverUrl)
+   * @param {string} [config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
    */
   constructor(config) {
     // Derived class: must call super() before accessing 'this'.
@@ -30,6 +32,14 @@ export class LegacyAPI extends BaseAPI {
     this.debug = config.debug || false;
     this.sessionKey = "";
     this.connectionTimeout = config.connectionTimeout || 10000;
+    this.handshakeUrl = this._resolveEndpointUrl(
+      config.handshakeUrl,
+      "/api/handshake",
+    );
+    this.messagesUrl = this._resolveEndpointUrl(
+      config.messagesUrl,
+      "/api/messages",
+    );
   }
 
   /**
@@ -125,7 +135,7 @@ export class LegacyAPI extends BaseAPI {
     }
 
     const callbackName = "handshakeCallback_" + Date.now();
-    const url = `${this.serverUrl}/api/handshake?callback=${callbackName}`;
+    const url = this._appendQuery(this.handshakeUrl, `callback=${callbackName}`);
 
     this._injectScript(url, callbackName, (response) => {
       if (response.status === "success") {
@@ -149,9 +159,9 @@ export class LegacyAPI extends BaseAPI {
 
     const sessionKey = this.getSessionKey();
     const callbackName = "connectCallback_" + Date.now();
-    const url = `${this.serverUrl}/api/messages?callback=${callbackName}&type=connect&session_key=${encodeURIComponent(
+    const url = this._appendQuery(this.messagesUrl, `callback=${callbackName}&type=connect&session_key=${encodeURIComponent(
       sessionKey,
-    )}`;
+    )}`);
 
     this._injectScript(url, callbackName, (response) => {
       if (onMessage) {
@@ -190,9 +200,9 @@ export class LegacyAPI extends BaseAPI {
 
     const sessionKey = this.getSessionKey();
     const callbackName = this._generateSecureCallbackName();
-    const url = `${this.serverUrl}/api/messages?callback=${callbackName}&message=${encodeURIComponent(
+    const url = this._appendQuery(this.messagesUrl, `callback=${callbackName}&message=${encodeURIComponent(
       validatedMessage,
-    )}&type=message&session_key=${encodeURIComponent(sessionKey)}`;
+    )}&type=message&session_key=${encodeURIComponent(sessionKey)}`);
 
     this._injectScript(url, callbackName, (response) => {
       // Validate response structure before processing

@@ -49,6 +49,41 @@ export class BaseAPI {
   }
 
   /**
+   * Resolve a configured endpoint URL against the server URL
+   * Absolute URLs (http/https) are used as-is; paths are resolved against
+   * serverUrl. Falls back to the default path when the value is missing or
+   * invalid.
+   * @protected
+   * @param {string} [url] - Configured endpoint URL or path
+   * @param {string} defaultPath - Default path appended to serverUrl
+   * @returns {string} Resolved endpoint URL
+   */
+  _resolveEndpointUrl(url, defaultPath) {
+    if (!url) {
+      return `${this.serverUrl}${defaultPath}`;
+    }
+    try {
+      return new URL(url, `${this.serverUrl}/`).toString();
+    } catch (error) {
+      console.warn(
+        `ChatWidget: Invalid endpoint URL "${url}", falling back to ${defaultPath}`,
+      );
+      return `${this.serverUrl}${defaultPath}`;
+    }
+  }
+
+  /**
+   * Append a query string to a URL, using "&" when the URL already has one
+   * @protected
+   * @param {string} url - Base URL
+   * @param {string} query - Query string without leading "?"
+   * @returns {string} URL with the query appended
+   */
+  _appendQuery(url, query) {
+    return url + (url.includes("?") ? "&" : "?") + query;
+  }
+
+  /**
    * Check if running in test environment (localhost:32000)
    * @returns {boolean} True if in test environment
    */

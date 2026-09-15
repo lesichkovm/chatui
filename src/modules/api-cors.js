@@ -12,6 +12,8 @@ export class CorsAPI extends BaseAPI {
    * @param {boolean} [config.debug=false] - Enable debug logging
    * @param {number} [config.timeout=5000] - Request timeout in milliseconds
    * @param {number} [config.connectionTimeout=10000] - Connection timeout in milliseconds
+   * @param {string} [config.handshakeUrl] - Custom handshake endpoint (absolute URL or path resolved against serverUrl)
+   * @param {string} [config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
    */
   constructor(config) {
     // Derived class: must call super() before accessing 'this'.
@@ -20,17 +22,19 @@ export class CorsAPI extends BaseAPI {
     if (!config) {
       throw new Error('CorsAPI: config is required');
     }
-    
+
     // Allow empty serverUrl for tests, but handle it gracefully
     if (config.serverUrl === null || config.serverUrl === undefined) {
       throw new Error('CorsAPI: serverUrl is required');
     }
-    
+
     this.serverUrl = config.serverUrl ? config.serverUrl.replace(/\/$/, '') : ''; // Remove trailing slash or keep empty
     this.debug = config.debug || false;
     this.timeout = config.timeout || 5000; // Add missing timeout property
     this.sessionKey = '';
     this.connectionTimeout = config.connectionTimeout || 10000;
+    this.handshakeUrl = this._resolveEndpointUrl(config.handshakeUrl, '/api/handshake');
+    this.messagesUrl = this._resolveEndpointUrl(config.messagesUrl, '/api/messages');
   }
 
   /**
@@ -128,7 +132,7 @@ export class CorsAPI extends BaseAPI {
       return;
     }
 
-    const url = `${this.serverUrl}/api/handshake`;
+    const url = this.handshakeUrl;
     
     try {
       const response = await this._fetchWithTimeout(url, {
@@ -187,7 +191,7 @@ export class CorsAPI extends BaseAPI {
     }
 
     const sessionKey = this.getSessionKey();
-    const url = `${this.serverUrl}/api/messages`;
+    const url = this.messagesUrl;
 
     try {
       const response = await this._fetchWithTimeout(url, {
@@ -240,7 +244,7 @@ export class CorsAPI extends BaseAPI {
     const validatedMessage = this.validateMessage(message);
     
     const sessionKey = this.getSessionKey();
-    const url = `${this.serverUrl}/api/messages`;
+    const url = this.messagesUrl;
 
     try {
       // In test environment, use the mock fetch directly

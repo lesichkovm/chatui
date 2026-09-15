@@ -19,6 +19,10 @@ export class ChatWidget {
    * @param {string} [input.config.title] - Widget title
    * @param {string} [input.config.targetSelector] - Target element selector for fullpage mode
    * @param {string} [input.config.serverUrl] - Server URL for chat API
+   * @param {string} [input.config.handshakeUrl] - Custom handshake endpoint (absolute URL or path resolved against serverUrl)
+   * @param {string} [input.config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
+   * @param {boolean} [input.config.forceJsonP] - Force JSONP transport (skip CORS)
+   * @param {boolean} [input.config.preferJsonP] - Prefer JSONP transport over CORS
    */
   constructor(input) {
     let config = {};
@@ -39,6 +43,8 @@ export class ChatWidget {
         title: scriptElement.getAttribute("data-title"),
         targetSelector: scriptElement.getAttribute("data-target"),
         serverUrl: scriptElement.getAttribute("data-server-url"),
+        handshakeUrl: scriptElement.getAttribute("data-handshake-url"),
+        messagesUrl: scriptElement.getAttribute("data-messages-url"),
         forceJsonP: scriptElement.getAttribute("data-force-jsonp") === "true",
         preferJsonP: scriptElement.getAttribute("data-prefer-jsonp") === "true",
       };
@@ -76,12 +82,22 @@ export class ChatWidget {
       title: config.title || "Chat with us",
       targetSelector: config.targetSelector || config.target || null,
       serverUrl: config.serverUrl || "http://localhost:3000",
+      handshakeUrl: config.handshakeUrl || null,
+      messagesUrl: config.messagesUrl || null,
+      forceJsonP: config.forceJsonP || false,
+      preferJsonP: config.preferJsonP || false,
       theme: themeConfig.theme,
       themeMode: themeConfig.mode,
       themeColors: themeConfig.colors,
     };
 
-    this.api = new HybridChatAPI({ serverUrl: this.config.serverUrl });
+    this.api = new HybridChatAPI({
+      serverUrl: this.config.serverUrl,
+      handshakeUrl: this.config.handshakeUrl,
+      messagesUrl: this.config.messagesUrl,
+      forceJsonP: this.config.forceJsonP,
+      preferJsonP: this.config.preferJsonP,
+    });
 
     // State initialization
     this.state = {

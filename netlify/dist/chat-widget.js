@@ -8,7 +8,7 @@
  * 1. Edit the source files in the src/ directory
  * 2. Run 'npm run build' to regenerate this file
  * 
- * Generated on: 2026-09-15T16:37:16.721Z
+ * Generated on: 2026-09-15T16:52:49.716Z
  */
 
 
@@ -4738,6 +4738,39 @@
       }
     }
     /**
+     * Resolve a configured endpoint URL against the server URL
+     * Absolute URLs (http/https) are used as-is; paths are resolved against
+     * serverUrl. Falls back to the default path when the value is missing or
+     * invalid.
+     * @protected
+     * @param {string} [url] - Configured endpoint URL or path
+     * @param {string} defaultPath - Default path appended to serverUrl
+     * @returns {string} Resolved endpoint URL
+     */
+    _resolveEndpointUrl(url, defaultPath) {
+      if (!url) {
+        return `${this.serverUrl}${defaultPath}`;
+      }
+      try {
+        return new URL(url, `${this.serverUrl}/`).toString();
+      } catch (error) {
+        console.warn(
+          `ChatWidget: Invalid endpoint URL "${url}", falling back to ${defaultPath}`
+        );
+        return `${this.serverUrl}${defaultPath}`;
+      }
+    }
+    /**
+     * Append a query string to a URL, using "&" when the URL already has one
+     * @protected
+     * @param {string} url - Base URL
+     * @param {string} query - Query string without leading "?"
+     * @returns {string} URL with the query appended
+     */
+    _appendQuery(url, query) {
+      return url + (url.includes("?") ? "&" : "?") + query;
+    }
+    /**
      * Check if running in test environment (localhost:32000)
      * @returns {boolean} True if in test environment
      */
@@ -4753,6 +4786,8 @@
      * @param {Object} config - Configuration object
      * @param {string} config.serverUrl - Base URL for the chat server
      * @param {boolean} [config.debug=false] - Enable debug logging
+     * @param {string} [config.handshakeUrl] - Custom handshake endpoint (absolute URL or path resolved against serverUrl)
+     * @param {string} [config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
      */
     constructor(config) {
       super();
@@ -4766,6 +4801,14 @@
       this.debug = config.debug || false;
       this.sessionKey = "";
       this.connectionTimeout = config.connectionTimeout || 1e4;
+      this.handshakeUrl = this._resolveEndpointUrl(
+        config.handshakeUrl,
+        "/api/handshake"
+      );
+      this.messagesUrl = this._resolveEndpointUrl(
+        config.messagesUrl,
+        "/api/messages"
+      );
     }
     /**
      * Validate message input to prevent injection attacks
@@ -4839,7 +4882,7 @@
         return;
       }
       const callbackName = "handshakeCallback_" + Date.now();
-      const url = `${this.serverUrl}/api/handshake?callback=${callbackName}`;
+      const url = this._appendQuery(this.handshakeUrl, `callback=${callbackName}`);
       this._injectScript(url, callbackName, (response) => {
         if (response.status === "success") {
           this.setSessionKey(response.session_key);
@@ -4860,9 +4903,9 @@
       }
       const sessionKey = this.getSessionKey();
       const callbackName = "connectCallback_" + Date.now();
-      const url = `${this.serverUrl}/api/messages?callback=${callbackName}&type=connect&session_key=${encodeURIComponent(
+      const url = this._appendQuery(this.messagesUrl, `callback=${callbackName}&type=connect&session_key=${encodeURIComponent(
         sessionKey
-      )}`;
+      )}`);
       this._injectScript(url, callbackName, (response) => {
         if (onMessage) {
           if (response.widget) {
@@ -4893,9 +4936,9 @@
       const validatedMessage = this.validateMessage(message);
       const sessionKey = this.getSessionKey();
       const callbackName = this._generateSecureCallbackName();
-      const url = `${this.serverUrl}/api/messages?callback=${callbackName}&message=${encodeURIComponent(
+      const url = this._appendQuery(this.messagesUrl, `callback=${callbackName}&message=${encodeURIComponent(
         validatedMessage
-      )}&type=message&session_key=${encodeURIComponent(sessionKey)}`;
+      )}&type=message&session_key=${encodeURIComponent(sessionKey)}`);
       this._injectScript(url, callbackName, (response) => {
         if (!this._validateJSONPResponse(response)) {
           console.error("ChatWidget: Invalid JSONP response format", response);
@@ -4962,6 +5005,8 @@
      * @param {boolean} [config.debug=false] - Enable debug logging
      * @param {number} [config.timeout=5000] - Request timeout in milliseconds
      * @param {number} [config.connectionTimeout=10000] - Connection timeout in milliseconds
+     * @param {string} [config.handshakeUrl] - Custom handshake endpoint (absolute URL or path resolved against serverUrl)
+     * @param {string} [config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
      */
     constructor(config) {
       super();
@@ -4976,6 +5021,8 @@
       this.timeout = config.timeout || 5e3;
       this.sessionKey = "";
       this.connectionTimeout = config.connectionTimeout || 1e4;
+      this.handshakeUrl = this._resolveEndpointUrl(config.handshakeUrl, "/api/handshake");
+      this.messagesUrl = this._resolveEndpointUrl(config.messagesUrl, "/api/messages");
     }
     /**
      * Validate message input to prevent injection attacks
@@ -5050,7 +5097,7 @@
         if (onSuccess) onSuccess();
         return;
       }
-      const url = `${this.serverUrl}/api/handshake`;
+      const url = this.handshakeUrl;
       try {
         const response = await this._fetchWithTimeout(url, {
           method: "POST",
@@ -5102,7 +5149,7 @@
         return;
       }
       const sessionKey = this.getSessionKey();
-      const url = `${this.serverUrl}/api/messages`;
+      const url = this.messagesUrl;
       try {
         const response = await this._fetchWithTimeout(url, {
           method: "POST",
@@ -5146,7 +5193,7 @@
     async sendMessage(message, onResponse, onError) {
       const validatedMessage = this.validateMessage(message);
       const sessionKey = this.getSessionKey();
-      const url = `${this.serverUrl}/api/messages`;
+      const url = this.messagesUrl;
       try {
         if (this.isTestEnvironment() && typeof global !== "undefined" && global.fetch) {
           const response2 = await global.fetch(url, {
@@ -5210,6 +5257,8 @@
      * @param {boolean} [config.forceJsonP=false] - Force JSONP only (no CORS)
      * @param {number} [config.timeout=5000] - CORS request timeout
      * @param {number} [config.fallbackRetries=2] - Number of fallback attempts
+     * @param {string} [config.handshakeUrl] - Custom handshake endpoint (absolute URL or path resolved against serverUrl)
+     * @param {string} [config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
      */
     constructor(config) {
       super(config);
@@ -7418,6 +7467,10 @@
      * @param {string} [input.config.title] - Widget title
      * @param {string} [input.config.targetSelector] - Target element selector for fullpage mode
      * @param {string} [input.config.serverUrl] - Server URL for chat API
+     * @param {string} [input.config.handshakeUrl] - Custom handshake endpoint (absolute URL or path resolved against serverUrl)
+     * @param {string} [input.config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
+     * @param {boolean} [input.config.forceJsonP] - Force JSONP transport (skip CORS)
+     * @param {boolean} [input.config.preferJsonP] - Prefer JSONP transport over CORS
      */
     constructor(input) {
       let config = {};
@@ -7435,6 +7488,8 @@
           title: scriptElement.getAttribute("data-title"),
           targetSelector: scriptElement.getAttribute("data-target"),
           serverUrl: scriptElement.getAttribute("data-server-url"),
+          handshakeUrl: scriptElement.getAttribute("data-handshake-url"),
+          messagesUrl: scriptElement.getAttribute("data-messages-url"),
           forceJsonP: scriptElement.getAttribute("data-force-jsonp") === "true",
           preferJsonP: scriptElement.getAttribute("data-prefer-jsonp") === "true"
         };
@@ -7463,11 +7518,21 @@
         title: config.title || "Chat with us",
         targetSelector: config.targetSelector || config.target || null,
         serverUrl: config.serverUrl || "http://localhost:3000",
+        handshakeUrl: config.handshakeUrl || null,
+        messagesUrl: config.messagesUrl || null,
+        forceJsonP: config.forceJsonP || false,
+        preferJsonP: config.preferJsonP || false,
         theme: themeConfig.theme,
         themeMode: themeConfig.mode,
         themeColors: themeConfig.colors
       };
-      this.api = new HybridChatAPI({ serverUrl: this.config.serverUrl });
+      this.api = new HybridChatAPI({
+        serverUrl: this.config.serverUrl,
+        handshakeUrl: this.config.handshakeUrl,
+        messagesUrl: this.config.messagesUrl,
+        forceJsonP: this.config.forceJsonP,
+        preferJsonP: this.config.preferJsonP
+      });
       this.state = {
         isOpen: this.config.displayMode === "fullpage",
         messages: []

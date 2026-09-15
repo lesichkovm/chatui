@@ -600,6 +600,65 @@ test.describe('CorsAPI', () => {
     });
   });
 
+  test.describe('Custom Endpoints', () => {
+    test('should use default endpoints when not configured', async () => {
+      api = new CorsAPI({ serverUrl: 'https://example.com' });
+      expect(api.handshakeUrl).toBe('https://example.com/api/handshake');
+      expect(api.messagesUrl).toBe('https://example.com/api/messages');
+    });
+
+    test('should use absolute custom endpoint URLs', async () => {
+      api = new CorsAPI({
+        serverUrl: 'https://example.com',
+        handshakeUrl: 'https://api.other.com/handshake',
+        messagesUrl: 'https://api.other.com/messages'
+      });
+      expect(api.handshakeUrl).toBe('https://api.other.com/handshake');
+      expect(api.messagesUrl).toBe('https://api.other.com/messages');
+    });
+
+    test('should resolve relative endpoint paths against serverUrl', async () => {
+      api = new CorsAPI({
+        serverUrl: 'https://example.com',
+        handshakeUrl: '/quesy/handshake',
+        messagesUrl: '/quesy/messages'
+      });
+      expect(api.handshakeUrl).toBe('https://example.com/quesy/handshake');
+      expect(api.messagesUrl).toBe('https://example.com/quesy/messages');
+    });
+
+    test('should fall back to default path for invalid endpoint URLs', async () => {
+      api = new CorsAPI({
+        serverUrl: 'https://example.com',
+        handshakeUrl: 'http://['
+      });
+      expect(api.handshakeUrl).toBe('https://example.com/api/handshake');
+    });
+
+    test('should request the custom handshake URL', async () => {
+      api = new CorsAPI({
+        serverUrl: 'https://example.com',
+        handshakeUrl: '/quesy/handshake'
+      });
+      api.isTestEnvironment = () => false;
+
+      let requestedUrl = '';
+      mockFetch = (url: string) => {
+        requestedUrl = url;
+        return Promise.resolve(
+          new MockResponse({ status: 'success', session_key: 'test-key' })
+        );
+      };
+      (global as any).fetch = mockFetch;
+
+      await new Promise<void>((resolve) => {
+        api.performHandshake(() => resolve(), () => resolve());
+      });
+
+      expect(requestedUrl).toBe('https://example.com/quesy/handshake');
+    });
+  });
+
   test.describe('Timeout Handling', () => {
     test('should abort request on timeout', async () => {
       api = new CorsAPI({ serverUrl: 'https://example.com', timeout: 100 });

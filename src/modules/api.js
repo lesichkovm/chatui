@@ -15,6 +15,8 @@ export class HybridChatAPI extends ChatAPI {
    * @param {boolean} [config.forceJsonP=false] - Force JSONP only (no CORS)
    * @param {number} [config.timeout=5000] - CORS request timeout
    * @param {number} [config.fallbackRetries=2] - Number of fallback attempts
+   * @param {string} [config.handshakeUrl] - Custom handshake endpoint (absolute URL or path resolved against serverUrl)
+   * @param {string} [config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
    */
   constructor(config) {
     // Always call super first
