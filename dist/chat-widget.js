@@ -4755,6 +4755,7 @@
      * @param {boolean} [config.debug=false] - Enable debug logging
      */
     constructor(config) {
+      super();
       if (!config) {
         throw new Error("LegacyAPI: config is required");
       }
@@ -4963,6 +4964,7 @@
      * @param {number} [config.connectionTimeout=10000] - Connection timeout in milliseconds
      */
     constructor(config) {
+      super();
       if (!config) {
         throw new Error("CorsAPI: config is required");
       }

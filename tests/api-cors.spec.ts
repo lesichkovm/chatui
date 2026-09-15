@@ -72,6 +72,15 @@ test.describe('CorsAPI', () => {
 
     mockLocalStorage = {};
     delete (global as any).window;
+
+    // Clear any session key persisted by a previous test (the BaseAPI
+    // refactor stores it in sessionStorage, with localStorage fallback).
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.removeItem("chat_session_key");
+    }
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("chat_session_key");
+    }
   });
 
   test.describe('Initialization', () => {
@@ -104,7 +113,6 @@ test.describe('CorsAPI', () => {
       
       api.setSessionKey('test-session-key');
       expect(api.getSessionKey()).toBe('test-session-key');
-      expect(mockLocalStorage['chat_session_key']).toBe('test-session-key');
     });
 
     test('should handle missing session key', async () => {
@@ -168,7 +176,10 @@ test.describe('CorsAPI', () => {
       });
 
       expect(handshakeSuccess).toBe(true);
-      expect(mockLocalStorage['chat_session_key']).toBe('test-key');
+      // The session key is stored via the storage abstraction (sessionStorage
+      // when available, else localStorage) — assert the contract, not the
+      // raw mock object.
+      expect(api.getSessionKey()).toBe('test-key');
     });
 
     test('should handle connect request', async () => {
@@ -447,7 +458,7 @@ test.describe('CorsAPI', () => {
       });
 
       expect(handshakeSuccess).toBe(true);
-      expect(mockLocalStorage['chat_session_key']).toBe('test-session-key');
+      expect(api.getSessionKey()).toBe('test-session-key');
     });
 
     test('should simulate delayed response in test environment', async () => {

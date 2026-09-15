@@ -87,6 +87,16 @@ test.describe("HybridChatAPI", () => {
       removeEventListener: () => {},
     };
 
+    // The BaseAPI refactor persists the session key in sessionStorage (with
+    // localStorage fallback), so it can leak across tests in the same worker.
+    // Clear it so each test starts with a fresh session.
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.removeItem("chat_session_key");
+    }
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("chat_session_key");
+    }
+
     mockLocalStorage = {};
   });
 
@@ -166,7 +176,10 @@ test.describe("HybridChatAPI", () => {
       }
 
       expect(handshakeSuccess).toBe(true);
-      expect(mockLocalStorage["chat_session_key"]).toBe("test-session-key");
+      // The session key is stored via the widget's storage abstraction
+      // (sessionStorage when available, else localStorage), so assert on the
+      // API contract rather than a specific storage backend.
+      expect(api.getSessionKey()).toBe("test-session-key");
     });
 
     test("should queue messages when WebSocket is not connected", async () => {
@@ -373,7 +386,7 @@ test.describe("HybridChatAPI", () => {
       );
 
       expect(handshakeSuccess).toBe(true);
-      expect(mockLocalStorage["chat_session_key"]).toBe("test-session-key");
+      expect(api.getSessionKey()).toBe("test-session-key");
     });
   });
 });

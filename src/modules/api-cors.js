@@ -14,6 +14,9 @@ export class CorsAPI extends BaseAPI {
    * @param {number} [config.connectionTimeout=10000] - Connection timeout in milliseconds
    */
   constructor(config) {
+    // Derived class: must call super() before accessing 'this'.
+    super();
+
     if (!config) {
       throw new Error('CorsAPI: config is required');
     }

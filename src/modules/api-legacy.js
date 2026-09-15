@@ -12,6 +12,9 @@ export class LegacyAPI extends BaseAPI {
    * @param {boolean} [config.debug=false] - Enable debug logging
    */
   constructor(config) {
+    // Derived class: must call super() before accessing 'this'.
+    super();
+
     if (!config) {
       throw new Error("LegacyAPI: config is required");
     }

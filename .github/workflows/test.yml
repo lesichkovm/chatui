@@ -8,39 +8,44 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    # Keep the job timeout short: a hang fails fast (and visibly) instead of
+    # burning 60 minutes. Long hangs here have historically been in the
+    # dependency/browser-install steps, not the tests.
+    timeout-minutes: 15
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
+    # Pin Node to an LTS release instead of "latest": a moving "latest" can
+    # break CI without any repo change.
     - uses: actions/setup-node@v4
       with:
-        node-version: latest
-    
+        node-version: 22
+
     - name: Install dependencies
-      run: npm ci
-    
+      run: npm ci --no-audit --no-fund
+
     - name: Install Playwright browsers
       run: npx playwright install --with-deps ${{ matrix.browser }}
-    
+
     - name: Build project
       run: npm run build
-    
+
     - name: Run Playwright tests
       run: npx playwright test --project=${{ matrix.browser }}
-    
+
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-report-${{ matrix.browser }}
         path: playwright-report/
         retention-days: 30
-    
+
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() && failure() }}
       with:
