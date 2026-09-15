@@ -1,6 +1,22 @@
 import { test, expect } from "@playwright/test";
 import { HybridChatAPI } from "../src/modules/api.js";
 
+// CloseEvent is only a Node.js global since v22.4 (it shipped with the
+// built-in WebSocket client), so older Node releases used on CI lack it.
+if (typeof (globalThis as any).CloseEvent === "undefined") {
+  (globalThis as any).CloseEvent = class extends Event {
+    code: number;
+    reason: string;
+    wasClean: boolean;
+    constructor(type: string, init: CloseEventInit = {}) {
+      super(type, init);
+      this.code = init.code ?? 0;
+      this.reason = init.reason ?? "";
+      this.wasClean = init.wasClean ?? false;
+    }
+  };
+}
+
 // Mock WebSocket for testing
 class MockWebSocket {
   static CONNECTING = 0;
