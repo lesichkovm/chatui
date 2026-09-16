@@ -1,3 +1,148 @@
+/**
+ * Build the response payload for a user message (shared by JSONP GET and CORS POST paths)
+ * @param {string} message - The user message text
+ * @param {string} session_key - Session key
+ * @returns {Object} Response data (may contain text or widgets array)
+ */
+function buildMessageResponseData(message, session_key) {
+  let responseData = {};
+  const lowerMessage = message.toLowerCase().trim();
+
+  if (lowerMessage === 'menu' || lowerMessage === 'options') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_fullpage_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Full Page Chat Features:", format: "plain" }
+        },
+        {
+          type: "buttons",
+          props: {
+            options: [
+              { id: "btn1", text: "📊 View Statistics", value: "stats" },
+              { id: "btn2", text: "🎨 Customize Theme", value: "theme" },
+              { id: "btn3", text: "📝 Start Survey", value: "survey" },
+              { id: "btn4", text: "💾 Save Conversation", value: "save" }
+            ]
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'stats') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_fullpage_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Chat Statistics:", format: "plain" }
+        },
+        {
+          type: "progress",
+          props: {
+            value: 75,
+            max: 100,
+            showPercentage: true,
+            label: "Completion"
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'theme') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_fullpage_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Choose your theme preference:", format: "plain" }
+        },
+        {
+          type: "radio",
+          props: {
+            options: [
+              { id: "light", text: "Light Theme", value: "light" },
+              { id: "dark", text: "Dark Theme", value: "dark" },
+              { id: "auto", text: "Auto (System)", value: "auto" }
+            ],
+            name: "theme_choice",
+            showSubmitButton: true,
+            buttonText: "Apply Theme"
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'survey') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_fullpage_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Please rate your experience:", format: "plain" }
+        },
+        {
+          type: "rating",
+          props: {
+            maxRating: 5,
+            iconType: "stars"
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'save') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_fullpage_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Enter a name for this conversation:", format: "plain" }
+        },
+        {
+          type: "input",
+          props: {
+            placeholder: "Conversation name...",
+            inputType: "text",
+            buttonText: "Save",
+            showSubmitButton: true
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'light' || lowerMessage === 'dark' || lowerMessage === 'auto') {
+    responseData = {
+      text: `Theme switched to ${lowerMessage} mode! 🎨`,
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_fullpage_" + Date.now()
+    };
+  } else {
+    const responses = [
+      "This is the full page chat demo! The interface is embedded directly in the page.",
+      "I'm the full page chat assistant. Try typing 'menu' to see available features.",
+      "This demo shows how the chat widget looks when embedded in a full page layout.",
+      "Try 'stats' to see progress indicators or 'theme' to change the appearance!",
+      "The full page mode is perfect for dedicated chat pages or support centers."
+    ];
+  
+    responseData = {
+      text: responses[Math.floor(Math.random() * responses.length)],
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_fullpage_" + Date.now()
+    };
+  }
+  return responseData;
+}
+
 const handler = async (event, context) => {
   const { httpMethod, queryStringParameters } = event;
   
@@ -37,140 +182,7 @@ const handler = async (event, context) => {
         
         // Messages endpoint
         else if (message) {
-          const lowerMessage = message.toLowerCase().trim();
-          
-          if (lowerMessage === 'menu' || lowerMessage === 'options') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_fullpage_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Full Page Chat Features:", format: "plain" }
-                },
-                {
-                  type: "buttons",
-                  props: {
-                    options: [
-                      { id: "btn1", text: "📊 View Statistics", value: "stats" },
-                      { id: "btn2", text: "🎨 Customize Theme", value: "theme" },
-                      { id: "btn3", text: "📝 Start Survey", value: "survey" },
-                      { id: "btn4", text: "💾 Save Conversation", value: "save" }
-                    ]
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'stats') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_fullpage_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Chat Statistics:", format: "plain" }
-                },
-                {
-                  type: "progress",
-                  props: {
-                    value: 75,
-                    max: 100,
-                    showPercentage: true,
-                    label: "Completion"
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'theme') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_fullpage_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Choose your theme preference:", format: "plain" }
-                },
-                {
-                  type: "radio",
-                  props: {
-                    options: [
-                      { id: "light", text: "Light Theme", value: "light" },
-                      { id: "dark", text: "Dark Theme", value: "dark" },
-                      { id: "auto", text: "Auto (System)", value: "auto" }
-                    ],
-                    name: "theme_choice",
-                    showSubmitButton: true,
-                    buttonText: "Apply Theme"
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'survey') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_fullpage_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Please rate your experience:", format: "plain" }
-                },
-                {
-                  type: "rating",
-                  props: {
-                    maxRating: 5,
-                    iconType: "stars"
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'save') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_fullpage_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Enter a name for this conversation:", format: "plain" }
-                },
-                {
-                  type: "input",
-                  props: {
-                    placeholder: "Conversation name...",
-                    inputType: "text",
-                    buttonText: "Save",
-                    showSubmitButton: true
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'light' || lowerMessage === 'dark' || lowerMessage === 'auto') {
-            responseData = {
-              text: `Theme switched to ${lowerMessage} mode! 🎨`,
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_fullpage_" + Date.now()
-            };
-          } else {
-            const responses = [
-              "This is the full page chat demo! The interface is embedded directly in the page.",
-              "I'm the full page chat assistant. Try typing 'menu' to see available features.",
-              "This demo shows how the chat widget looks when embedded in a full page layout.",
-              "Try 'stats' to see progress indicators or 'theme' to change the appearance!",
-              "The full page mode is perfect for dedicated chat pages or support centers."
-            ];
-            
-            responseData = {
-              text: responses[Math.floor(Math.random() * responses.length)],
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_fullpage_" + Date.now()
-            };
-          }
+          responseData = buildMessageResponseData(message, session_key);
         }
         
         // Handle connection initialization
@@ -227,9 +239,8 @@ const handler = async (event, context) => {
           };
         } else if (message) {
           responseData = {
-            text: "Full page demo response for: " + message,
-            sender: "bot",
-            timestamp: Date.now()
+            status: "success",
+            ...buildMessageResponseData(message, session_key)
           };
         } else if (type === 'connect') {
           responseData = {
@@ -256,7 +267,7 @@ const handler = async (event, context) => {
     // Handle POST requests
     else if (httpMethod === 'POST') {
       const body = JSON.parse(event.body || '{}');
-      const { type, payload, session_key } = body;
+      const { type, payload, message, session_key } = body;
       
       let responseData = {};
       
@@ -270,13 +281,22 @@ const handler = async (event, context) => {
           };
           break;
           
-        case 'message':
+        case 'connect':
           responseData = {
-            type: 'message',
-            text: "Full page chat received: " + (payload?.text || "your message"),
+            type: 'connect',
+            status: 'success',
+            text: "Full Page Chat Demo loaded! Type menu to see options.",
             sender: 'bot',
             timestamp: Date.now(),
             session_key: session_key
+          };
+          break;
+
+        case 'message':
+          responseData = {
+            type: 'message',
+            status: 'success',
+            ...buildMessageResponseData(message || payload?.text || '', session_key)
           };
           break;
           

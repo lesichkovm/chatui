@@ -1,3 +1,49 @@
+/**
+ * Build the response payload for a user message (shared by JSONP GET and CORS POST paths)
+ * @param {string} message - The user message text
+ * @param {string} session_key - Session key
+ * @returns {Object} Response data (may contain text or widgets array)
+ */
+function buildMessageResponseData(message, session_key, widget_type) {
+  let responseData = {};
+  const lowerMessage = message.toLowerCase().trim();
+  const widget = widget_type || 'general';
+
+  if (lowerMessage === 'menu' || lowerMessage === 'options') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_widget_" + widget + "_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: `${widget.charAt(0).toUpperCase() + widget.slice(1)} Widget Options:`, format: "plain" }
+        },
+        {
+          type: widget === 'color_picker' ? "color_picker" : 
+                widget === 'file_upload' ? "file_upload" : widget,
+          props: getWidgetProps(widget)
+        }
+      ]
+    };
+  } else {
+    const responses = [
+      `This is the ${widget} widget demo! Try 'menu' to see specific options.`,
+      `I can demonstrate the ${widget} widget functionality. Type 'menu' to explore!`,
+      `${widget.charAt(0).toUpperCase() + widget.slice(1)} widget features are available. Type 'menu' to see them.`,
+      `Try the ${widget} widget by typing 'menu' or interacting with the widget directly.`
+    ];
+  
+    responseData = {
+      text: responses[Math.floor(Math.random() * responses.length)],
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_widget_" + widget + "_" + Date.now()
+    };
+  }
+  return responseData;
+}
+
 const handler = async (event, context) => {
   const { httpMethod, queryStringParameters } = event;
   
@@ -37,41 +83,7 @@ const handler = async (event, context) => {
         
         // Messages endpoint
         else if (message) {
-          const lowerMessage = message.toLowerCase().trim();
-          const widget = widget_type || 'general';
-          
-          if (lowerMessage === 'menu' || lowerMessage === 'options') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_widget_" + widget + "_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: `${widget.charAt(0).toUpperCase() + widget.slice(1)} Widget Options:`, format: "plain" }
-                },
-                {
-                  type: widget === 'color_picker' ? "color_picker" : 
-                        widget === 'file_upload' ? "file_upload" : widget,
-                  props: getWidgetProps(widget)
-                }
-              ]
-            };
-          } else {
-            const responses = [
-              `This is the ${widget} widget demo! Try 'menu' to see specific options.`,
-              `I can demonstrate the ${widget} widget functionality. Type 'menu' to explore!`,
-              `${widget.charAt(0).toUpperCase() + widget.slice(1)} widget features are available. Type 'menu' to see them.`,
-              `Try the ${widget} widget by typing 'menu' or interacting with the widget directly.`
-            ];
-            
-            responseData = {
-              text: responses[Math.floor(Math.random() * responses.length)],
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_widget_" + widget + "_" + Date.now()
-            };
-          }
+          responseData = buildMessageResponseData(message, session_key, widget_type);
         }
         
         // Handle connection initialization
@@ -131,9 +143,8 @@ const handler = async (event, context) => {
           };
         } else if (message) {
           responseData = {
-            text: `${widget} demo response for: ` + message,
-            sender: "bot",
-            timestamp: Date.now()
+            status: "success",
+            ...buildMessageResponseData(message, session_key, widget_type)
           };
         } else if (type === 'connect') {
           responseData = {
@@ -160,7 +171,7 @@ const handler = async (event, context) => {
     // Handle POST requests
     else if (httpMethod === 'POST') {
       const body = JSON.parse(event.body || '{}');
-      const { type, payload, session_key } = body;
+      const { type, payload, message, session_key } = body;
       const widget = queryStringParameters?.widget_type || 'general';
       
       let responseData = {};
@@ -175,13 +186,22 @@ const handler = async (event, context) => {
           };
           break;
           
-        case 'message':
+        case 'connect':
           responseData = {
-            type: 'message',
-            text: `${widget} demo received: ` + (payload?.text || "your message"),
+            type: 'connect',
+            status: 'success',
+            text: "Demo loaded!",
             sender: 'bot',
             timestamp: Date.now(),
             session_key: session_key
+          };
+          break;
+
+        case 'message':
+          responseData = {
+            type: 'message',
+            status: 'success',
+            ...buildMessageResponseData(message || payload?.text || '', session_key, widget)
           };
           break;
           

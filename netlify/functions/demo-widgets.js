@@ -543,9 +543,8 @@ const handler = async (event, context) => {
           };
         } else if (message) {
           responseData = {
-            text: "Widgets demo response for: " + message,
-            sender: "bot",
-            timestamp: Date.now()
+            status: "success",
+            ...buildMessageResponseData(message, session_key)
           };
         } else if (type === 'connect') {
           responseData = {

@@ -1,3 +1,147 @@
+/**
+ * Build the response payload for a user message (shared by JSONP GET and CORS POST paths)
+ * @param {string} message - The user message text
+ * @param {string} session_key - Session key
+ * @returns {Object} Response data (may contain text or widgets array)
+ */
+function buildMessageResponseData(message, session_key) {
+  let responseData = {};
+  const lowerMessage = message.toLowerCase().trim();
+
+  if (lowerMessage === 'menu' || lowerMessage === 'options') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_buttons_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Button Widget Options:", format: "plain" }
+        },
+        {
+          type: "buttons",
+          props: {
+            options: [
+              { id: "btn1", text: "🚀 Quick Actions", value: "quick" },
+              { id: "btn2", text: "🎨 Style Options", value: "style" },
+              { id: "btn3", text: "⚙️ Settings", value: "settings" },
+              { id: "btn4", text: "📊 Analytics", value: "analytics" }
+            ]
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'quick') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_buttons_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Quick Actions:", format: "plain" }
+        },
+        {
+          type: "buttons",
+          props: {
+            options: [
+              { id: "save", text: "💾 Save", value: "save_action" },
+              { id: "cancel", text: "❌ Cancel", value: "cancel_action" },
+              { id: "submit", text: "✅ Submit", value: "submit_action" },
+              { id: "reset", text: "🔄 Reset", value: "reset_action" }
+            ]
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'style') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_buttons_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Button Style Options:", format: "plain" }
+        },
+        {
+          type: "buttons",
+          props: {
+            options: [
+              { id: "primary", text: "🔵 Primary", value: "primary_style" },
+              { id: "secondary", text: "⚪ Secondary", value: "secondary_style" },
+              { id: "success", text: "🟢 Success", value: "success_style" },
+              { id: "danger", text: "🔴 Danger", value: "danger_style" }
+            ]
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'types') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_buttons_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Different Button Types:", format: "plain" }
+        },
+        {
+          type: "buttons",
+          props: {
+            options: [
+              { id: "icon", text: "🎨 Icon Button", value: "icon_button" },
+              { id: "text", text: "📝 Text Only", value: "text_button" },
+              { id: "emoji", text: "😀 Emoji Button", value: "emoji_button" },
+              { id: "mixed", text: "🎯 Mixed Content", value: "mixed_button" }
+            ]
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'interactive') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_buttons_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Interactive Button Demo:", format: "plain" }
+        },
+        {
+          type: "buttons",
+          props: {
+            options: [
+              { id: "click1", text: "👆 Click Me!", value: "click_demo_1" },
+              { id: "click2", text: "🎯 Try This", value: "click_demo_2" },
+              { id: "click3", text: "⚡ Quick Action", value: "click_demo_3" },
+              { id: "click4", text: "🔄 Refresh", value: "click_demo_4" }
+            ]
+          }
+        }
+      ]
+    };
+  } else {
+    const responses = [
+      "This is the Buttons Widget Demo! Try 'menu' to see different button options.",
+      "I can show you various button styles and interactions. Type 'menu' to explore!",
+      "Buttons available: quick actions, style options, button types, and interactive demos.",
+      "Try 'quick' for common actions, 'style' for different colors, or 'types' for button varieties.",
+      "Click any button to see how it responds! Type 'interactive' for a hands-on demo."
+    ];
+  
+    responseData = {
+      text: responses[Math.floor(Math.random() * responses.length)],
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_buttons_" + Date.now()
+    };
+  }
+  return responseData;
+}
+
 const handler = async (event, context) => {
   const { httpMethod, queryStringParameters } = event;
   
@@ -37,139 +181,7 @@ const handler = async (event, context) => {
         
         // Messages endpoint
         else if (message) {
-          const lowerMessage = message.toLowerCase().trim();
-          
-          if (lowerMessage === 'menu' || lowerMessage === 'options') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_buttons_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Button Widget Options:", format: "plain" }
-                },
-                {
-                  type: "buttons",
-                  props: {
-                    options: [
-                      { id: "btn1", text: "🚀 Quick Actions", value: "quick" },
-                      { id: "btn2", text: "🎨 Style Options", value: "style" },
-                      { id: "btn3", text: "⚙️ Settings", value: "settings" },
-                      { id: "btn4", text: "📊 Analytics", value: "analytics" }
-                    ]
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'quick') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_buttons_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Quick Actions:", format: "plain" }
-                },
-                {
-                  type: "buttons",
-                  props: {
-                    options: [
-                      { id: "save", text: "💾 Save", value: "save_action" },
-                      { id: "cancel", text: "❌ Cancel", value: "cancel_action" },
-                      { id: "submit", text: "✅ Submit", value: "submit_action" },
-                      { id: "reset", text: "🔄 Reset", value: "reset_action" }
-                    ]
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'style') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_buttons_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Button Style Options:", format: "plain" }
-                },
-                {
-                  type: "buttons",
-                  props: {
-                    options: [
-                      { id: "primary", text: "🔵 Primary", value: "primary_style" },
-                      { id: "secondary", text: "⚪ Secondary", value: "secondary_style" },
-                      { id: "success", text: "🟢 Success", value: "success_style" },
-                      { id: "danger", text: "🔴 Danger", value: "danger_style" }
-                    ]
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'types') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_buttons_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Different Button Types:", format: "plain" }
-                },
-                {
-                  type: "buttons",
-                  props: {
-                    options: [
-                      { id: "icon", text: "🎨 Icon Button", value: "icon_button" },
-                      { id: "text", text: "📝 Text Only", value: "text_button" },
-                      { id: "emoji", text: "😀 Emoji Button", value: "emoji_button" },
-                      { id: "mixed", text: "🎯 Mixed Content", value: "mixed_button" }
-                    ]
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'interactive') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_buttons_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Interactive Button Demo:", format: "plain" }
-                },
-                {
-                  type: "buttons",
-                  props: {
-                    options: [
-                      { id: "click1", text: "👆 Click Me!", value: "click_demo_1" },
-                      { id: "click2", text: "🎯 Try This", value: "click_demo_2" },
-                      { id: "click3", text: "⚡ Quick Action", value: "click_demo_3" },
-                      { id: "click4", text: "🔄 Refresh", value: "click_demo_4" }
-                    ]
-                  }
-                }
-              ]
-            };
-          } else {
-            const responses = [
-              "This is the Buttons Widget Demo! Try 'menu' to see different button options.",
-              "I can show you various button styles and interactions. Type 'menu' to explore!",
-              "Buttons available: quick actions, style options, button types, and interactive demos.",
-              "Try 'quick' for common actions, 'style' for different colors, or 'types' for button varieties.",
-              "Click any button to see how it responds! Type 'interactive' for a hands-on demo."
-            ];
-            
-            responseData = {
-              text: responses[Math.floor(Math.random() * responses.length)],
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_buttons_" + Date.now()
-            };
-          }
+          responseData = buildMessageResponseData(message, session_key);
         }
         
         // Handle connection initialization
@@ -226,9 +238,8 @@ const handler = async (event, context) => {
           };
         } else if (message) {
           responseData = {
-            text: "Buttons demo response for: " + message,
-            sender: "bot",
-            timestamp: Date.now()
+            status: "success",
+            ...buildMessageResponseData(message, session_key)
           };
         } else if (type === 'connect') {
           responseData = {
@@ -255,7 +266,7 @@ const handler = async (event, context) => {
     // Handle POST requests
     else if (httpMethod === 'POST') {
       const body = JSON.parse(event.body || '{}');
-      const { type, payload, session_key } = body;
+      const { type, payload, message, session_key } = body;
       
       let responseData = {};
       
@@ -269,13 +280,22 @@ const handler = async (event, context) => {
           };
           break;
           
-        case 'message':
+        case 'connect':
           responseData = {
-            type: 'message',
-            text: "Buttons demo received: " + (payload?.text || "your message"),
+            type: 'connect',
+            status: 'success',
+            text: "Buttons Widget Demo loaded! Type menu to see options.",
             sender: 'bot',
             timestamp: Date.now(),
             session_key: session_key
+          };
+          break;
+
+        case 'message':
+          responseData = {
+            type: 'message',
+            status: 'success',
+            ...buildMessageResponseData(message || payload?.text || '', session_key)
           };
           break;
           

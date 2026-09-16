@@ -8,6 +8,147 @@ const {
   withErrorHandling
 } = require('./utils');
 
+/**
+ * Build the response payload for a user message (shared by JSONP GET and CORS POST paths)
+ * @param {string} message - The user message text
+ * @param {string} session_key - Session key
+ * @returns {Object} Response data (may contain text or widgets array)
+ */
+function buildMessageResponseData(message, session_key) {
+  let responseData = {};
+  // Handle special commands that trigger widgets
+  const lowerMessage = message.toLowerCase().trim();
+
+  if (lowerMessage === 'menu' || lowerMessage === 'options') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_session_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Choose an option below:", format: "plain" }
+        },
+        {
+          type: "buttons",
+          props: {
+            options: [
+              { id: "btn1", text: "📝 Rate Service", value: "rate" },
+              { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
+              { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
+              { id: "btn4", text: "📋 View Options", value: "more_options" }
+            ]
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'rate' || lowerMessage === 'rating') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_session_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "How would you rate our service?", format: "plain" }
+        },
+        {
+          type: "rating",
+          props: {
+            maxRating: 5,
+            iconType: "star"
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'feedback' || lowerMessage === 'comment') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_session_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Please share your feedback:", format: "plain" }
+        },
+        {
+          type: "textarea",
+          props: {
+            placeholder: "Please share your feedback:",
+            rows: 4,
+            required: true,
+            showSubmitButton: true,
+            buttonText: "Submit Feedback"
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'schedule' || lowerMessage === 'date') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_session_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "When would you like to schedule?", format: "plain" }
+        },
+        {
+          type: "date",
+          props: {
+            value: new Date().toISOString().split('T')[0],
+            required: true,
+            showSubmitButton: true,
+            buttonText: "Schedule"
+          }
+        }
+      ]
+    };
+  } else if (lowerMessage === 'color' || lowerMessage === 'theme') {
+    responseData = {
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_session_" + Date.now(),
+      widgets: [
+        {
+          type: "text",
+          props: { content: "Choose your preferred color:", format: "plain" }
+        },
+        {
+          type: "color_picker",
+          props: {
+            defaultColor: "#667eea",
+            presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"],
+            showSubmitButton: true,
+            buttonText: "Apply Color"
+          }
+        }
+      ]
+    };
+  } else {
+    // Default responses for regular messages
+    const responses = [
+      "That's interesting! Tell me more about that.",
+      "I understand. How can I help you today?",
+      "Thanks for sharing! What would you like to discuss?",
+      "Great question! Let me think about that...",
+      "I'm here to help! What's on your mind?",
+      "That's a good point. What else would you like to know?",
+      "I appreciate you reaching out. How can I assist you?",
+      "Interesting! Can you elaborate on that?",
+      "Try typing 'menu' to see interactive widgets, 'rate' for rating, 'feedback' for comments, or 'color' for color picker."
+    ];
+  
+    responseData = {
+      text: responses[Math.floor(Math.random() * responses.length)],
+      sender: "bot",
+      timestamp: Date.now(),
+      session_key: session_key || "demo_session_" + Date.now()
+    };
+  }
+  return responseData;
+}
+
 const handler = withErrorHandling(async (event, context) => {
   const { httpMethod, queryStringParameters } = event;
   
@@ -35,136 +176,7 @@ const handler = withErrorHandling(async (event, context) => {
         
         // Messages endpoint
         else if (message) {
-          // Handle special commands that trigger widgets
-          const lowerMessage = message.toLowerCase().trim();
-          
-          if (lowerMessage === 'menu' || lowerMessage === 'options') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_session_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Choose an option below:", format: "plain" }
-                },
-                {
-                  type: "buttons",
-                  props: {
-                    options: [
-                      { id: "btn1", text: "📝 Rate Service", value: "rate" },
-                      { id: "btn2", text: "📅 Schedule Meeting", value: "schedule" },
-                      { id: "btn3", text: "💬 Leave Feedback", value: "feedback" },
-                      { id: "btn4", text: "📋 View Options", value: "more_options" }
-                    ]
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'rate' || lowerMessage === 'rating') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_session_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "How would you rate our service?", format: "plain" }
-                },
-                {
-                  type: "rating",
-                  props: {
-                    maxRating: 5,
-                    iconType: "star"
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'feedback' || lowerMessage === 'comment') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_session_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Please share your feedback:", format: "plain" }
-                },
-                {
-                  type: "textarea",
-                  props: {
-                    placeholder: "Please share your feedback:",
-                    rows: 4,
-                    required: true,
-                    showSubmitButton: true,
-                    buttonText: "Submit Feedback"
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'schedule' || lowerMessage === 'date') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_session_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "When would you like to schedule?", format: "plain" }
-                },
-                {
-                  type: "date",
-                  props: {
-                    value: new Date().toISOString().split('T')[0],
-                    required: true,
-                    showSubmitButton: true,
-                    buttonText: "Schedule"
-                  }
-                }
-              ]
-            };
-          } else if (lowerMessage === 'color' || lowerMessage === 'theme') {
-            responseData = {
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_session_" + Date.now(),
-              widgets: [
-                {
-                  type: "text",
-                  props: { content: "Choose your preferred color:", format: "plain" }
-                },
-                {
-                  type: "color_picker",
-                  props: {
-                    defaultColor: "#667eea",
-                    presetColors: ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#ff6b6b", "#4ecdc4"],
-                    showSubmitButton: true,
-                    buttonText: "Apply Color"
-                  }
-                }
-              ]
-            };
-          } else {
-            // Default responses for regular messages
-            const responses = [
-              "That's interesting! Tell me more about that.",
-              "I understand. How can I help you today?",
-              "Thanks for sharing! What would you like to discuss?",
-              "Great question! Let me think about that...",
-              "I'm here to help! What's on your mind?",
-              "That's a good point. What else would you like to know?",
-              "I appreciate you reaching out. How can I assist you?",
-              "Interesting! Can you elaborate on that?",
-              "Try typing 'menu' to see interactive widgets, 'rate' for rating, 'feedback' for comments, or 'color' for color picker."
-            ];
-            
-            responseData = {
-              text: responses[Math.floor(Math.random() * responses.length)],
-              sender: "bot",
-              timestamp: Date.now(),
-              session_key: session_key || "demo_session_" + Date.now()
-            };
-          }
+          responseData = buildMessageResponseData(message, session_key);
         }
         
         // Handle connection initialization
@@ -304,7 +316,12 @@ const handler = withErrorHandling(async (event, context) => {
             timestamp: Date.now()
           };
         }
-        
+
+        // Mark successful message/connect responses so CORS clients process them
+        if (!responseData.status && (responseData.text || responseData.widget || responseData.widgets)) {
+          responseData.status = "success";
+        }
+
         return createJSONResponse(responseData);
       }
     }
@@ -312,7 +329,7 @@ const handler = withErrorHandling(async (event, context) => {
   // Handle POST requests (for WebSocket-like functionality)
   else if (httpMethod === 'POST') {
     const body = JSON.parse(event.body || '{}');
-    const { type, session_key } = body;
+    const { type, message, session_key } = body;
     
     let responseData = {};
     
@@ -338,22 +355,12 @@ const handler = withErrorHandling(async (event, context) => {
         break;
         
       case 'message':
-        const responses = [
-          "That's interesting! Tell me more.",
-          "I understand. How can I help?",
-          "Thanks for sharing! What else?",
-          "Great question! Let me assist you.",
-          "I'm here to help! What's on your mind?"
-        ];
-        
-        responseData = {
-          type: 'message',
-          text: responses[Math.floor(Math.random() * responses.length)],
-          sender: 'bot',
-          timestamp: Date.now(),
-          session_key
-        };
-        break;
+          responseData = {
+            type: 'message',
+            status: 'success',
+            ...buildMessageResponseData(message || '', session_key)
+          };
+          break;
         
       case 'typing':
         responseData = {
