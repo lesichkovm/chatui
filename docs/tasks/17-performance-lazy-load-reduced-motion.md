@@ -27,6 +27,27 @@ transforms, slide-in error) have no `prefers-reduced-motion` handling.
   `@media (prefers-reduced-motion: no-preference)` or add a reduced-motion
   override block.
 
+## Pros / Cons
+
+**Pros**
+- Host pages stop paying full parse/init cost for users who never open chat
+- `prefers-reduced-motion` is a one-line-each CSS guard — cheap a11y win
+- Improves host-site Lighthouse/Core Web Vitals, which embedders care about
+
+**Cons**
+- A loader stub + split bundle adds build and init complexity — two artifacts
+  to version, cache-bust, and keep API-compatible
+- First open has a load delay; may need a loading state on the launcher
+- The MutationObserver/auto-init timing must be reproduced inside the loader
+  (script tags added before the bundle loads)
+- Easier to get subtly wrong than it looks; the win is small if the bundle
+  is already tiny
+
+**AI Recommendation:** **Split it.** Do the `prefers-reduced-motion` part —
+it's ~10 lines of CSS. Defer lazy-loading: the bundle is small, the IIFE is
+already cheap to parse, and a loader stub adds real complexity for a gain
+that should be measured first. Revisit if the bundle grows significantly.
+
 ## Acceptance Criteria
 
 - [ ] Initial page load fetches only the loader; full bundle loads deferred

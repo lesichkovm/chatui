@@ -34,6 +34,25 @@ Whichever approach is chosen must preserve correct scrolling when messages
 exceed the container height and keep the existing auto-scroll-to-latest
 behavior in `appendMessage` and `addWaitingMessage` working.
 
+## Pros / Cons
+
+**Pros**
+- Fixes the "looks broken" empty void — the single highest-impact visual issue
+- Matches every mainstream chat product (iMessage, Intercom, WhatsApp)
+- `data-message-anchor` keeps embedders in control
+
+**Cons**
+- `flex-direction: column-reverse` inverts DOM order vs. visual order, which
+  can confuse screen readers and keyboard scrolling — `justify-content`/
+  `margin-top: auto` avoids this but is a subtler fix
+- Small risk of regressions in the existing force-scroll behavior
+- Yet another config option to document and support
+
+**AI Recommendation:** **Do it.** Highest-impact fix in the list for the least
+effort — the empty-void look is a genuine defect, not a taste issue. Implement
+with `margin-top: auto` on the first child (avoids the column-reverse a11y
+trap), default `bottom`, ship the `data-message-anchor` opt-out.
+
 ## Acceptance Criteria
 
 - [ ] With few messages, they sit at the bottom of the message area by default

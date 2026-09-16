@@ -21,6 +21,23 @@ messages can look like loose text on the panel.
 - While here, verify user/agent bubble contrast still meets 4.5:1 for text
   (feeds into task 12).
 
+## Pros / Cons
+
+**Pros**
+- Cheap clarity win — bubbles that read as bubbles
+- Border option works without changing any theme variable values
+
+**Cons**
+- Changing `--chat-surface` luminance affects everything using that variable
+  (header, widgets, cards) — a border on `.bot-message` only is safer
+- Any tweak must be re-verified across 4 theme/mode combos plus embedder
+  custom colors, which may already rely on the current subtlety
+
+**AI Recommendation:** **Do it — via border, not luminance.** A
+`1px solid var(--chat-border)` on `.bot-message` is a two-line fix that
+doesn't disturb `--chat-surface` (used by header/cards/widgets) or embedder
+custom colors.
+
 ## Acceptance Criteria
 
 - [ ] Agent bubbles are visually distinct from the panel in all four theme/mode combos

@@ -24,6 +24,25 @@ An empty chat panel gives users nothing to act on.
 - Reuse existing message/chip styling conventions and sanitization
   (`createSafeMessageHTML`) — chips must not inject raw HTML.
 
+## Pros / Cons
+
+**Pros**
+- Measurable engagement lift — gives users something to act on immediately
+- Teaches users what the agent can do
+- Configurable via `data-*`, consistent with existing patterns
+
+**Cons**
+- A canned greeting can misfire if the backend/agent isn't actually responsive
+  (sets an expectation the product may not meet)
+- Chips send hardcoded text — useless or misleading if the backend can't
+  handle those prompts; quality depends entirely on embedder configuration
+- More first-open UI to keep theme-consistent and test
+
+**AI Recommendation:** **Do it.** Biggest UX lever after the layout fixes —
+an empty panel is a dead end, and the mechanism (chips calling `sendMessage`)
+is simple. Make both greeting and chips config-only with no defaults, so
+embedders who don't configure it get today's clean empty state.
+
 ## Acceptance Criteria
 
 - [ ] Fresh widget opens with a greeting bubble and starter chips

@@ -23,6 +23,26 @@ file-size/secondary text at `opacity: 0.7`, and dropzone icon at `opacity: 0.6`
 - Fix failures by adjusting theme variables or removing/lowering opacity, not
   by hardcoding overrides.
 
+## Pros / Cons
+
+**Pros**
+- WCAG AA conformance matters for embedders selling to enterprises/gov
+- Fixes are mostly variable/opacity tweaks — low code risk
+- Produces a reusable contrast checklist for future UI work
+
+**Cons**
+- Raising contrast changes the visual design — e.g. the dimmed close button
+  at `opacity: 0.6` was likely an aesthetic choice
+- Embedder custom colors can still fail contrast; the widget can't police
+  arbitrary `data-*-color` values (could warn, but that's scope creep)
+- Manual audit work is tedious; automated computed-style checks only
+  partially cover it (opacity, inheritance, placeholders)
+
+**AI Recommendation:** **Do it once, manually + targeted automation.** Fix the
+known suspects (dimmed close, placeholder, 0.7-opacity secondary text) and
+add computed-style assertions for the key pairs. Don't build a general
+contrast framework — embedder custom colors are their responsibility anyway.
+
 ## Acceptance Criteria
 
 - [ ] Documented list of checked combinations and results

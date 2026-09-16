@@ -22,6 +22,22 @@ empty `<span>`s with no accessible text.
 - Add a `.visually-hidden` / `.sr-only` utility class to the injected styles.
 - Mark the animated dots container `aria-hidden="true"` so only the text is announced.
 
+## Pros / Cons
+
+**Pros**
+- Tiny change, real a11y win — screen-reader users currently get silence
+- Reuses the existing live region; no new ARIA machinery needed
+
+**Cons**
+- If the waiting indicator appears/disappears rapidly (retries, flaky
+  network), `aria-live` can spam announcements — may need a slight debounce
+- The sr-only text is a new translatable string (currently all UI strings
+  are hardcoded English anyway)
+
+**AI Recommendation:** **Do it.** A few lines of markup for a real
+screen-reader gap. Add a small guard so a flapping indicator doesn't spam the
+live region (e.g. only announce on insert, rely on removal being silent).
+
 ## Acceptance Criteria
 
 - [ ] Screen reader announces "Agent is typing" when the indicator appears

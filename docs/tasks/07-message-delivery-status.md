@@ -24,6 +24,26 @@ instantly as if delivered, with no "sending…" or "sent" state.
   existing retry affordance) instead of/in addition to the separate indicator row.
 - Keep the existing auto-retry queue; make its state visible on the bubble.
 
+## Pros / Cons
+
+**Pros**
+- Honest feedback — users know their message is in flight, not lost
+- Builds on the already-implemented failure/retry machinery
+- Silent failure is the worst outcome on embedded widgets; this removes it
+
+**Cons**
+- "Sent" is approximate: over the JSONP/HTTP fallback it means "server
+  responded", not "agent received" — the semantics must be chosen carefully
+  to avoid overpromising
+- Status icons add per-message UI state to manage and keep synchronized with
+  the retry queue
+- Small perpetual animation/tick elements add DOM noise to the live region
+
+**AI Recommendation:** **Do it.** The retry/failure machinery is already built;
+surfacing per-message state is incremental work that eliminates silent
+failure — the worst UX outcome here. Keep semantics honest: label it
+"Sending…" then remove the indicator on ack rather than claiming "Delivered".
+
 ## Acceptance Criteria
 
 - [ ] User message shows pending state until the server acknowledges it

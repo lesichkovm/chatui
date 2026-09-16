@@ -26,6 +26,25 @@ Several interactive elements are below the 44×44px minimum:
 - Coordinate with task 03 (icon-only send button) so the new send button lands
   at ≥44px from the start.
 
+## Pros / Cons
+
+**Pros**
+- Real usability fix — the current X is nearly untappable on mobile
+- Pseudo-element hit-area technique preserves the compact visual design
+- Aligns with WCAG 2.5.5 / platform HIGs
+
+**Cons**
+- Larger hit areas can overlap adjacent elements (e.g. tag-remove next to a
+  tag chip) causing mis-taps if done naively
+- Some controls (color presets in a row) physically can't reach 44px without
+  redesigning the layout — a compromise may be needed
+- Touches many CSS rules; regression surface is broad
+
+**AI Recommendation:** **Do it, pragmatically.** Fix the main controls (close,
+send, launcher, retry) to true ≥44px; use pseudo-element hit-area expansion
+for small inline controls like tag-remove; accept documented exceptions
+(e.g. 32px color presets) where 44px would force a redesign.
+
 ## Acceptance Criteria
 
 - [ ] Every clickable element in the widget has ≥44×44px hit area

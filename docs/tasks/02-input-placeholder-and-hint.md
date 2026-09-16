@@ -26,6 +26,24 @@ which wraps to two lines and inflates the input box.
 - Ensure the helper text does not permanently grow the input area; prefer
   showing on focus or as a subtle one-line caption.
 
+## Pros / Cons
+
+**Pros**
+- Compact single-line input; the widget stops looking inflated
+- Configurable placeholder is a consistent, cheap embedder win
+- Helper text pattern is reusable for future input hints
+
+**Cons**
+- Focus-only hint = lower discoverability for the Shift+Enter shortcut
+- Persistent helper text costs vertical space — the trade-off between
+  discoverability and compactness needs a decision
+- More `data-*` surface area to maintain
+
+**AI Recommendation:** **Do it.** Cheap, safe, and the placeholder wrap is a
+visible defect. Reveal the hint on focus (not persistent) to keep the input
+area compact. Adding `data-placeholder` costs almost nothing and matches the
+project's config style.
+
 ## Acceptance Criteria
 
 - [ ] Default placeholder fits on one line at the default 350px widget width

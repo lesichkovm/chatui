@@ -22,6 +22,26 @@ it covers most of the screen but still behaves like a floating card, and
 - Keep the launcher button reachable and correctly positioned on small screens.
 - Ensure body scroll behind the sheet is locked while open on mobile.
 
+## Pros / Cons
+
+**Pros**
+- The 350×500 fixed card is essentially broken on phones today — this is the
+  correct responsive pattern for embedded chat
+- `100dvh` + safe-area fixes real, well-known mobile-keyboard cropping bugs
+- Mostly additive CSS; low risk to the desktop experience
+
+**Cons**
+- A full-screen takeover is aggressive — the user loses all page context;
+  some products prefer a taller card instead
+- `dvh` units and `env()` need fallbacks for older browsers
+- Testing matrix grows: viewport sizes, orientation, keyboard open/closed
+  are hard to fully cover even with emulation
+
+**AI Recommendation:** **Do it.** A 350×500 fixed card on a phone is a defect,
+not a preference — every embedded chat product does full-screen on mobile.
+Mostly additive CSS with a `vh` fallback; the testing cost is the real price,
+and it's still worth it.
+
 ## Acceptance Criteria
 
 - [ ] At ≤640px the widget is full-screen; above it remains a floating card

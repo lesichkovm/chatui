@@ -22,6 +22,22 @@ space.
 - Keep the button height aligned with the textarea (38px) and ensure a minimum
   44px touch target (see task 13).
 
+## Pros / Cons
+
+**Pros**
+- Reclaims ~40px of horizontal room for the textarea
+- Matches modern chat conventions (paper-plane icon)
+
+**Cons**
+- An icon is less explicit than the word "Send" — a minor usability/accessibility
+  downgrade mitigated only by the aria-label
+- Breaking change for any embedder CSS or tests selecting the text button
+- Localization: "Send" text is self-explanatory; an icon relies on convention
+
+**AI Recommendation:** **Optional — low priority.** The space saving is real
+but modest, and it trades away the explicit "Send" label. Worth doing only as
+part of a broader input-area refresh (with tasks 02 and 13), not standalone.
+
 ## Acceptance Criteria
 
 - [ ] Send button renders as an icon in both light and dark modes

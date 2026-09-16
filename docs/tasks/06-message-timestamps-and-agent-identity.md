@@ -23,6 +23,25 @@ so users cannot tell who said what or when.
   appropriate `alt`/`aria-hidden` handling.
 - Theme-aware styling via CSS variables.
 
+## Pros / Cons
+
+**Pros**
+- Timestamps already exist in state — display is the only missing piece
+- Agent name/avatar builds trust and distinguishes bot vs. user messages
+- Configurable identity fits the `data-*` model
+
+**Cons**
+- Visual clutter risk if every bubble shows a timestamp — hover/day-break
+  grouping adds logic
+- Time formatting raises i18n questions (locale, 12/24h) that are easy to
+  get subtly wrong
+- Avatar images introduce loading/failure states and layout shifts
+
+**AI Recommendation:** **Do timestamps, defer avatars.** Timestamps are nearly
+free (data already exists) — show on hover to avoid clutter. Agent *name* is
+a cheap config string worth adding; avatar images add loading/failure/layout
+complexity that isn't justified yet.
+
 ## Acceptance Criteria
 
 - [ ] User can see when a message was sent

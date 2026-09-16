@@ -23,6 +23,24 @@ closes.
 - Consider a light focus trap or at least a sensible tab order while open.
 - Remove document-level listeners in `destroy()` to avoid leaks.
 
+## Pros / Cons
+
+**Pros**
+- Keyboard users currently can't close the widget without finding the X
+- Focus return is required for WCAG focus-order conformance
+- Small, well-understood implementation
+
+**Cons**
+- A global Escape listener could interfere with host-page shortcuts if not
+  scoped to "focus inside the widget"
+- A full focus trap is likely overkill for a popup panel — scope creep risk;
+  Escape + focus-return alone may be the right cut
+- Must not fire in `fullpage` mode (no close affordance there)
+
+**AI Recommendation:** **Do it, but keep scope tight.** Escape-to-close plus
+focus-return-to-launcher covers the requirement. Skip a full focus trap —
+it's disproportionate for a non-modal popup panel and easy to get wrong.
+
 ## Acceptance Criteria
 
 - [ ] Escape closes the widget from anywhere inside it

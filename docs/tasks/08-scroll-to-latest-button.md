@@ -22,6 +22,23 @@ jump back down other than manual scrolling.
   "scroll to latest" button (optionally with an unread-count badge).
 - Clicking it scrolls to the bottom and hides the button.
 
+## Pros / Cons
+
+**Pros**
+- Reading history is no longer interrupted by incoming messages
+- Unread-count badge gives users a reason to come back down
+- Standard pattern in every mature chat UI
+
+**Cons**
+- A floating button inside a 350px panel can overlap message content
+- "Near bottom" threshold logic has edge cases (short threads, resizing,
+  widget messages with variable height)
+- More scroll-event handling to keep performant and leak-free on `destroy()`
+
+**AI Recommendation:** **Do it, after task 01.** Once messages anchor to the
+bottom, force-scrolling becomes actively annoying — this is the correct
+companion fix. Skip the unread badge in v1 to keep it small; just the button.
+
 ## Acceptance Criteria
 
 - [ ] Reading history is not interrupted by incoming messages

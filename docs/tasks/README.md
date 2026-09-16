@@ -4,7 +4,9 @@ Tasks generated from the UI/UX review in `docs/proposal.md`. Each file is one
 valid proposal item, numbered in the proposal's priority order.
 
 All tasks must include Playwright test coverage (see `tests/`); each task's
-acceptance criteria lists the specific coverage expected.
+acceptance criteria lists the specific coverage expected. Every task also
+includes a **Pros / Cons** section so items can be accepted or rejected on
+their merits — a task existing here is not a commitment to build it.
 
 | File | Task | Priority |
 |------|------|----------|
@@ -25,6 +27,7 @@ acceptance criteria lists the specific coverage expected.
 | 15 | Mobile full-screen sheet + 100dvh + safe-area | High |
 | 16 | Persist conversation, minimize vs end-chat | Medium |
 | 17 | Lazy-load bundle + prefers-reduced-motion | Medium |
+| 18 | Transcript download (URL + optional built-in) | Low |
 
 ## Not a task (already implemented)
 
