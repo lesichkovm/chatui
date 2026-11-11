@@ -23,6 +23,7 @@ export class ChatWidget {
    * @param {string} [input.config.messagesUrl] - Custom messages endpoint (absolute URL or path resolved against serverUrl)
    * @param {boolean} [input.config.forceJsonP] - Force JSONP transport (skip CORS)
    * @param {boolean} [input.config.preferJsonP] - Prefer JSONP transport over CORS
+   * @param {number|string} [input.config.timeout] - Request timeout in milliseconds (default: 5000)
    */
   constructor(input) {
     let config = {};
@@ -47,6 +48,7 @@ export class ChatWidget {
         messagesUrl: scriptElement.getAttribute("data-messages-url"),
         forceJsonP: scriptElement.getAttribute("data-force-jsonp") === "true",
         preferJsonP: scriptElement.getAttribute("data-prefer-jsonp") === "true",
+        timeout: scriptElement.getAttribute("data-timeout"),
       };
     } else {
       config = input || {};
@@ -74,6 +76,10 @@ export class ChatWidget {
     this.themeManager = new ThemeManager(this.widgetId, scriptElement);
     const themeConfig = this.themeManager.getThemeConfig();
 
+    const parsedTimeout = parseInt(config.timeout, 10);
+    const requestTimeout =
+      Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : null;
+
     this.config = {
       displayMode: config.displayMode || config.mode || "popup",
       position: config.position || "bottom-right",
@@ -86,6 +92,7 @@ export class ChatWidget {
       messagesUrl: config.messagesUrl || null,
       forceJsonP: config.forceJsonP || false,
       preferJsonP: config.preferJsonP || false,
+      timeout: requestTimeout,
       theme: themeConfig.theme,
       themeMode: themeConfig.mode,
       themeColors: themeConfig.colors,
@@ -97,6 +104,7 @@ export class ChatWidget {
       messagesUrl: this.config.messagesUrl,
       forceJsonP: this.config.forceJsonP,
       preferJsonP: this.config.preferJsonP,
+      timeout: this.config.timeout,
     });
 
     // State initialization

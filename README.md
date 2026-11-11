@@ -73,6 +73,7 @@ chat.open();
 | `data-messages-url` | Custom messages endpoint — absolute URL or path resolved against `data-server-url` | `<server-url>/api/messages` |
 | `data-force-jsonp` | Force JSONP transport, skip CORS | `false` |
 | `data-prefer-jsonp` | Prefer JSONP transport over CORS | `false` |
+| `data-timeout` | Request timeout in milliseconds | `5000` |
 | `data-display` | `popup` or `fullpage` | `popup` |
 | `data-position` | `bottom-right`, `bottom-left`, `top-right`, `top-left` | `bottom-right` |
 | `data-title` | Header title | `Chat with us` |
