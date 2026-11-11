@@ -12,7 +12,10 @@ jobs:
     # burning 60 minutes. Long hangs here have historically been in the
     # dependency/browser-install steps, not the tests.
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    # Pin the runner: ubuntu-latest now resolves to 26.04, which Playwright
+    # does not support yet (`install --with-deps` fails on it). Revisit once
+    # Playwright adds ubuntu26.04-x64 support.
+    runs-on: ubuntu-24.04
 
     strategy:
       matrix:
